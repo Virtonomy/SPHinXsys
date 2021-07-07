@@ -66,8 +66,8 @@ endif()
 
 enable_testing()
 
+include(Common)
 if(NOT WASM_BUILD)
-    include(Common)
     include(Import3rdpartylibs) # TBB and Boost
 endif()
 

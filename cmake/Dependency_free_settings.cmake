@@ -18,6 +18,7 @@ if(WASM_BUILD)
     set(BUILD_WITH_DEPENDENCIES_SOURCE 1)
     message(WARNING "SPH_ONLY_STATIC_BUILD is forced on")
     set(SPH_ONLY_STATIC_BUILD 1)
+    add_definitions(-DSIMBODY_WITHOUT_LAPACK)
 endif(WASM_BUILD)
 
 

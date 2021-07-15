@@ -1,6 +1,6 @@
-[submodule "oneTBB-2019-wasm"]
-	path = oneTBB-2019-wasm
-	url = https://github.com/amkram/oneTBB-2019-wasm
 [submodule "SPHINXsys/src/shared/simbody"]
 	path = SPHINXsys/src/shared/simbody
 	url = https://github.com/BenceVirtonomy/simbody
+[submodule "3rdparty/wasmtbb"]
+	path = 3rdparty/wasmtbb
+	url = git@github.com:hpcwasm/wasmtbb.git

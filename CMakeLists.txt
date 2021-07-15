@@ -4,10 +4,23 @@
 cmake_minimum_required(VERSION 3.12)
 project(SPHINXsys VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+add_definitions(-D_LIBCPP_NO_EXPERIMENTAL_DEPRECATION_WARNING_FILESYSTEM)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 ###### Change settings in this file if you want to build with Simbody and/or oneTBB source code ######
-include("${CMAKE_MODULE_PATH}/Dependency_free_settings.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Common.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Dependency_free_settings.cmake")
+
+set(EMSCRIPTEN 1)
+
+if (EMSCRIPTEN)
+    set(BUILD_WITH_ONETBB 0)
+    remove_definitions(-DTBB_2021_2_0)
+    set(TBB_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/wasmtbb)
+    INCLUDE_DIRECTORIES("${TBB_ROOT}/include")
+    set(OBJDIR "${TBB_ROOT}/build/linux_wasm32_emscripten_emscripten_wasm32_release/")
+    FILE(GLOB TBB_OBJECTS ${OBJDIR}/*.o)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
@@ -37,7 +50,12 @@ if(MSVC)
     SET(CMAKE_CL_64 1)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" " /MP")
     add_definitions(-D_USE_MATH_DEFINES)
-else(MSVC)
+elseif(EMSCRIPTEN)
+    set(PRE_POST "")
+    #-s ALLOW_MEMORY_GROWTH=1
+    set(EM_FLAGS "${PRE_POST} -fPIC -DUNIX -D__linux__=1 --bind -std=c++11 -s USE_PTHREADS=1 -s TOTAL_MEMORY=268435456 ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EM_FLAGS}")
+else()
     add_compile_definitions(__linux__=1)
     set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DUNIX -pthread")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -48,7 +66,7 @@ else(MSVC)
         set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
     ENDIF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
-endif(MSVC)
+endif()
 message("===========================================")
 message("${PROJECT_NAME}, VERSION ${PROJECT_VERSION}")
 message("Cmake build type: ${CMAKE_BUILD_TYPE}")
@@ -71,10 +89,14 @@ if(NOT WASM_BUILD)
     include(Import3rdpartylibs) # TBB and Boost
 endif()
 
-add_subdirectory(SPHINXsys)
-if(BUILD_WITH_ONETBB)
-    add_subdirectory(oneTBB)
+if (EMSCRIPTEN)
+    set(PRE_POST "")
+    #set(EM_FLAGS " -s EXPORTED_FUNCTIONS=['_main','_getcontext','_makecontext','_sched_getaffinity','_sched_setaffinity','_swapcontext']" )
+    set(EM_FLAGS " -s EXPORTED_FUNCTIONS=[_main]" )
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EM_FLAGS}")
 endif()
+
+add_subdirectory(SPHINXsys)
 
 if(NOT WASM_BUILD)
     add_subdirectory(cases_test)

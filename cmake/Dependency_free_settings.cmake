@@ -1,5 +1,5 @@
 ## Build with Simbody and/or oneTBB source code
-option(BUILD_WITH_DEPENDENCIES_SOURCE "BUILD_WITH_DEPENDENCIES_SOURCE" 0)
+option(BUILD_WITH_DEPENDENCIES_SOURCE "BUILD_WITH_DEPENDENCIES_SOURCE" 1)
 
 ## Static build
 option(SPH_ONLY_STATIC_BUILD "SPH_ONLY_STATIC_BUILD" 0)
@@ -31,7 +31,7 @@ if(BUILD_WITH_DEPENDENCIES_SOURCE)
     ###### Simbody ######
     ###### oneTBB ######
     # oneTBB source code will be built with the project
-    set(BUILD_WITH_ONETBB 1)
+    set(BUILD_WITH_ONETBB 0)
     if(BUILD_WITH_ONETBB)
         add_definitions(-DTBB_2021_2_0)
     endif()
@@ -55,7 +55,7 @@ endif(BUILD_WITH_DEPENDENCIES_SOURCE)
 
 
 ###### Simbody ######
-# if(BUILD_WITH_SIMBODY)
+if(BUILD_WITH_SIMBODY)
     include_directories(${PLATFORM_INCLUDE_DIRECTORIES})
     set(SIMBODY_MAJOR_VERSION 3)
     set(SIMBODY_MINOR_VERSION 7)
@@ -94,5 +94,5 @@ endif(BUILD_WITH_DEPENDENCIES_SOURCE)
 
     add_definitions(-DBUILD_VISUALIZER=off)
     set(CMAKE_C_FLAGS "-DINTEGER_STAR_8")
-# endif(BUILD_WITH_SIMBODY)
+endif(BUILD_WITH_SIMBODY)
 ###### Simbody ######

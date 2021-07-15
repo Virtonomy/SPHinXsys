@@ -28,7 +28,7 @@ foreach(STL_FILE ${FILES_STL})
 endforeach()
 
 aux_source_directory(. DIR_SRCS)
-ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS})
+ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS} ${TBB_OBJECTS})
 
 add_test(NAME ${PROJECT_NAME}_particle_relaxation 
 		 COMMAND ${PROJECT_NAME} --r=true
@@ -39,11 +39,11 @@ if(NOT SPH_ONLY_STATIC_BUILD) # usual dynamic build
 		target_link_libraries(${PROJECT_NAME} sphinxsys_3d)
 		add_dependencies(${PROJECT_NAME} sphinxsys_3d sphinxsys_static_3d)
 	else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(${PROJECT_NAME} sphinxsys_3d stdc++)
-		else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		if((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR EMSCRIPTEN)
+			target_link_libraries(${PROJECT_NAME} sphinxsys_3d)
+		else()
 			target_link_libraries(${PROJECT_NAME} sphinxsys_3d stdc++ stdc++fs dl)
-		endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		endif()
 
 		if(DEFINED BOOST_AVAILABLE) # link Boost if available (not for Windows)
 			target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
@@ -53,12 +53,11 @@ else() # static build only
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		target_link_libraries(${PROJECT_NAME} sphinxsys_static_3d)
 	else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(${PROJECT_NAME} sphinxsys_static_3d stdc++)
-		else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(${PROJECT_NAME} sphinxsys_static_3d stdc++ stdc++fs dl)
-		endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
+		if((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR EMSCRIPTEN)
+			target_link_libraries(${PROJECT_NAME} sphinxsys_static_3d)
+		else()
+				target_link_libraries(${PROJECT_NAME} sphinxsys_static_3d stdc++ stdc++fs)
+		endif()
 		if(DEFINED BOOST_AVAILABLE) # link Boost if available (not for Windows)
 			target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 		endif()

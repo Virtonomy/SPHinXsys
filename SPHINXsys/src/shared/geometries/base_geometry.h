@@ -37,6 +37,7 @@
 
 #include "base_data_package.h"
 #include "sph_data_conainers.h"
+#include "base_particles.h"
 
 #include <string>
 

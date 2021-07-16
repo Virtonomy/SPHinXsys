@@ -2,6 +2,8 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake) # main (top) cmake dir
 include(Dirsearch_for_3D_build)
 
+set(EMSCRIPTEN 1)
+
 ## prepare dirctoriesfor head and source files
 HEADER_DIRECTORIES_SHARED(headdirs_shared)
 SOURCE_DIRECTORIES_SHARED(sourcedirs_shared)
@@ -54,7 +56,7 @@ if(NOT SPH_ONLY_STATIC_BUILD)
 		if(EMSCRIPTEN OR (${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
 			target_link_libraries(sphinxsys_3d )
 		else()
-		target_link_libraries(sphinxsys_3d stdc++ stdc++fs)
+			target_link_libraries(sphinxsys_3d stdc++ stdc++fs)
 		endif()
 
 	if(DEFINED BOOST_AVAILABLE) # link Boost if available (not for Windows)

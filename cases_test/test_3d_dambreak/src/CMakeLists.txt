@@ -7,8 +7,10 @@ include(ImportSPHINXsysFromSource_for_3D_build)
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
+set(EMSCRIPTEN 1)
+
 aux_source_directory(. DIR_SRCS)
-ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS})
+ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS} ${TBB_OBJECTS})
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
 
@@ -17,11 +19,11 @@ if(NOT SPH_ONLY_STATIC_BUILD) # usual dynamic build
 		target_link_libraries(${PROJECT_NAME} sphinxsys_3d)
 		add_dependencies(${PROJECT_NAME} sphinxsys_3d sphinxsys_static_3d)
 	else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		if((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR EMSCRIPTEN)
 			target_link_libraries(${PROJECT_NAME} sphinxsys_3d stdc++)
-		else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		else()
 			target_link_libraries(${PROJECT_NAME} sphinxsys_3d stdc++ stdc++fs dl)
-		endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		endif()
 
 		if(DEFINED BOOST_AVAILABLE) # link Boost if available (not for Windows)
 			target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})

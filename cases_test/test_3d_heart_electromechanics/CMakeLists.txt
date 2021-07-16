@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake) # main (top) cmake dir
 set(CMAKE_VERBOSE_MAKEFILE on)
 
+set(EMSCRIPTEN 1)
+
 STRING( REGEX REPLACE ".*/(.*)" "\\1" CURRENT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR} )
 PROJECT("${CURRENT_FOLDER}")
 
@@ -18,7 +20,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data/heart-new.stl
         DESTINATION ${BUILD_INPUT_PATH})
 
 aux_source_directory(. DIR_SRCS)
-ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS})
+ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS} ${TBB_OBJECTS})
 
 add_test(NAME ${PROJECT_NAME}_particle_relaxation 
 		 COMMAND ${PROJECT_NAME} --r=true --i=false
@@ -33,11 +35,11 @@ if(NOT SPH_ONLY_STATIC_BUILD) # usual dynamic build
 		target_link_libraries(${PROJECT_NAME} sphinxsys_3d)
 		add_dependencies(${PROJECT_NAME} sphinxsys_3d sphinxsys_static_3d)
 	else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		if((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR EMSCRIPTEN)
 			target_link_libraries(${PROJECT_NAME} sphinxsys_3d stdc++)
-		else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		else()
 			target_link_libraries(${PROJECT_NAME} sphinxsys_3d stdc++ stdc++fs dl)
-		endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		endif()
 
 		if(DEFINED BOOST_AVAILABLE) # link Boost if available (not for Windows)
 			target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})

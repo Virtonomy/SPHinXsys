@@ -4,3 +4,6 @@
 [submodule "3rdparty/wasmtbb"]
 	path = 3rdparty/wasmtbb
 	url = git@github.com:hpcwasm/wasmtbb.git
+[submodule "3rdparty/eigen"]
+	path = 3rdparty/eigen
+	url = https://gitlab.com/libeigen/eigen.git

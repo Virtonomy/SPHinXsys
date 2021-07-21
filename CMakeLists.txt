@@ -79,11 +79,12 @@ if(BUILD_WITH_ONETBB)
     add_subdirectory(oneTBB)
 endif()
 
-if(NOT WASM_BUILD)
-    add_subdirectory(cases_test)
-    add_subdirectory(cases_user)
+option(BUILD_TESTS "BUILD_TESTS" 1)
+if(BUILD_TESTS)
+    add_subdirectory(tests)
 endif()
-add_subdirectory(cases_high_level_simulation)
+
+add_subdirectory(cases_user)
 
 if(ACTIVATE_CUDA)
     add_subdirectory(cases_test_gpu)

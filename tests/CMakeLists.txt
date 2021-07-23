@@ -16,5 +16,5 @@ if(BUILD_HIGH_LEVEL_EXAMPLES)
 endif()
 
 if(BUILD_UNIT_TESTS)
-	ADD_SUBDIRECTORY(src)
+	ADD_SUBDIRECTORY(unit_tests_src)
 endif()

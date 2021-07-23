@@ -1,13 +1,14 @@
 #---------------------------------------
 # SPHINXSYS V.1.0.0
 #---------------------------------------
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(SPHINXsys VERSION 1.0.0 LANGUAGES CXX)
 
 set(SPHINXSYS_PROJECT_DIR ${PROJECT_SOURCE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SPHINXSYS_PROJECT_DIR}/cmake)
 
 ###### Change settings in this file if you want to build with Simbody and/or oneTBB source code ######
+option(ONLY_3D "ONLY_3D" 0)
 include(Dependency_free_settings)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -74,12 +75,12 @@ if(NOT WASM_BUILD)
     include(Import3rdpartylibs)
 endif()
 
+option(BUILD_TESTS "BUILD_TESTS" 1)
 add_subdirectory(SPHINXsys)
 if(BUILD_WITH_ONETBB)
     add_subdirectory(oneTBB)
 endif()
 
-option(BUILD_TESTS "BUILD_TESTS" 1)
 if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()

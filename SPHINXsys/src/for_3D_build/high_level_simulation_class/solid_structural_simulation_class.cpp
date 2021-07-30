@@ -636,8 +636,6 @@ void StructuralSimulation::runSimulationStep(int &ite, Real &dt, Real &integrati
 	executeinitializeATimeStep();
 	executeAccelerationForBodyPartInBoundingBox();
 	executeSpringDamperConstraintParticleWise();
-	// velocity based
-	executeTranslateSolidBodyPart(dt);
 
 	/** CONTACT */
 	executeContactDensitySummation();
@@ -649,13 +647,18 @@ void StructuralSimulation::runSimulationStep(int &ite, Real &dt, Real &integrati
 	executeConstrainSolidBodyRegion();
 	executePositionSolidBody(dt);
 	executePositionScaleSolidBody(dt);
-	executeTranslateSolidBody(dt); // only one time
+	executeTranslateSolidBody(dt);
+	// velocity based
+	executeTranslateSolidBodyPart(dt);
 
 	executeDamping(dt);
 
 	executeConstrainSolidBodyRegion();
 	executePositionSolidBody(dt);
 	executePositionScaleSolidBody(dt);
+	executeTranslateSolidBody(dt);
+	// velocity based
+	executeTranslateSolidBodyPart(dt);
 
 	executeStressRelaxationSecondHalf(dt);
 	

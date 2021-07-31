@@ -106,6 +106,20 @@ namespace SPH {
 		return von_Mises_stress_vector;
 	}
 	//=================================================================================================//
+	Real ElasticSolidParticles::getMaxVonMisesStress()
+	{
+		Real von_Mises_stress_max = 0;
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			Real von_Mises_stress_i = von_Mises_stress(index_i);
+			if (von_Mises_stress_max < von_Mises_stress_i)
+			{
+				von_Mises_stress_max = von_Mises_stress_i;
+			}
+		}
+		return von_Mises_stress_max;
+	}
+	//=================================================================================================//
 	void ElasticSolidParticles::writeParticlesToVtuFile(std::ofstream& output_file)
 	{
 		SolidParticles::writeParticlesToVtuFile(output_file);

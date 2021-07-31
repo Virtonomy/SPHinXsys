@@ -170,6 +170,9 @@ class StructuralSimulation
 
 		// iterators
 		int iteration_;
+
+		// data storage
+		vector<Real> von_mises_stress_max_;
 		
 		// for constructor, the order is important
 		void scaleTranslationAndResolution();

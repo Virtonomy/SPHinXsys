@@ -102,6 +102,7 @@ namespace SPH {
 		StdLargeVec<Matd>	stress_PK1_;	/**<  first Piola-Kirchhoff stress tensor */
 
 		StdLargeVec<Real> getVonMisesStress();
+		Real getMaxVonMisesStress();
 
 		virtual void writeParticlesToVtuFile(std::ofstream &output_file) override;
 

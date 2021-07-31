@@ -173,7 +173,11 @@ StructuralSimulation::StructuralSimulation(StructuralSimulationInput& input):
 	position_solid_body_tuple_(input.position_solid_body_tuple_),
 	position_scale_solid_body_tuple_(input.position_scale_solid_body_tuple_),
 	translation_solid_body_tuple_(input.translation_solid_body_tuple_),
-	translation_solid_body_part_tuple_(input.translation_solid_body_part_tuple_)
+	translation_solid_body_part_tuple_(input.translation_solid_body_part_tuple_),
+
+	// iterators
+	iteration_(0)
+
 {
 	// scaling of translation and resolution
 	scaleTranslationAndResolution();
@@ -202,7 +206,7 @@ StructuralSimulation::StructuralSimulation(StructuralSimulationInput& input):
 	initializeTranslateSolidBodyPart();
 
 	// initialize simulation
-	initializeSimulation();
+	//initializeSimulation();
 }
 
 StructuralSimulation::~StructuralSimulation()
@@ -627,9 +631,9 @@ void StructuralSimulation::executeContactUpdateConfiguration()
 	}
 }
 
-void StructuralSimulation::runSimulationStep(int &ite, Real &dt, Real &integration_time)
+void StructuralSimulation::runSimulationStep(Real &dt, Real &integration_time)
 {
-	if (ite % 100 == 0) cout << "N=" << ite << " Time: " << GlobalStaticVariables::physical_time_ << "	dt: " << dt << "\n";
+	if (iteration_ % 100 == 0) cout << "N=" << iteration_ << " Time: " << GlobalStaticVariables::physical_time_ << "	dt: " << dt << "\n";
 
 	/** ACTIVE BOUNDARY CONDITIONS */
 	// force (acceleration) based
@@ -663,7 +667,7 @@ void StructuralSimulation::runSimulationStep(int &ite, Real &dt, Real &integrati
 	executeStressRelaxationSecondHalf(dt);
 	
 	/** UPDATE TIME STEP SIZE, INCREMENT */
-	ite++;
+	iteration_++;
 	dt = system_.getSmallestTimeStepAmongSolidBodies();
 	integration_time += dt;
 	GlobalStaticVariables::physical_time_ += dt;
@@ -689,7 +693,6 @@ void StructuralSimulation::runSimulation(Real end_time)
 
 	/** Statistics for computing time. */
 	write_states.writeToFile(0);
-	int ite = 0;
 	Real output_period = end_time / 100.0;
 	Real dt = 0.0;
 	tick_count t1 = tick_count::now();
@@ -700,7 +703,7 @@ void StructuralSimulation::runSimulation(Real end_time)
 		Real integration_time = 0.0;
 		while (integration_time < output_period) 
 		{
-			runSimulationStep(ite, dt, integration_time);
+			runSimulationStep(dt, integration_time);
 		}
 		tick_count t2 = tick_count::now();
 		write_states.writeToFile();
@@ -731,18 +734,17 @@ double StructuralSimulation::runSimulationFixedDurationJS(int number_of_steps)
 	/** Statistics for computing time. */
 	write_states.writeToFile(0);
 	int output_period = 100;
-	int ite = 0;	
 	Real dt = 0.0;
 	tick_count t1 = tick_count::now();
 	tick_count::interval_t interval;
 	/** Main loop */
-	while (ite < number_of_steps)
+	while (iteration_ < number_of_steps)
 	{
 		Real integration_time = 0.0;
 		int output_step = 0;
 		while (output_step < output_period)
 		{
-			runSimulationStep(ite, dt, integration_time);
+			runSimulationStep(dt, integration_time);
 			output_step++;
 		}
 		tick_count t2 = tick_count::now();

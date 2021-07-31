@@ -208,10 +208,10 @@ class StructuralSimulation
 		void executeStressRelaxationSecondHalf(Real dt);
 		void executeUpdateCellLinkedList();
 		void executeContactUpdateConfiguration();
-		void runSimulationStep(Real &dt, Real &integration_time);
 
-		// initialize simulation
 		void initializeSimulation();
+
+		void runSimulationStep(Real &dt, Real &integration_time);
 
 	public:
 		StructuralSimulation(StructuralSimulationInput& input);

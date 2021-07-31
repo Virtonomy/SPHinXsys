@@ -206,7 +206,7 @@ StructuralSimulation::StructuralSimulation(StructuralSimulationInput& input):
 	initializeTranslateSolidBodyPart();
 
 	// initialize simulation
-	//initializeSimulation();
+	initializeSimulation();
 }
 
 StructuralSimulation::~StructuralSimulation()
@@ -631,6 +631,18 @@ void StructuralSimulation::executeContactUpdateConfiguration()
 	}
 }
 
+void StructuralSimulation::initializeSimulation()
+{	
+	GlobalStaticVariables::physical_time_ = 0.0;
+
+	/** INITIALALIZE SYSTEM */
+	system_.initializeSystemCellLinkedLists();
+	system_.initializeSystemConfigurations();
+
+	/** INITIAL CONDITION */
+	executeCorrectConfiguration();	
+}
+
 void StructuralSimulation::runSimulationStep(Real &dt, Real &integration_time)
 {
 	if (iteration_ % 100 == 0) cout << "N=" << iteration_ << " Time: " << GlobalStaticVariables::physical_time_ << "	dt: " << dt << "\n";
@@ -682,14 +694,6 @@ void StructuralSimulation::runSimulationStep(Real &dt, Real &integration_time)
 void StructuralSimulation::runSimulation(Real end_time)
 {
 	BodyStatesRecordingToVtu write_states(in_output_, system_.real_bodies_);
-	GlobalStaticVariables::physical_time_ = 0.0;
-
-	/** INITIALALIZE SYSTEM */
-	system_.initializeSystemCellLinkedLists();
-	system_.initializeSystemConfigurations();
-
-	/** INITIAL CONDITION */
-	executeCorrectConfiguration();	
 
 	/** Statistics for computing time. */
 	write_states.writeToFile(0);
@@ -714,16 +718,6 @@ void StructuralSimulation::runSimulation(Real end_time)
 	tick_count::interval_t tt;
 	tt = t4 - t1 - interval;
 	cout << "Total wall time for computation: " << tt.seconds() << " seconds." << endl;
-}
-
-void StructuralSimulation::initializeSimulation()
-{	
-	/** INITIALALIZE SYSTEM */
-	system_.initializeSystemCellLinkedLists();
-	system_.initializeSystemConfigurations();
-
-	/** INITIAL CONDITION */
-	executeCorrectConfiguration();
 }
 
 double StructuralSimulation::runSimulationFixedDurationJS(int number_of_steps)

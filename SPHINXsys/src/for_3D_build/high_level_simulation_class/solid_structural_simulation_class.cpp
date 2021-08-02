@@ -87,7 +87,7 @@ void relaxParticlesSingleResolution(In_Output* in_output,
 	//	Particle relaxation time stepping start here.
 	//----------------------------------------------------------------------
 	int ite_p = 0;
-	while (ite_p < 500)
+	while (ite_p < 1000)
 	{
 		relaxation_step_inner.parallel_exec();
 		ite_p += 1;

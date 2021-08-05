@@ -18,6 +18,7 @@ using namespace std;
 using GravityPair = pair<int, Vec3d>;
 using AccelTuple = tuple<int, BoundingBox, Vec3d>;
 using SpringDamperTuple = tuple<int, Vec3d, Real>;
+using ConstrainedRegionPair = pair<int, BoundingBox>;
 using PositionSolidBodyTuple = tuple<int, Real, Real, Vec3d>;
 using PositionScaleSolidBodyTuple = tuple<int, Real, Real, Real>;
 using TranslateSolidBodyTuple = tuple<int, Real, Real, Vec3d>;
@@ -96,6 +97,7 @@ public:
 	vector<AccelTuple> acceleration_bounding_box_tuple_;
 	vector<SpringDamperTuple> spring_damper_tuple_;
 	vector<int> body_indeces_fixed_constraint_;
+	vector<ConstrainedRegionPair> body_indeces_fixed_constraint_region_;
 	vector<PositionSolidBodyTuple> position_solid_body_tuple_;
 	vector<PositionScaleSolidBodyTuple> position_scale_solid_body_tuple_;
 	vector<TranslateSolidBodyTuple> translation_solid_body_tuple_;
@@ -157,7 +159,7 @@ class StructuralSimulation
 		vector<int> body_indeces_fixed_constraint_;
 		// for ConstrainSolidBodyRegion
 		vector<shared_ptr<solid_dynamics::ConstrainSolidBodyRegion>> fixed_constraint_region_;
-		vector<int> body_indeces_fixed_constraint_region_;
+		vector<ConstrainedRegionPair> body_indeces_fixed_constraint_region_;
 		// for PositionSolidBody
 		vector<shared_ptr<solid_dynamics::PositionSolidBody>> position_solid_body_;
 		vector<PositionSolidBodyTuple> position_solid_body_tuple_;

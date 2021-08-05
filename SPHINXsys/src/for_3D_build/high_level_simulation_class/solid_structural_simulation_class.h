@@ -17,6 +17,7 @@ using namespace SPH;
 using namespace std;
 using GravityPair = pair<int, Vec3d>;
 using AccelTuple = tuple<int, BoundingBox, Vec3d>;
+using ForceTuple = tuple<int, BoundingBox, Vec3d, Real>;
 using SpringDamperTuple = tuple<int, Vec3d, Real>;
 using ConstrainedRegionPair = pair<int, BoundingBox>;
 using PositionSolidBodyTuple = tuple<int, Real, Real, Vec3d>;
@@ -95,6 +96,7 @@ public:
 	// boundary conditions
 	vector<GravityPair> non_zero_gravity_;
 	vector<AccelTuple> acceleration_bounding_box_tuple_;
+	vector<ForceTuple> force_in_body_region_tuple_;
 	vector<SpringDamperTuple> spring_damper_tuple_;
 	vector<int> body_indeces_fixed_constraint_;
 	vector<ConstrainedRegionPair> body_indeces_fixed_constraint_region_;
@@ -151,6 +153,9 @@ class StructuralSimulation
 		// for AccelerationForBodyPartInBoundingBox
 		vector<shared_ptr<solid_dynamics::AccelerationForBodyPartInBoundingBox>> acceleration_bounding_box_;
 		vector<AccelTuple> acceleration_bounding_box_tuple_;
+		// for ForceInBodyRegion
+		vector<shared_ptr<solid_dynamics::ForceInBodyRegion>> force_in_body_region_;
+		vector<ForceTuple> force_in_body_region_tuple_;
 		// for SpringDamperConstraintParticleWise
 		vector<shared_ptr<solid_dynamics::SpringDamperConstraintParticleWise>> spring_damper_constraint_;
 		vector<SpringDamperTuple> spring_damper_tuple_;
@@ -192,6 +197,7 @@ class StructuralSimulation
 		// for initializeBoundaryConditions
 		void initializeGravity();
 		void initializeAccelerationForBodyPartInBoundingBox();
+		void initializeForceInBodyRegion();
 		void initializeSpringDamperConstraintParticleWise();
 		void initializeConstrainSolidBody();
 		void initializeConstrainSolidBodyRegion();
@@ -204,6 +210,7 @@ class StructuralSimulation
 		void executeCorrectConfiguration();
 		void executeinitializeATimeStep();
 		void executeAccelerationForBodyPartInBoundingBox();
+		void executeForceInBodyRegion();
 		void executeSpringDamperConstraintParticleWise();
 		void executeContactDensitySummation();
 		void executeContactForce();

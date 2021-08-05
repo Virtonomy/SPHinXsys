@@ -152,9 +152,12 @@ class StructuralSimulation
 		// for SpringDamperConstraintParticleWise
 		vector<shared_ptr<solid_dynamics::SpringDamperConstraintParticleWise>> spring_damper_constraint_;
 		vector<SpringDamperTuple> spring_damper_tuple_;
-		// for ConstrainSolidBodyRegion
-		vector<shared_ptr<solid_dynamics::ConstrainSolidBodyRegion>> fixed_constraint_;
+		// for ConstrainSolidBody
+		vector<shared_ptr<solid_dynamics::ConstrainSolidBodyRegion>> fixed_constraint_body_;
 		vector<int> body_indeces_fixed_constraint_;
+		// for ConstrainSolidBodyRegion
+		vector<shared_ptr<solid_dynamics::ConstrainSolidBodyRegion>> fixed_constraint_region_;
+		vector<int> body_indeces_fixed_constraint_region_;
 		// for PositionSolidBody
 		vector<shared_ptr<solid_dynamics::PositionSolidBody>> position_solid_body_;
 		vector<PositionSolidBodyTuple> position_solid_body_tuple_;
@@ -188,6 +191,7 @@ class StructuralSimulation
 		void initializeGravity();
 		void initializeAccelerationForBodyPartInBoundingBox();
 		void initializeSpringDamperConstraintParticleWise();
+		void initializeConstrainSolidBody();
 		void initializeConstrainSolidBodyRegion();
 		void initializePositionSolidBody();
 		void initializePositionScaleSolidBody();
@@ -202,6 +206,7 @@ class StructuralSimulation
 		void executeContactDensitySummation();
 		void executeContactForce();
 		void executeStressRelaxationFirstHalf(Real dt);
+		void executeConstrainSolidBody();
 		void executeConstrainSolidBodyRegion();
 		void executePositionSolidBody(Real dt);
 		void executePositionScaleSolidBody(Real dt);

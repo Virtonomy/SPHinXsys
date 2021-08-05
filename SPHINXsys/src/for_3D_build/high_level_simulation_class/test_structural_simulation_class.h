@@ -37,8 +37,8 @@ public:
 	// for SpringDamperConstraintParticleWise
 	vector<shared_ptr<solid_dynamics::SpringDamperConstraintParticleWise>> get_spring_damper_constraint_(){ return spring_damper_constraint_; };
 	vector<SpringDamperTuple> get_spring_damper_tuple_(){ return spring_damper_tuple_; };
-	// for ConstrainSolidBodyRegion
-	vector<shared_ptr<solid_dynamics::ConstrainSolidBodyRegion>> get_fixed_constraint_(){ return fixed_constraint_; };
+	// for ConstrainSolidBody
+	vector<shared_ptr<solid_dynamics::ConstrainSolidBodyRegion>> get_fixed_constraint_(){ return fixed_constraint_body_; };
 	vector<int> get_body_indeces_fixed_constraint_(){ return body_indeces_fixed_constraint_; };
 	// for PositionSolidBody
 	vector<shared_ptr<solid_dynamics::PositionSolidBody>> get_position_solid_body_(){ return position_solid_body_; };

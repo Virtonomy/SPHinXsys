@@ -671,7 +671,8 @@ namespace SPH
 		void ForceInBodyRegion::Update(size_t index_i, Real dt)
 		{
 			try{
-				dvel_dt_prior_[index_i] = acceleration_ * GlobalStaticVariables::physical_time_ / end_time_;
+				Real time_factor = std::min(GlobalStaticVariables::physical_time_ / end_time_, 1.0);
+				dvel_dt_prior_[index_i] = acceleration_ * time_factor;
 			}
 			catch(out_of_range& e){
 				throw runtime_error(string("ForceInBodyRegion::Update: particle index out of bounds") + to_string(index_i));

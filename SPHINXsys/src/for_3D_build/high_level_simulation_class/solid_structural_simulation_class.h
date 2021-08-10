@@ -43,12 +43,11 @@ class SolidBodyForSimulation
 {
 private:
 	ImportedModel imported_model_;
-	//LinearElasticSolid material_model_;
 	ElasticSolidParticles elastic_solid_particles_;
 	BodyRelationInner inner_body_relation_;
 
 	solid_dynamics::CorrectConfiguration correct_configuration_;
-	solid_dynamics::StressRelaxationFirstHalf stress_relaxation_first_half_;
+	solid_dynamics::KirchhoffStressRelaxationFirstHalf stress_relaxation_first_half_;
 	solid_dynamics::StressRelaxationSecondHalf stress_relaxation_second_half_;
 	DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec3d>> damping_random_;
 
@@ -57,12 +56,11 @@ public:
 	~SolidBodyForSimulation(){};
 
 	ImportedModel* getImportedModel() { return &imported_model_; };
-	//LinearElasticSolid* GetMaterialModel() { return &material_model_; };
 	ElasticSolidParticles* getElasticSolidParticles() { return &elastic_solid_particles_; };
 	BodyRelationInner* getInnerBodyRelation() { return &inner_body_relation_; };
 
 	solid_dynamics::CorrectConfiguration* getCorrectConfiguration() { return &correct_configuration_; };
-	solid_dynamics::StressRelaxationFirstHalf* getStressRelaxationFirstHalf() { return &stress_relaxation_first_half_; };
+	solid_dynamics::KirchhoffStressRelaxationFirstHalf* getStressRelaxationFirstHalf() { return &stress_relaxation_first_half_; };
 	solid_dynamics::StressRelaxationSecondHalf* getStressRelaxationSecondHalf() { return &stress_relaxation_second_half_; };
 	DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec3d>>* getDampingWithRandomChoice() { return &damping_random_; };
 };

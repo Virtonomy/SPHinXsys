@@ -37,7 +37,7 @@ SolidBodyForSimulation::SolidBodyForSimulation(SPHSystem &system, string body_na
 	inner_body_relation_(BodyRelationInner(&imported_model_)),
 
 	correct_configuration_(solid_dynamics::CorrectConfiguration(&inner_body_relation_)),
-	stress_relaxation_first_half_(solid_dynamics::KirchhoffStressRelaxationFirstHalf(&inner_body_relation_)),
+	stress_relaxation_first_half_(solid_dynamics::StressRelaxationFirstHalf(&inner_body_relation_)),
 	stress_relaxation_second_half_(solid_dynamics::StressRelaxationSecondHalf(&inner_body_relation_)),
 	damping_random_(DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec3d>>(&inner_body_relation_, 0.1, "Velocity", physical_viscosity))
 {}
@@ -775,7 +775,7 @@ void StructuralSimulation::runSimulationStep(Real &dt, Real &integration_time)
 	executeContactDensitySummation();
 	executeContactForce();
 
-	/** STRESS RELAXATION, DAMPING, POSITIONAL CONSTRAINTS */
+	/** STRESS RELAXATOIN, DAMPING, POSITIONAL CONSTRAINTS */
 	executeStressRelaxationFirstHalf(dt);
 
 	executeConstrainSolidBody();

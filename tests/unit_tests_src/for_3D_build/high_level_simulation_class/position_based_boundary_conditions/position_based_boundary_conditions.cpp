@@ -53,7 +53,7 @@ TEST(StructuralSimulation, PositionSolidBodyTuple)
 	Real scale_system_bounds = 10;
 	input.scale_system_boundaries_ = scale_system_bounds;
 	input.position_solid_body_tuple_ = { PositionSolidBodyTuple(0, 0.0, end_time * 0.75, final_position_center ),
-											PositionSolidBodyTuple(0, end_time * 0.75, end_time * 1.1, final_position_center ) };
+											PositionSolidBodyTuple(0, end_time * 0.75, end_time, final_position_center ) };
 	//=================================================================================================//
 
 	//=================================================================================================//
@@ -108,7 +108,7 @@ TEST(StructuralSimulation, PositionSolidBodyTuple)
 		for (size_t i = 0; i < 3; i++)
 		{
 			Vecd displ = pos_n[index] - pos_0[index];
-			EXPECT_NEAR(displ[i], final_position_center[i], final_position_center.norm() * 1e-5);
+			EXPECT_NEAR(displ[i], final_position_center[i], final_position_center.norm() * tolerance);
 		}
 	}
 	//=================================================================================================//
@@ -143,11 +143,8 @@ TEST(StructuralSimulation, PositionScaleSolidBodyTuple)
 		physical_viscosity,
 		contacting_bodies_list,
 	};
-	// scale it until 0.9 * end time, then keep the position until the end
 	Real scale = 0.9;
-	input.position_scale_solid_body_tuple_ = {
-		PositionScaleSolidBodyTuple(0, 0.0, end_time_position, scale),
-		PositionScaleSolidBodyTuple(0, end_time_position, end_time_simulation * 1.1, scale) };
+	input.position_scale_solid_body_tuple_ = { PositionScaleSolidBodyTuple(0, 0.0, end_time_position, scale) };
 
 	//=================================================================================================//
 	TestStructuralSimulation sim (input);

@@ -617,6 +617,98 @@ namespace SPH
 			dvel_dt_prior_[index_i] += getDampingForce(index_i);
 		}
 		//=================================================================================================//
+		SpringNormalOnSurfaceParticles::
+			SpringNormalOnSurfaceParticles(SolidBody *body, Vecd stiffness, Vecd source_point, Real damping_ratio)
+			: ParticleDynamicsSimple(body), SolidDataSimple(body),
+			  pos_n_(particles_->pos_n_),
+			  pos_0_(particles_->pos_0_),
+			  vel_n_(particles_->vel_n_),
+			  dvel_dt_prior_(particles_->dvel_dt_prior_),
+			  apply_spring_force_to_particle_({})
+		{
+			// set apply_spring_force_to_particle_ to false for each particle
+			for (size_t i = 0; i < particles_->pos_0_.size(); i++)
+			{
+				apply_spring_force_to_particle_.push_back(false);
+			}
+			// get the surface layer of particles
+			ShapeSurface surface_layer_(body);
+			// select which paricles the pressure is applied to
+			for (size_t i = 0; i < surface_layer_.body_part_particles_.size(); i++)
+			{
+				// index of surface particle
+				size_t particle_i = surface_layer_.body_part_particles_[i];
+				// vector to the source point from the particle
+				Vecd vector_to_particle = source_point - particles_->pos_0_[particle_i];
+				// normal of the particle
+				Vecd normal = particles_->n_0_[particle_i];
+
+				// get the cos of the angle between the vector and the normal
+				Real dot_product = 0.0;
+				for (int j = 0; j < normal.size(); j++) dot_product += vector_to_particle[j] * normal[j];
+				Real cos_teta = dot_product / vector_to_particle.norm(); // normal.norm() = 1
+				
+				// if the angle is less than 90°, we apply the spring force to the surface particle
+				if (cos_teta > 1e-3)
+				{
+					apply_spring_force_to_particle_[particle_i] = true;
+				}
+			}
+			// calculate total mass
+			total_mass_ = 0.0;
+			for (size_t i = 0; i < particles_->mass_.size(); i++)
+			{
+				total_mass_ += particles_->mass_[i];
+			}
+			// scale stiffness and damping by mass here, so it's not necessary in each iteration
+			stiffness_ = stiffness / total_mass_;
+			damping_coeff_ = stiffness * damping_ratio / total_mass_;
+		}
+		//=================================================================================================//
+		SpringNormalOnSurfaceParticles::~SpringNormalOnSurfaceParticles()
+		{
+		}
+		//=================================================================================================//
+		void SpringNormalOnSurfaceParticles::setupDynamics(Real dt)
+		{
+			particles_->total_ghost_particles_ = 0;
+		}
+		//=================================================================================================//
+		Vecd SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd &disp)
+		{
+			Vecd spring_force(0);
+			for (int i = 0; i < disp.size(); i++)
+			{
+				spring_force[i] = -stiffness_[i] * disp[i];
+			}
+			return spring_force;
+		}
+		//=================================================================================================//
+		Vecd SpringNormalOnSurfaceParticles::getDampingForce(size_t index_i)
+		{
+			Vecd damping_force(0);
+			for (int i = 0; i < vel_n_[index_i].size(); i++)
+			{
+				damping_force[i] = -damping_coeff_[i] * vel_n_[index_i][i];
+			}
+			return damping_force;
+		}
+		//=================================================================================================//
+		void SpringNormalOnSurfaceParticles::Update(size_t index_i, Real dt)
+		{
+			try{
+				if (apply_spring_force_to_particle_[index_i])
+				{
+					Vecd delta_x = pos_n_[index_i] - pos_0_[index_i];
+					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * getSpringForce(index_i, delta_x);
+					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * getDampingForce(index_i);
+				}
+			}
+				catch(out_of_range& e){
+				throw runtime_error(string("SpringNormalOnSurfaceParticles::Update: particle index out of bounds") + to_string(index_i));
+			}
+		}
+		//=================================================================================================//
 		AccelerationForBodyPartInBoundingBox::
 			AccelerationForBodyPartInBoundingBox(SolidBody* body, BoundingBox& bounding_box, Vecd acceleration) :
 			ParticleDynamicsSimple(body), SolidDataSimple(body),

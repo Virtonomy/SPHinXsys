@@ -618,12 +618,14 @@ namespace SPH
 		}
 		//=================================================================================================//
 		SpringNormalOnSurfaceParticles::
-			SpringNormalOnSurfaceParticles(SolidBody *body, Vecd stiffness, Vecd source_point, Real damping_ratio)
+			SpringNormalOnSurfaceParticles(SolidBody *body, Vecd source_point, Real stiffness, Real damping_ratio)
 			: ParticleDynamicsSimple(body), SolidDataSimple(body),
 			  pos_n_(particles_->pos_n_),
 			  pos_0_(particles_->pos_0_),
+			  n_(particles_->n_),
 			  vel_n_(particles_->vel_n_),
 			  dvel_dt_prior_(particles_->dvel_dt_prior_),
+			  mass_(particles_->mass_),
 			  apply_spring_force_to_particle_({})
 		{
 			// set apply_spring_force_to_particle_ to false for each particle
@@ -654,15 +656,9 @@ namespace SPH
 					apply_spring_force_to_particle_[particle_i] = true;
 				}
 			}
-			// calculate total mass
-			total_mass_ = 0.0;
-			for (size_t i = 0; i < particles_->mass_.size(); i++)
-			{
-				total_mass_ += particles_->mass_[i];
-			}
 			// scale stiffness and damping by mass here, so it's not necessary in each iteration
-			stiffness_ = stiffness / total_mass_;
-			damping_coeff_ = stiffness * damping_ratio / total_mass_;
+			// stiffness_ = stiffness / mass_[index i];
+			// damping_coeff_ = stiffness * damping_ratio / mass_[index i];
 		}
 		//=================================================================================================//
 		SpringNormalOnSurfaceParticles::~SpringNormalOnSurfaceParticles()
@@ -677,9 +673,10 @@ namespace SPH
 		Vecd SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd &disp)
 		{
 			Vecd spring_force(0);
+			Real area = std::pow(particles_->Vol_[index_i], 2.0 / 3.0);
 			for (int i = 0; i < disp.size(); i++)
 			{
-				spring_force[i] = -stiffness_[i] * disp[i];
+				spring_force[i] = -stiffness_ * area * disp[i];
 			}
 			return spring_force;
 		}
@@ -700,8 +697,10 @@ namespace SPH
 				if (apply_spring_force_to_particle_[index_i])
 				{
 					Vecd delta_x = pos_n_[index_i] - pos_0_[index_i];
-					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * getSpringForce(index_i, delta_x);
-					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * getDampingForce(index_i);
+					Vecd acc_from_spring_force = getSpringForce(index_i, delta_x) / mass_[index_i];
+					Vecd acc_from_damping = getDampingForce(index_i) / mass_[index_i];
+					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * acc_from_spring_force[index_i];
+					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * acc_from_damping[index_i];
 				}
 			}
 				catch(out_of_range& e){

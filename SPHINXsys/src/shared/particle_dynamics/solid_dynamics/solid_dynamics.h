@@ -414,14 +414,14 @@ namespace SPH
 			: public ParticleDynamicsSimple, public SolidDataSimple
 		{
 		public:
-			SpringNormalOnSurfaceParticles(SolidBody* body, Vecd stiffness, Vecd source_point, Real damping_ratio = 0.05);
+			SpringNormalOnSurfaceParticles(SolidBody* body, Vecd source_point, Real stiffness, Real damping_ratio = 0.05);
 			~SpringNormalOnSurfaceParticles();
 
 			StdLargeVec<bool>& GetApplySpringForceToParticle(){ return apply_spring_force_to_particle_; }
 		protected:
-			Real total_mass_;
-			StdLargeVec<Vecd>& pos_n_,& pos_0_,& vel_n_,& dvel_dt_prior_;
-			Vecd stiffness_;
+			StdLargeVec<Vecd>& pos_n_,& pos_0_,& n_,& vel_n_,& dvel_dt_prior_;
+			StdLargeVec<Real>& mass_;
+			Real stiffness_;
 			Vecd damping_coeff_; // damping component parallel to the spring force component
 			StdLargeVec<bool> apply_spring_force_to_particle_;
 

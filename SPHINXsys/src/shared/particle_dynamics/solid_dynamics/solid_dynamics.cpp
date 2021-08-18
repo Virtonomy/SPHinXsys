@@ -658,7 +658,7 @@ namespace SPH
 			}
 			// scale stiffness and damping by mass here, so it's not necessary in each iteration
 			// stiffness_ = stiffness / mass_[index i];
-			// damping_coeff_ = stiffness * damping_ratio / mass_[index i];
+			damping_coeff_ = stiffness * damping_ratio;
 		}
 		//=================================================================================================//
 		SpringNormalOnSurfaceParticles::~SpringNormalOnSurfaceParticles()

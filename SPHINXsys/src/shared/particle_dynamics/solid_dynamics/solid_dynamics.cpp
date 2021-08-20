@@ -701,12 +701,8 @@ namespace SPH
 				spring_force_vector[i] = -stiffness_ * area * normal_disp[i];
 			}
 			//get magnitude of spring force vector
-			Real sum = 0;
-			for (int k = 0; k < spring_force_vector.size(); k++)
-			{
-				sum += spring_force_vector[k] * spring_force_vector[k];
-			}
-			Real spring_force_value = sqrt(sum);
+			Real spring_force_value = spring_force_vector.norm();
+
 			return spring_force_value;
 		}
 		//=================================================================================================//
@@ -738,12 +734,8 @@ namespace SPH
 				Vecd normal_vel = lambda * normal;
 				damping_force_vector[i] = -damping_coeff_[i] * normal_vel[i];
 			}
-			Real sum = 0;
-			for (int k = 0; k < damping_force_vector.size(); k++)
-			{
-				sum += damping_force_vector[k] * damping_force_vector[k];
-			}
-			Real damping_force_value = sqrt(sum);
+			Real damping_force_value = damping_force_vector.norm();
+			
 			return damping_force_value;
 		}
 		//=================================================================================================//

@@ -673,6 +673,7 @@ namespace SPH
 		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd &disp)
 		{
 			Vecd spring_force_vector(0);
+
 			Real area = std::pow(particles_->Vol_[index_i], 2.0 / 3.0);
 			for (int i = 0; i < disp.size(); i++)
 			{
@@ -690,9 +691,16 @@ namespace SPH
 				}
 				//get scalar, which to multiply n_0 with
 				Real lambda = dot_product_1 / dot_product_2;
+				// if the angle between displ and normal is more than 90°, the normal portion of disp will be in the opposite direction
+				Real cos_teta = dot_product_1 / disp.norm(); // normal.norm() = 1
+				if (cos_teta < -1e-3)
+				{
+					lambda = -lambda;
+				}
 				Vecd normal_disp = lambda * normal;
 				spring_force_vector[i] = -stiffness_ * area * normal_disp[i];
 			}
+			//get magnitude of spring force vector
 			Real sum = 0;
 			for (int k = 0; k < spring_force_vector.size(); k++)
 			{
@@ -721,6 +729,12 @@ namespace SPH
 				}
 				//get scalar, which to multiply n_0 with
 				Real lambda = dot_product_1 / dot_product_2;
+				// if the angle between displ and normal is more than 90°, the normal portion of disp will be in the opposite direction
+				Real cos_teta = dot_product_1 / vel_n_[index_i].norm(); // normal.norm() = 1
+				if (cos_teta < -1e-3)
+				{
+					lambda = -lambda;
+				}
 				Vecd normal_vel = lambda * normal;
 				damping_force_vector[i] = -damping_coeff_[i] * normal_vel[i];
 			}

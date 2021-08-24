@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "small_vectors.h"
-#include "test_structural_simulation_class.h"
+
+using namespace SPH;
 
 TEST(AngleBetweenTwo3DVectors, getAngleBetweenTwo3DVectors)
 {
@@ -29,4 +30,10 @@ TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
         EXPECT_NEAR(proj_vector_1[i], proj_vector_1_ref[i], 1e-6);
 	}
 
+}
+//=================================================================================================//
+int main(int argc, char* argv[])
+{	
+	testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

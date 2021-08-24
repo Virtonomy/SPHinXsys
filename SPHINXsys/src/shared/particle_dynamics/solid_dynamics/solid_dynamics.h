@@ -422,7 +422,7 @@ namespace SPH
 			StdLargeVec<Vecd>& pos_n_,& pos_0_,& n_,& vel_n_,& dvel_dt_prior_;
 			StdLargeVec<Real>& mass_;
 			Real stiffness_;
-			Vecd damping_coeff_; // damping component parallel to the spring force component
+			Real damping_coeff_; // damping component parallel to the spring force component
 			StdLargeVec<bool> apply_spring_force_to_particle_;
 
 			virtual void setupDynamics(Real dt = 0.0) override;

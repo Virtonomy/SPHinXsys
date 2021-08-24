@@ -691,12 +691,7 @@ namespace SPH
 				}
 				//get scalar, which to multiply n_0 with
 				Real lambda = dot_product_1 / dot_product_2;
-				// if the angle between displ and normal is more than 90°, the normal portion of disp will be in the opposite direction
-				Real cos_teta = dot_product_1 / disp.norm(); // normal.norm() = 1
-				if (cos_teta < -1e-3)
-				{
-					lambda = -lambda;
-				}
+
 				Vecd normal_disp = lambda * normal;
 				spring_force_vector[i] = -stiffness_ * area * normal_disp[i];
 			}
@@ -725,14 +720,8 @@ namespace SPH
 				}
 				//get scalar, which to multiply n_0 with
 				Real lambda = dot_product_1 / dot_product_2;
-				// if the angle between displ and normal is more than 90°, the normal portion of disp will be in the opposite direction
-				Real cos_teta = dot_product_1 / vel_n_[index_i].norm(); // normal.norm() = 1
-				if (cos_teta < -1e-3)
-				{
-					lambda = -lambda;
-				}
 				Vecd normal_vel = lambda * normal;
-				damping_force_vector[i] = -damping_coeff_[i] * normal_vel[i];
+				damping_force_vector[i] = -damping_coeff_ * normal_vel[i];
 			}
 			Real damping_force_value = damping_force_vector.norm();
 			

@@ -23,7 +23,7 @@ TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
     
     Vec3d proj_vector_1 = getVectorProjectionOf3DVector(vector_1, vector_2);
 
-    Vec3d proj_vector_1_ref = Vec3d(0.857142, 1.714285, 2.571428);
+    Vec3d proj_vector_1_ref = Vec3d(1.142857, -0.571428, 2.285714);
 
 	for (size_t i = 0; i < 3; i++)
 	{

@@ -221,7 +221,7 @@ namespace SPH {
 		{
 			dot_product_1 += vector_1[i] * vector_2[i];
 		}
-		Real cos_teta = dot_product_1 / vector_1.norm() * vector_2.norm();
+		Real cos_teta = dot_product_1 / (vector_1.norm() * vector_2.norm());
 
 		return cos_teta;
 	}
@@ -239,7 +239,7 @@ namespace SPH {
 		//get scalar, which to multiply n_0 with
 		Real lambda = dot_product_1 / dot_product_2;
 		// if the angle between displ and normal is more than 90°, the normal portion of disp will be in the opposite direction
-		Real cos_teta = dot_product_1 / vector_1.norm(); // normal.norm() = 1
+		Real cos_teta = dot_product_1 /(vector_1.norm() * vector_2.norm()) ; // normal.norm() = 1
 		if (cos_teta < -1e-3)
 		{
 			lambda = -lambda;

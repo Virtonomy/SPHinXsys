@@ -34,13 +34,29 @@ TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
     Vec3d vector_1 = Vec3d(1, 2, 3);
     Vec3d vector_2 = Vec3d(2, -1, 4);
     
-    Vec3d proj_vector_1 = getVectorProjectionOf3DVector(vector_1, vector_2);
 
+    //angle more than 90°
+    Vec3d vector_3 = Vec3d(1, 1, 0);
+    Vec3d vector_4 = Vec3d(-1, 0, 0);
+    
+    //vectors in opposite direction
+    Vec3d vector_5 = Vec3d(1, 1, 0);
+    Vec3d vector_6 = Vec3d(-1, -1, 0);
+
+    Vec3d proj_vector_1 = getVectorProjectionOf3DVector(vector_1, vector_2);
     Vec3d proj_vector_1_ref = Vec3d(1.142857, -0.571428, 2.285714);
+
+    Vec3d proj_vector_2 = getVectorProjectionOf3DVector(vector_3, vector_4);
+    Vec3d proj_vector_2_ref = Vec3d(1, 0, 0);
+
+    Vec3d proj_vector_3 = getVectorProjectionOf3DVector(vector_5, vector_6);
+    Vec3d proj_vector_3_ref = Vec3d(1, 1, 0);
 
 	for (size_t i = 0; i < 3; i++)
 	{
         EXPECT_NEAR(proj_vector_1[i], proj_vector_1_ref[i], 1e-6);
+        EXPECT_NEAR(proj_vector_2[i], proj_vector_2_ref[i], 1e-6);
+        EXPECT_NEAR(proj_vector_3[i], proj_vector_3_ref[i], 1e-6);
 	}
 
 }

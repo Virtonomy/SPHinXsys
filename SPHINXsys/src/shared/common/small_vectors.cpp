@@ -228,7 +228,7 @@ namespace SPH {
 	//=================================================================================================//
 	Vec3d getVectorProjectionOf3DVector (Vec3d vector_1, Vec3d vector_2)
 	{
-		// get the orthogonal projection of the vector_1, which is parallel to the vector_2, meaning it is the vector_2 * scalar
+		// get the projection of the vector_1 on vector 2, which is parallel to the vector_2, meaning it is the vector_2 * scalar
 		Real dot_product_1 = 0.0;
 		Real dot_product_2 = 0.0;
 		for (int i = 0; i < vector_1.size(); i++)
@@ -238,12 +238,6 @@ namespace SPH {
 		}
 		//get scalar, which to multiply n_0 with
 		Real lambda = dot_product_1 / dot_product_2;
-		// if the angle between displ and normal is more than 90°, the normal portion of disp will be in the opposite direction
-		Real cos_teta = dot_product_1 /(vector_1.norm() * vector_2.norm()) ; // normal.norm() = 1
-		if (cos_teta < -1e-3)
-		{
-			lambda = -lambda;
-		}
 		Vec3d proj_vector_1 = lambda * vector_2;
 
 		return proj_vector_1;

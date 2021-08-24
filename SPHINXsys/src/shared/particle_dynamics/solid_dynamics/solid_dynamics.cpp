@@ -5,6 +5,7 @@
 
 #include "solid_dynamics.h"
 #include "general_dynamics.h"
+#include "small_vectors.h"
 
 using namespace SimTK;
 
@@ -646,9 +647,7 @@ namespace SPH
 				Vecd normal = particles_->n_0_[particle_i];
 
 				// get the cos of the angle between the vector and the normal
-				Real dot_product = 0.0;
-				for (int j = 0; j < normal.size(); j++) dot_product += vector_to_particle[j] * normal[j];
-				Real cos_teta = dot_product / vector_to_particle.norm(); // normal.norm() = 1
+				Real cos_teta = getAngleBetweenTwo3DVectors (vector_to_particle, normal);
 				
 				// if the angle is less than 90°, we apply the spring force to the surface particle
 				if (cos_teta > 1e-3)
@@ -682,17 +681,7 @@ namespace SPH
 				// normal of the particle
 				Vecd normal = particles_->n_0_[particle_i];
 				// get the normal portion of the displacement, which is parallel to the normal of particles, meaning it is the normal vector * scalar
-				Real dot_product_1 = 0.0;
-				Real dot_product_2 = 0.0;
-				for (int j = 0; j < normal.size(); j++)
-				{
-					dot_product_1 += disp[j] * normal[j];
-					dot_product_2 += normal[j] * normal[j];
-				}
-				//get scalar, which to multiply n_0 with
-				Real lambda = dot_product_1 / dot_product_2;
-
-				Vecd normal_disp = lambda * normal;
+				Vecd normal_disp = getVectorProjectionOf3DVector (disp, normal);
 				spring_force_vector[i] = -stiffness_ * area * normal_disp[i];
 			}
 			//get magnitude of spring force vector
@@ -711,16 +700,7 @@ namespace SPH
 				// normal of the particle
 				Vecd normal = particles_->n_0_[particle_i];
 				// get the normal portion of the velocity, which is parallel to the normal of particles, meaning it is the normal vector * scalar
-				Real dot_product_1 = 0.0;
-				Real dot_product_2 = 0.0;
-				for (int j = 0; j < normal.size(); j++)
-				{
-					dot_product_1 += vel_n_[index_i][j] * normal[j];
-					dot_product_2 += normal[j] * normal[j];
-				}
-				//get scalar, which to multiply n_0 with
-				Real lambda = dot_product_1 / dot_product_2;
-				Vecd normal_vel = lambda * normal;
+				Vecd normal_vel = getVectorProjectionOf3DVector (vel_n_[index_i], normal);
 				damping_force_vector[i] = -damping_coeff_ * normal_vel[i];
 			}
 			Real damping_force_value = damping_force_vector.norm();

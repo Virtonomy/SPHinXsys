@@ -43,6 +43,9 @@ TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
     Vec3d vector_5 = Vec3d(1, 1, 0);
     Vec3d vector_6 = Vec3d(-1, -1, 0);
 
+    Vec3d vector_7 = Vec3d(5.44009282066326e-15, -0.000058164135562623, 2.22856150706995e-07);
+    Vec3d vector_8 = Vec3d(-9.6283166736093e-11, 0.999698258170137, -0.00394363294839056);
+
     Vec3d proj_vector_1 = getVectorProjectionOf3DVector(vector_1, vector_2);
     Vec3d proj_vector_1_ref = Vec3d(1.142857, -0.571428, 2.285714);
 
@@ -52,11 +55,16 @@ TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
     Vec3d proj_vector_3 = getVectorProjectionOf3DVector(vector_5, vector_6);
     Vec3d proj_vector_3_ref = Vec3d(1, 1, 0);
 
+    //values from spring normal to surface
+    Vec3d proj_vector_4 = getVectorProjectionOf3DVector(vector_7, vector_8);
+    Vec3d proj_vector_4_ref = Vec3d(5.60191499112963e-15, -0.000058164109562364, 2.29447132681609e-07);
+
 	for (size_t i = 0; i < 3; i++)
 	{
         EXPECT_NEAR(proj_vector_1[i], proj_vector_1_ref[i], 1e-6);
         EXPECT_NEAR(proj_vector_2[i], proj_vector_2_ref[i], 1e-6);
         EXPECT_NEAR(proj_vector_3[i], proj_vector_3_ref[i], 1e-6);
+        EXPECT_NEAR(proj_vector_4[i], proj_vector_4_ref[i], 1e-8);
 	}
 
 }

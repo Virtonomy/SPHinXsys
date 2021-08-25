@@ -5,7 +5,6 @@
 
 #include "solid_dynamics.h"
 #include "general_dynamics.h"
-#include "small_vectors.h"
 
 using namespace SimTK;
 
@@ -624,6 +623,7 @@ namespace SPH
 			  pos_n_(particles_->pos_n_),
 			  pos_0_(particles_->pos_0_),
 			  n_(particles_->n_),
+			  n_0_(particles_->n_0_),
 			  vel_n_(particles_->vel_n_),
 			  dvel_dt_prior_(particles_->dvel_dt_prior_),
 			  mass_(particles_->mass_),
@@ -656,7 +656,7 @@ namespace SPH
 				}
 			}
 			// scale stiffness and damping by mass here, so it's not necessary in each iteration
-			// stiffness_ = stiffness / mass_[index i];
+			stiffness_ = stiffness;
 			damping_coeff_ = stiffness * damping_ratio;
 		}
 		//=================================================================================================//
@@ -672,7 +672,6 @@ namespace SPH
 		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd &disp)
 		{
 			Vecd spring_force_vector(0);
-
 			Real area = std::pow(particles_->Vol_[index_i], 2.0 / 3.0);
 			for (int i = 0; i < disp.size(); i++)
 			{
@@ -682,6 +681,7 @@ namespace SPH
 				Vecd normal = particles_->n_0_[particle_i];
 				// get the normal portion of the displacement, which is parallel to the normal of particles, meaning it is the normal vector * scalar
 				Vecd normal_disp = getVectorProjectionOf3DVector (disp, normal);
+				
 				spring_force_vector[i] = -stiffness_ * area * normal_disp[i];
 			}
 			//get magnitude of spring force vector
@@ -701,6 +701,7 @@ namespace SPH
 				Vecd normal = particles_->n_0_[particle_i];
 				// get the normal portion of the velocity, which is parallel to the normal of particles, meaning it is the normal vector * scalar
 				Vecd normal_vel = getVectorProjectionOf3DVector (vel_n_[index_i], normal);
+				
 				damping_force_vector[i] = -damping_coeff_ * normal_vel[i];
 			}
 			Real damping_force_value = damping_force_vector.norm();

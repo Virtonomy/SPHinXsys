@@ -716,8 +716,8 @@ namespace SPH
 					Vecd delta_x = pos_n_[index_i] - pos_0_[index_i];
 					Real acc_from_spring_force = getSpringForce(index_i, delta_x) / mass_[index_i];
 					Real acc_from_damping = getDampingForce(index_i) / mass_[index_i];
-					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * acc_from_spring_force;
-					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * acc_from_damping;
+					dvel_dt_prior_[index_i] += n_[index_i] * acc_from_spring_force;
+					dvel_dt_prior_[index_i] += n_[index_i] * acc_from_damping;
 
 				}
 			}

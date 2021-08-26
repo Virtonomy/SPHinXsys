@@ -9,7 +9,17 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SPHINXSYS_PROJECT_DIR}/cmake)
 
 ###### Change settings in this file if you want to build with Simbody and/or oneTBB source code ######
 option(ONLY_3D "ONLY_3D" 0)
-include(Dependency_free_settings)
+option(BUILD_WITH_SIMBODY "BUILD_WITH_SIMBODY" 0)
+option(EMSCRIPTEN "EMSCRIPTEN" 0)
+
+if(EMSCRIPTEN)
+    set(BUILD_WITH_SIMBODY 1)
+    set(ONLY_3D 1)
+    set(BUILD_SHARED_LIBS OFF)
+    message(STATUS "BUILD_SHARED_LIBS is set off")
+else()
+    add_definitions(-DBOOST_AVAILABLE)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
@@ -41,7 +51,7 @@ if(MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
 else(MSVC)
     add_compile_definitions(__linux__=1)
-    set(CMAKE_CXX_FLAGS "-Wall -Werror -std=c++11 -DUNIX -pthread")
+    set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DUNIX -pthread")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -ggdb")
     IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
@@ -51,6 +61,11 @@ else(MSVC)
     ENDIF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
 endif(MSVC)
+
+if(NOT BUILD_WITH_SIMBODY)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" " -Werror")
+endif()
+
 add_compile_definitions(TBB_SUPPRESS_DEPRECATED_MESSAGES=1)
 
 message("===========================================")
@@ -70,22 +85,18 @@ endif()
 
 enable_testing()
 
-if(NOT WASM_BUILD)
-    include(Common)
-    include(Import3rdpartylibs)
-endif()
+include(Common)
+include(Import3rdpartylibs)
+
+add_subdirectory(SPHINXsys)
+
+set(simbody_root "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/simbody")
+add_subdirectory(${simbody_root})
 
 option(BUILD_TESTS "BUILD_TESTS" 1)
-add_subdirectory(SPHINXsys)
-if(BUILD_WITH_ONETBB)
-    add_subdirectory(oneTBB)
-endif()
-
 if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()
-
-add_subdirectory(cases_user)
 
 if(ACTIVATE_CUDA)
     add_subdirectory(cases_test_gpu)

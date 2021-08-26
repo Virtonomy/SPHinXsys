@@ -62,11 +62,6 @@ if(NOT SPH_ONLY_STATIC_BUILD)
 		endif()
 	endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	if(NOT BUILD_WITH_ONETBB) # link TBB if not built by the project
-		target_link_libraries(sphinxsys_3d ${TBB_LIBRARYS})
-	else()
-		target_link_libraries(sphinxsys_3d TBB::tbb TBB::tbbmalloc) # TBB::tbbmalloc_proxy is not needed
-	endif()
 	if(NOT BUILD_WITH_SIMBODY) # link Simbody if not built by the project
 		target_link_libraries(sphinxsys_3d ${Simbody_LIBRARIES})
 	endif()

@@ -90,7 +90,7 @@ include(Import3rdpartylibs)
 
 add_subdirectory(SPHINXsys)
 
-set(simbody_root "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/simbody")
+set(simbody_root "${SPHINXSYS_PROJECT_DIR}/3rd_party/simbody")
 add_subdirectory(${simbody_root})
 
 option(BUILD_TESTS "BUILD_TESTS" 1)

@@ -26,7 +26,6 @@ SET(sourcedirs ${sourcedirs_shared} ${sourcedirs_3D})
 
 ##Add all header dirs
 FOREACH(headdir_path ${headdirs})
-	#message(STATUS ${headdir_path})
 	INCLUDE_DIRECTORIES("${headdir_path}")
 ENDFOREACH()
 
@@ -59,27 +58,17 @@ if(NOT EMSCRIPTEN)
 		endif()
 	endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	target_link_libraries(sphinxsys_3d ${Simbody_LIBRARIES} ${TBB_LIBRARYS})
+	if(BUILD_WITH_SIMBODY)
+		target_link_libraries(sphinxsys_3d SimTKcommon SimTKmath SimTKsimbody ${TBB_LIBRARYS})
+	else()
+		target_link_libraries(sphinxsys_3d ${Simbody_LIBRARIES} ${TBB_LIBRARYS})
+	endif()
 	### SPHinXsys dynamic lib ###
 else()
 	### SPHinXsys static lib ###
+	# only Linux
 	ADD_LIBRARY(sphinxsys_static_3d STATIC ${SCR_FILES})
-
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		#target_link_libraries(sphinxsys_static_3d)
-	else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(sphinxsys_static_3d stdc++)
-		else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(sphinxsys_static_3d stdc++ stdc++fs)
-		endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-		if(DEFINED BOOST_AVAILABLE) # link Boost if available (not for Windows)
-			target_link_libraries(sphinxsys_static_3d ${Boost_LIBRARIES})
-		endif()
-	endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-
-	target_link_libraries(sphinxsys_static_3d ${Simbody_LIBRARIES} ${TBB_LIBRARYS})
+	target_link_libraries(sphinxsys_static_3d stdc++ stdc++fs  SimTKcommon SimTKmath SimTKsimbody ${TBB_LIBRARYS})
 	### SPHinXsys static lib ###
 endif()
 

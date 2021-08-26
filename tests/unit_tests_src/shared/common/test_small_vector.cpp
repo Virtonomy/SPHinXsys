@@ -35,9 +35,9 @@ TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
     Vec3d vector_2 = Vec3d(2, -1, 4);
     
 
-    //angle more than 90°
-    Vec3d vector_3 = Vec3d(1, 1, 0);
-    Vec3d vector_4 = Vec3d(-1, 0, 0);
+    //angle exactly 90°
+    Vec3d vector_3 = Vec3d( 0, 0, 0);
+    Vec3d vector_4 = Vec3d(0, 1, 0);
     
     //vectors in opposite direction
     Vec3d vector_5 = Vec3d(1, 1, 0);
@@ -50,7 +50,7 @@ TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
     Vec3d proj_vector_1_ref = Vec3d(1.142857, -0.571428, 2.285714);
 
     Vec3d proj_vector_2 = getVectorProjectionOf3DVector(vector_3, vector_4);
-    Vec3d proj_vector_2_ref = Vec3d(1, 0, 0);
+    Vec3d proj_vector_2_ref = Vec3d(0, 0, 0);
 
     Vec3d proj_vector_3 = getVectorProjectionOf3DVector(vector_5, vector_6);
     Vec3d proj_vector_3_ref = Vec3d(1, 1, 0);

@@ -36,7 +36,7 @@ if [ $BUILD_PLATFORM == "x64" ]; then
         -DWASM_BUILD=0
 fi
 
-# cd $BUILD_DIR && ninja && cd ..
+cd $BUILD_DIR && ninja && cd ..
 
 # if [ $BUILD_PLATFORM == "wasm" ]; then
 #     cp -r $BUILD_DIR/src/bin/* js/

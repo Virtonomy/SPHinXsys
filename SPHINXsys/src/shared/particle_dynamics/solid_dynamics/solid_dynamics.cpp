@@ -673,18 +673,16 @@ namespace SPH
 		{
 			Vecd spring_force_vector(0);
 			Real area = std::pow(particles_->Vol_[index_i], 2.0 / 3.0);
-			for (int i = 0; i < disp.size(); i++)
-			{
-				// normal of the particle
-				Vecd normal = particles_->n_0_[index_i];
-				// get the normal portion of the displacement, which is parallel to the normal of particles, meaning it is the normal vector * scalar
-				Vecd normal_disp = getVectorProjectionOf3DVector (disp, normal);
-				
-				spring_force_vector[i] = -stiffness_ * area * normal_disp[i];
-			}
+			// normal of the particle
+			Vecd normal = particles_->n_0_[index_i];
+			// get the normal portion of the displacement, which is parallel to the normal of particles, meaning it is the normal vector * scalar
+			Vecd normal_disp = getVectorProjectionOf3DVector (disp, normal);
+			
+			spring_force_vector = -stiffness_ * area * normal_disp;
+
 			//get magnitude of spring force vector
 			Real spring_force_value = spring_force_vector.norm();
-			Vecd normal = particles_->n_0_[index_i];
+
 			if (spring_force_value > 1)
 			{
 				std::cout << "spring force: " << spring_force_value << std::endl;
@@ -696,17 +694,23 @@ namespace SPH
 		//=================================================================================================//
 		Real SpringNormalOnSurfaceParticles::getDampingForce(size_t index_i)
 		{
-			Vecd damping_force_vector(0);
-			for (int i = 0; i < vel_n_[index_i].size(); i++)
-			{
-				// normal of the particle
-				Vecd normal = particles_->n_0_[index_i];
-				// get the normal portion of the velocity, which is parallel to the normal of particles, meaning it is the normal vector * scalar
-				Vecd normal_vel = getVectorProjectionOf3DVector (vel_n_[index_i], normal);
+			// normal of the particle
+			Vecd normal = particles_->n_0_[index_i];
+			//velocity of the particle
+			Vecd velocity_n = vel_n_[index_i];
+			// get the normal portion of the velocity, which is parallel to the normal of particles, meaning it is the normal vector * scalar
+			Vecd normal_vel = getVectorProjectionOf3DVector (velocity_n, normal);
 				
-				damping_force_vector[i] = -damping_coeff_ * normal_vel[i];
-			}
+			Vecd damping_force_vector = -damping_coeff_ * normal_vel;
+			
+			//get magnitude of damping force vector
 			Real damping_force_value = damping_force_vector.norm();
+			if (damping_force_value > 10)
+			{
+				std::cout << "damping force: " << damping_force_value << std::endl;
+				std::cout << "normal: " << normal << std::endl;
+				std::cout << "normal vel: " << getVectorProjectionOf3DVector (velocity_n, normal) << std::endl;
+			}
 			
 			return damping_force_value;
 		}

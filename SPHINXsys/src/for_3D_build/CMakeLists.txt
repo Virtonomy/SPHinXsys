@@ -40,7 +40,7 @@ ENDFOREACH()
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-if(NOT EMSCRIPTEN)
+if(NOT STATIC_BUILD)
 	### SPHinXsys dynamic lib ###
 	ADD_LIBRARY(sphinxsys_3d SHARED ${SCR_FILES})
 
@@ -66,13 +66,30 @@ if(NOT EMSCRIPTEN)
 	### SPHinXsys dynamic lib ###
 else()
 	### SPHinXsys static lib ###
-	# only Linux
 	ADD_LIBRARY(sphinxsys_static_3d STATIC ${SCR_FILES})
-	target_link_libraries(sphinxsys_static_3d stdc++ stdc++fs  SimTKcommon SimTKmath SimTKsimbody ${TBB_LIBRARYS})
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		#target_link_libraries(sphinxsys_3d)
+	else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_libraries(sphinxsys_static_3d stdc++)
+		else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_libraries(sphinxsys_static_3d stdc++ stdc++fs)
+		endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+		if(DEFINED BOOST_AVAILABLE) # link Boost if available (not for Windows)
+			target_link_libraries(sphinxsys_static_3d ${Boost_LIBRARIES})
+		endif()
+	endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+	if(BUILD_WITH_SIMBODY)
+		target_link_libraries(sphinxsys_static_3d SimTKcommon_static SimTKmath_static SimTKsimbody_static ${TBB_LIBRARYS})
+	else()
+		target_link_libraries(sphinxsys_static_3d ${Simbody_LIBRARIES} ${TBB_LIBRARYS})
+	endif()
 	### SPHinXsys static lib ###
 endif()
 
-if(NOT EMSCRIPTEN)
+if(NOT STATIC_BUILD)
 	INSTALL(TARGETS sphinxsys_3d
 	RUNTIME DESTINATION 3d_code/bin
 	LIBRARY DESTINATION 3d_code/lib

@@ -669,16 +669,14 @@ namespace SPH
 			particles_->total_ghost_particles_ = 0;
 		}
 		//=================================================================================================//
-		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd &disp)
+		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd disp)
 		{
 			Vecd spring_force_vector(0);
 			Real area = std::pow(particles_->Vol_[index_i], 2.0 / 3.0);
 			for (int i = 0; i < disp.size(); i++)
 			{
-				// index of particles
-				size_t particle_i = disp.size();
 				// normal of the particle
-				Vecd normal = particles_->n_0_[particle_i];
+				Vecd normal = particles_->n_0_[index_i];
 				// get the normal portion of the displacement, which is parallel to the normal of particles, meaning it is the normal vector * scalar
 				Vecd normal_disp = getVectorProjectionOf3DVector (disp, normal);
 				
@@ -686,7 +684,13 @@ namespace SPH
 			}
 			//get magnitude of spring force vector
 			Real spring_force_value = spring_force_vector.norm();
-
+			Vecd normal = particles_->n_0_[index_i];
+			if (spring_force_value > 1)
+			{
+				std::cout << "spring force: " << spring_force_value << std::endl;
+				std::cout << "normal: " << normal << std::endl;
+				std::cout << "normal displacement: " << getVectorProjectionOf3DVector (disp, normal) << std::endl;
+			}
 			return spring_force_value;
 		}
 		//=================================================================================================//
@@ -695,10 +699,8 @@ namespace SPH
 			Vecd damping_force_vector(0);
 			for (int i = 0; i < vel_n_[index_i].size(); i++)
 			{
-				// index of particles
-				size_t particle_i = vel_n_[index_i].size();
 				// normal of the particle
-				Vecd normal = particles_->n_0_[particle_i];
+				Vecd normal = particles_->n_0_[index_i];
 				// get the normal portion of the velocity, which is parallel to the normal of particles, meaning it is the normal vector * scalar
 				Vecd normal_vel = getVectorProjectionOf3DVector (vel_n_[index_i], normal);
 				

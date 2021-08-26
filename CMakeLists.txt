@@ -95,8 +95,10 @@ include(Import3rdpartylibs)
 
 add_subdirectory(SPHINXsys)
 
-set(simbody_root "${SPHINXSYS_PROJECT_DIR}/3rd_party/simbody")
-add_subdirectory(${simbody_root})
+if(BUILD_WITH_SIMBODY)
+    set(simbody_root "${SPHINXSYS_PROJECT_DIR}/3rd_party/simbody")
+    add_subdirectory(${simbody_root})
+endif()
 
 option(BUILD_TESTS "BUILD_TESTS" 1)
 if(BUILD_TESTS)

@@ -41,12 +41,9 @@ ENDFOREACH()
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-if(NOT SPH_ONLY_STATIC_BUILD)
+if(NOT EMSCRIPTEN)
 	### SPHinXsys dynamic lib ###
 	ADD_LIBRARY(sphinxsys_3d SHARED ${SCR_FILES})
-	
-	ADD_LIBRARY(sphinxsys_static_3d STATIC ${SCR_FILES})
-	SET_TARGET_PROPERTIES(sphinxsys_static_3d PROPERTIES OUTPUT_NAME "sphinxsys_3d")
 
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		#target_link_libraries(sphinxsys_3d)
@@ -62,9 +59,7 @@ if(NOT SPH_ONLY_STATIC_BUILD)
 		endif()
 	endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	if(NOT BUILD_WITH_SIMBODY) # link Simbody if not built by the project
-		target_link_libraries(sphinxsys_3d ${Simbody_LIBRARIES})
-	endif()
+	target_link_libraries(sphinxsys_3d ${Simbody_LIBRARIES} ${TBB_LIBRARYS})
 	### SPHinXsys dynamic lib ###
 else()
 	### SPHinXsys static lib ###
@@ -84,19 +79,12 @@ else()
 		endif()
 	endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
-	if(NOT BUILD_WITH_ONETBB) # link TBB if not built by the project
-		target_link_libraries(sphinxsys_static_3d ${TBB_LIBRARYS})
-	else()
-		target_link_libraries(sphinxsys_static_3d TBB::tbb TBB::tbbmalloc) # TBB::tbbmalloc_proxy is not needed
-	endif()
-	if(NOT BUILD_WITH_SIMBODY) # link Simbody if not built by the project
-		target_link_libraries(sphinxsys_static_3d ${Simbody_LIBRARIES})
-	endif()
+	target_link_libraries(sphinxsys_static_3d ${Simbody_LIBRARIES} ${TBB_LIBRARYS})
 	### SPHinXsys static lib ###
 endif()
 
-if(NOT SPH_ONLY_STATIC_BUILD)
-	INSTALL(TARGETS sphinxsys_3d sphinxsys_static_3d
+if(NOT EMSCRIPTEN)
+	INSTALL(TARGETS sphinxsys_3d
 	RUNTIME DESTINATION 3d_code/bin
 	LIBRARY DESTINATION 3d_code/lib
 	ARCHIVE DESTINATION 3d_code/lib)

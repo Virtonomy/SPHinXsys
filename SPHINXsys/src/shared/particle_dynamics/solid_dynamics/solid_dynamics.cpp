@@ -655,9 +655,12 @@ namespace SPH
 					apply_spring_force_to_particle_[particle_i] = true;
 				}
 			}
-			// scale stiffness and damping by mass here, so it's not necessary in each iteration
-			stiffness_ = stiffness;
-			damping_coeff_ = stiffness * damping_ratio;
+			// scale stiffness and damping by area here, so it's not necessary in each iteration
+			//index of any uniform particle
+			size_t particle_j = 0;
+			Real area = std::pow(particles_->Vol_[particle_j], 2.0 / 3.0);
+			stiffness_ = stiffness * area;
+			damping_coeff_ = stiffness * area * damping_ratio;
 		}
 		//=================================================================================================//
 		SpringNormalOnSurfaceParticles::~SpringNormalOnSurfaceParticles()
@@ -672,13 +675,12 @@ namespace SPH
 		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd disp)
 		{
 			Vecd spring_force_vector(0);
-			Real area = std::pow(particles_->Vol_[index_i], 2.0 / 3.0);
 			// normal of the particle
 			Vecd normal = particles_->n_0_[index_i];
 			// get the normal portion of the displacement, which is parallel to the normal of particles, meaning it is the normal vector * scalar
 			Vecd normal_disp = getVectorProjectionOf3DVector (disp, normal);
 			
-			spring_force_vector = -stiffness_ * area * normal_disp;
+			spring_force_vector = -stiffness_ * normal_disp;
 
 			//get magnitude of spring force vector
 			Real spring_force_value = spring_force_vector.norm();

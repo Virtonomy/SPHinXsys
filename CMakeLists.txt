@@ -22,6 +22,7 @@ if(EMSCRIPTEN)
     set(BUILD_STATIC_LIBRARIES on) # Simbody
     set(BUILD_DYNAMIC_LIBRARIES off) # Simbody
     add_definitions(-DSIMBODY_WITHOUT_LAPACK)
+    add_definitions(-D__EMSCRIPTEN__)
 
     set(EIGEN_ROOT ${SPHINXSYS_PROJECT_DIR}/3rd_party/eigen)
     message("${EIGEN_ROOT}")
@@ -67,11 +68,10 @@ if(MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
 elseif(EMSCRIPTEN)
     set(PRE_POST "")
-    #-s ALLOW_MEMORY_GROWTH=1
-    set(EM_FLAGS "${PRE_POST} -fPIC -g -O0 --profiling -DUNIX -D__linux__=1 --bind -std=c++11 -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
-    #set(EM_FLAGS "${PRE_POST} -fPIC -g -O3 -DUNIX -D__linux__=1 --bind -std=c++11 -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
+    #set(EM_FLAGS "${PRE_POST} -fPIC -g -O0 --profiling -DUNIX -D__linux__=1 --bind -std=c++11 -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
+    set(EM_FLAGS "${PRE_POST} -fPIC -g -O3 -DUNIX -D__linux__=1 --bind -std=c++11 -s USE_PTHREADS=1 -s DISABLE_EXCEPTION_CATCHING=0")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EM_FLAGS}")
-    set(EM_FLAGS " -s INITIAL_MEMORY=536870912 -s ASSERTIONS=1 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0")
+    set(EM_FLAGS " -s INITIAL_MEMORY=536870912 -s ASSERTIONS=1 -s ALLOW_MEMORY_GROWTH=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EM_FLAGS}")
 else()
     add_compile_definitions(__linux__=1)

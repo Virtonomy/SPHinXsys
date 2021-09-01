@@ -76,10 +76,12 @@ namespace SPH {
 	Mat3d getTransformationMatrix(const Vec3d& direction_of_z);
 
 	/** get angle between two vectors. */
-	Real getAngleBetweenTwo3DVectors (Vec3d vector_1, Vec3d vector_2);
+	Real getAngleBetweenTwoVectors (Vec2d vector_1, Vec2d vector_2);
+	Real getAngleBetweenTwoVectors (Vec3d vector_1, Vec3d vector_2);
 
 	/** get orthogonal projection of a vactor. */
-	Vec3d getVectorProjectionOf3DVector (Vec3d vector_1, Vec3d vector_2);
+	Vec2d getVectorProjectionOfVector (Vec2d vector_1, Vec2d vector_2);
+	Vec3d getVectorProjectionOfVector (Vec3d vector_1, Vec3d vector_2);
 }
 
 #endif //SMALL_VECTORS_H

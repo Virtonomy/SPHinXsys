@@ -672,7 +672,7 @@ namespace SPH
 			particles_->total_ghost_particles_ = 0;
 		}
 		//=================================================================================================//
-		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd disp)
+		Vecd SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd disp)
 		{
 			// normal of the particle
 			Vecd normal = particles_->n_0_[index_i];
@@ -681,12 +681,10 @@ namespace SPH
 			
 			Vecd spring_force_vector = -stiffness_ * normal_disp;
 
-			//get magnitude of spring force vector
-			Real spring_force_value = spring_force_vector.norm();
-			return spring_force_value;
+			return spring_force_vector;
 		}
 		//=================================================================================================//
-		Real SpringNormalOnSurfaceParticles::getDampingForce(size_t index_i)
+		Vecd SpringNormalOnSurfaceParticles::getDampingForce(size_t index_i)
 		{
 			// normal of the particle
 			Vecd normal = particles_->n_0_[index_i];
@@ -697,10 +695,7 @@ namespace SPH
 				
 			Vecd damping_force_vector = -damping_coeff_ * normal_vel;
 			
-			//get magnitude of damping force vector
-			Real damping_force_value = damping_force_vector.norm();
-			
-			return damping_force_value;
+			return damping_force_vector;
 		}
 		//=================================================================================================//
 		void SpringNormalOnSurfaceParticles::Update(size_t index_i, Real dt)
@@ -709,10 +704,8 @@ namespace SPH
 				if (apply_spring_force_to_particle_[index_i])
 				{
 					Vecd delta_x = pos_n_[index_i] - pos_0_[index_i];
-					Real acc_from_spring_force = getSpringForce(index_i, delta_x) / mass_[index_i];
-					Real acc_from_damping = getDampingForce(index_i) / mass_[index_i];
-					dvel_dt_prior_[index_i] += n_[index_i] * acc_from_spring_force;
-					dvel_dt_prior_[index_i] += n_[index_i] * acc_from_damping;
+					dvel_dt_prior_[index_i] += getSpringForce(index_i, delta_x) / mass_[index_i];
+					dvel_dt_prior_[index_i] += getDampingForce(index_i) / mass_[index_i];
 
 				}
 			}

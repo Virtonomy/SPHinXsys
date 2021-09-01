@@ -426,8 +426,8 @@ namespace SPH
 			StdLargeVec<bool> apply_spring_force_to_particle_;
 
 			virtual void setupDynamics(Real dt = 0.0) override;
-			virtual Real getSpringForce(size_t index_i, Vecd disp);
-			virtual Real getDampingForce(size_t index_i);
+			virtual Vecd getSpringForce(size_t index_i, Vecd disp);
+			virtual Vecd getDampingForce(size_t index_i);
 			virtual void Update(size_t index_i, Real dt = 0.0) override;
 		};
 		/**

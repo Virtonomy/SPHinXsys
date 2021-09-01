@@ -642,9 +642,9 @@ namespace SPH
 				// index of surface particle
 				size_t particle_i = surface_layer_.body_part_particles_[i];
 				// vector to the source point from the particle
-				Vecd vector_to_particle = source_point - particles_->pos_0_[particle_i];
+				Vec3d vector_to_particle = source_point - particles_->pos_0_[particle_i];
 				// normal of the particle
-				Vecd normal = particles_->n_0_[particle_i];
+				Vec3d normal = particles_->n_0_[particle_i];
 
 				// get the cos of the angle between the vector and the normal
 				Real cos_teta = getAngleBetweenTwo3DVectors (vector_to_particle, normal);
@@ -672,47 +672,34 @@ namespace SPH
 			particles_->total_ghost_particles_ = 0;
 		}
 		//=================================================================================================//
-		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vecd disp)
+		Real SpringNormalOnSurfaceParticles::getSpringForce(size_t index_i, Vec3d disp)
 		{
 			Vecd spring_force_vector(0);
 			// normal of the particle
-			Vecd normal = particles_->n_0_[index_i];
+			Vec3d normal = particles_->n_0_[index_i];
 			// get the normal portion of the displacement, which is parallel to the normal of particles, meaning it is the normal vector * scalar
-			Vecd normal_disp = getVectorProjectionOf3DVector (disp, normal);
+			Vec3d normal_disp = getVectorProjectionOf3DVector (disp, normal);
 			
 			spring_force_vector = -stiffness_ * normal_disp;
 
 			//get magnitude of spring force vector
 			Real spring_force_value = spring_force_vector.norm();
-
-			if (spring_force_value > 1)
-			{
-				std::cout << "spring force: " << spring_force_value << std::endl;
-				std::cout << "normal: " << normal << std::endl;
-				std::cout << "normal displacement: " << getVectorProjectionOf3DVector (disp, normal) << std::endl;
-			}
 			return spring_force_value;
 		}
 		//=================================================================================================//
 		Real SpringNormalOnSurfaceParticles::getDampingForce(size_t index_i)
 		{
 			// normal of the particle
-			Vecd normal = particles_->n_0_[index_i];
+			Vec3d normal = particles_->n_0_[index_i];
 			//velocity of the particle
-			Vecd velocity_n = vel_n_[index_i];
+			Vec3d velocity_n = vel_n_[index_i];
 			// get the normal portion of the velocity, which is parallel to the normal of particles, meaning it is the normal vector * scalar
-			Vecd normal_vel = getVectorProjectionOf3DVector (velocity_n, normal);
+			Vec3d normal_vel = getVectorProjectionOf3DVector (velocity_n, normal);
 				
 			Vecd damping_force_vector = -damping_coeff_ * normal_vel;
 			
 			//get magnitude of damping force vector
 			Real damping_force_value = damping_force_vector.norm();
-			if (damping_force_value > 10)
-			{
-				std::cout << "damping force: " << damping_force_value << std::endl;
-				std::cout << "normal: " << normal << std::endl;
-				std::cout << "normal vel: " << getVectorProjectionOf3DVector (velocity_n, normal) << std::endl;
-			}
 			
 			return damping_force_value;
 		}
@@ -722,7 +709,7 @@ namespace SPH
 			try{
 				if (apply_spring_force_to_particle_[index_i])
 				{
-					Vecd delta_x = pos_n_[index_i] - pos_0_[index_i];
+					Vec3d delta_x = pos_n_[index_i] - pos_0_[index_i];
 					Real acc_from_spring_force = getSpringForce(index_i, delta_x) / mass_[index_i];
 					Real acc_from_damping = getDampingForce(index_i) / mass_[index_i];
 					dvel_dt_prior_[index_i] += n_[index_i] * acc_from_spring_force;

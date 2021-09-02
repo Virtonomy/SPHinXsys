@@ -19,8 +19,6 @@ if(EMSCRIPTEN)
     set(BUILD_WITH_SIMBODY 1)
     set(ONLY_3D 1)
     set(BUILD_TESTS 1)
-    set(BUILD_STATIC_LIBRARIES on) # Simbody
-    set(BUILD_DYNAMIC_LIBRARIES off) # Simbody
     add_definitions(-D__SIMBODY_WITHOUT_LAPACK__)
     add_definitions(-D__EIGEN__)
     add_definitions(-D__EMSCRIPTEN__)
@@ -41,6 +39,11 @@ if(BUILD_WITH_SIMBODY)
     set(EIGEN_ROOT ${SPHINXSYS_PROJECT_DIR}/3rd_party/eigen)
     message("${EIGEN_ROOT}")
     include_directories("${EIGEN_ROOT}")
+endif()
+
+if(STATIC_BUILD)
+    set(BUILD_STATIC_LIBRARIES 1) # Simbody
+    set(BUILD_DYNAMIC_LIBRARIES 0) # Simbody
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)

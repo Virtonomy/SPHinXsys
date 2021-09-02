@@ -22,6 +22,7 @@ if(EMSCRIPTEN)
     set(BUILD_STATIC_LIBRARIES on) # Simbody
     set(BUILD_DYNAMIC_LIBRARIES off) # Simbody
     add_definitions(-DSIMBODY_WITHOUT_LAPACK)
+    add_definitions(-D__EIGEN__)
     add_definitions(-D__EMSCRIPTEN__)
 
     remove_definitions(-DTBB_2021_2_0)
@@ -36,6 +37,7 @@ endif()
 
 if(BUILD_WITH_SIMBODY)
     add_definitions(-D__EIGEN__)
+    #add_definitions(-DSIMBODY_WITHOUT_LAPACK)
     set(EIGEN_ROOT ${SPHINXSYS_PROJECT_DIR}/3rd_party/eigen)
     message("${EIGEN_ROOT}")
     include_directories("${EIGEN_ROOT}")

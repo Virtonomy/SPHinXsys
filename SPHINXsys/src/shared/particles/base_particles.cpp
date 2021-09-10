@@ -37,12 +37,14 @@ namespace SPH
 		//		add basic output particle data
 		//----------------------------------------------------------------------
 		addAVariableToWrite<indexVector, Vecd>("Velocity");
+		addAVariableToWrite<indexVector, Vecd>("Acceleration");
 		addAVariableToWrite<indexScalar, Real>("Density");
 		//----------------------------------------------------------------------
 		//		add restart output particle data
 		//----------------------------------------------------------------------
 		addAVariableNameToList<indexVector, Vecd>(variables_to_restart_, "Position");
 		addAVariableNameToList<indexVector, Vecd>(variables_to_restart_, "Velocity");
+		addAVariableNameToList<indexVector, Vecd>(variables_to_restart_, "Acceleration");
 		addAVariableNameToList<indexScalar, Real>(variables_to_restart_, "Volume");
 		addAVariableNameToList<indexScalar, Real>(variables_to_restart_, "Density");
 

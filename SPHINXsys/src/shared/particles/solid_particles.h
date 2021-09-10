@@ -104,6 +104,10 @@ namespace SPH {
 		StdLargeVec<Real> getVonMisesStress();
 		Real getMaxVonMisesStress();
 
+		/**< Computing displacemnt. */
+		Vecd displacement(size_t particle_i);
+		StdLargeVec<Vecd> getDisplacement();
+
 		virtual void writeParticlesToVtuFile(std::ofstream &output_file) override;
 
 		virtual ElasticSolidParticles* ThisObjectPtr() override {return this;};

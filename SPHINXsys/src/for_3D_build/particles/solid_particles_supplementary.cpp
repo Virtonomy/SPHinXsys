@@ -31,4 +31,10 @@ namespace SPH {
 			+ 3.0 * (sigmaxy * sigmaxy + sigmaxz * sigmaxz + sigmayz * sigmayz));
 	}
 	//=================================================================================================//
+	Vec3d ElasticSolidParticles::displacement(size_t particle_i)
+	{
+		Vec3d disp = pos_n_[particle_i] - pos_0_[particle_i];
+		return disp;
+	}
+	//=================================================================================================//
 }

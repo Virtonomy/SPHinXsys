@@ -108,6 +108,10 @@ namespace SPH {
 		Vecd displacement(size_t particle_i);
 		StdLargeVec<Vecd> getDisplacement();
 
+		/**< Computing normal. */
+		Vecd normal (size_t particle_i);
+		StdLargeVec<Vecd> getNormal();
+
 		virtual void writeParticlesToVtuFile(std::ofstream &output_file) override;
 
 		virtual ElasticSolidParticles* ThisObjectPtr() override {return this;};

@@ -122,7 +122,7 @@ namespace SPH {
 		return von_Mises_stress_max;
 	}
 	//=================================================================================================//
-		StdLargeVec<Vecd> ElasticSolidParticles::getDisplacement()
+	StdLargeVec<Vecd> ElasticSolidParticles::getDisplacement()
 	{
 		StdLargeVec<Vecd> displacement_vector = {};
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
@@ -130,6 +130,16 @@ namespace SPH {
 			displacement_vector.push_back(displacement(index_i));
 		}
 		return displacement_vector;
+	}
+	//=================================================================================================//
+	StdLargeVec<Vecd> ElasticSolidParticles::getNormal()
+	{
+		StdLargeVec<Vecd> normal_vector = {};
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			normal_vector.push_back(normal(index_i));
+		}
+		return normal_vector;
 	}
 	//=================================================================================================//
 	void ElasticSolidParticles::writeParticlesToVtuFile(std::ofstream& output_file)
@@ -151,8 +161,18 @@ namespace SPH {
 		output_file << "    <DataArray Name=\"Displacement\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_real_particles; ++i) {
-			Vec3d displacement_vector = displacement(i);
+			Vecd displacement_vector = displacement(i);
 			output_file << displacement_vector[0] << " " << displacement_vector[1] << " " << displacement_vector[2] << " ";
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
+
+		//write Normal Vectors
+		output_file << "    <DataArray Name=\"Normal Vector\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_real_particles; ++i) {
+			Vecd normal_vector = normal(i);
+			output_file << normal_vector[0] << " " << normal_vector[1] << " " << normal_vector[2] << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -164,6 +184,7 @@ namespace SPH {
 
 		output_file << ",\" von Mises stress \"";
 		output_file << ",\" Displacement \"";
+		output_file << ",\" Normal Vectors \"";
 	}
 	//=================================================================================================//
 	void ElasticSolidParticles::writePltFileParticleData(std::ofstream& output_file, size_t index_i)
@@ -171,7 +192,7 @@ namespace SPH {
 		SolidParticles::writePltFileParticleData(output_file, index_i);
 		
 		output_file << von_Mises_stress(index_i) << " ";
-		Vec3d displacement_vector = displacement(index_i);
+		Vecd displacement_vector = displacement(index_i);
 		output_file << displacement_vector[0] << " " << displacement_vector[1] << " " << displacement_vector[2] << " "
 			<< index_i << " ";
 	}

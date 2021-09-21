@@ -108,9 +108,14 @@ namespace SPH {
 		Vecd displacement(size_t particle_i);
 		StdLargeVec<Vecd> getDisplacement();
 
-		/**< Computing normal. */
+		/**< Computing normal vector. */
 		Vecd normal (size_t particle_i);
 		StdLargeVec<Vecd> getNormal();
+
+		/**< Computing von Mises equivalent stress. */
+		Real von_Mises_strain (size_t particle_i);
+		StdLargeVec<Real> getVonMisesStrain();
+		Real getMaxVonMisesStrain();
 
 		virtual void writeParticlesToVtuFile(std::ofstream &output_file) override;
 

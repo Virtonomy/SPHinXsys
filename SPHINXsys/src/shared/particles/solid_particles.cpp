@@ -142,6 +142,30 @@ namespace SPH {
 		return normal_vector;
 	}
 	//=================================================================================================//
+	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrain()
+	{
+		StdLargeVec<Real> von_Mises_strain_vector = {};
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			von_Mises_strain_vector.push_back(von_Mises_strain(index_i));
+		}
+		return von_Mises_strain_vector;
+	}
+	//=================================================================================================//
+	Real ElasticSolidParticles::getMaxVonMisesStrain()
+	{
+		Real von_Mises_strain_max = 0;
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			Real von_Mises_strain_i = von_Mises_strain(index_i);
+			if (von_Mises_strain_max < von_Mises_strain_i)
+			{
+				von_Mises_strain_max = von_Mises_strain_i;
+			}
+		}
+		return von_Mises_strain_max;
+	}
+	//=================================================================================================//
 	void ElasticSolidParticles::writeParticlesToVtuFile(std::ofstream& output_file)
 	{
 		SolidParticles::writeParticlesToVtuFile(output_file);
@@ -176,6 +200,15 @@ namespace SPH {
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
+
+		//write von Mises strain
+		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_real_particles; ++i) {
+			output_file << std::fixed << std::setprecision(9) << von_Mises_strain(i) << " ";
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
 	}
 	//=================================================================================================//
 	void ElasticSolidParticles::writePltFileHeader(std::ofstream& output_file)
@@ -185,6 +218,7 @@ namespace SPH {
 		output_file << ",\" von Mises stress \"";
 		output_file << ",\" Displacement \"";
 		output_file << ",\" Normal Vectors \"";
+		output_file << ",\" von Mises strain \"";
 	}
 	//=================================================================================================//
 	void ElasticSolidParticles::writePltFileParticleData(std::ofstream& output_file, size_t index_i)
@@ -195,6 +229,7 @@ namespace SPH {
 		Vecd displacement_vector = displacement(index_i);
 		output_file << displacement_vector[0] << " " << displacement_vector[1] << " " << displacement_vector[2] << " "
 			<< index_i << " ";
+		output_file << von_Mises_strain(index_i) << " ";
 	}
 	//=============================================================================================//
 	void ActiveMuscleParticles::initializeActiveMuscleParticleData()

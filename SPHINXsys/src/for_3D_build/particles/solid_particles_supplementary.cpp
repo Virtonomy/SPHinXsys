@@ -47,7 +47,7 @@ namespace SPH {
 	{
 		
 		Mat3d F = F_[particle_i];
-		Mat3d epsilon = 0.5 * (~F * F - Matd(1.0)); //calculation of the Green-Lgrange strain tensor
+		Mat3d epsilon = 0.5 * (~F * F - Matd(1.0)); //calculation of the Green-Lagrange strain tensor
 		
 
 		Real epsilonxx = epsilon(0, 0);
@@ -57,7 +57,7 @@ namespace SPH {
 		Real epsilonxz = epsilon(0, 2);
 		Real epsilonyz = epsilon(1, 2);
 
-		return sqrt( (1 / 3) * (std::pow(epsilonxx - epsilonyy, 2.0) + std::pow(epsilonyy - epsilonzz, 2.0) + std::pow(epsilonzz - epsilonxx, 2.0))
+		return sqrt( (1.0 / 3.0) * (std::pow(epsilonxx - epsilonyy, 2.0) + std::pow(epsilonyy - epsilonzz, 2.0) + std::pow(epsilonzz - epsilonxx, 2.0))
 		 + 2.0 * (std::pow(epsilonxy, 2.0) + std::pow(epsilonyz, 2.0) + std::pow(epsilonxz, 2.0)));
 	}
 	//=================================================================================================//

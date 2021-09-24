@@ -177,23 +177,25 @@ namespace SPH {
 	* @class OrthotropicSolid
 	* @brief Ortothropic solid
 	*/
-	class OrtothropicSolid : public LinearElasticSolid
+	class OrthotropicSolid : public LinearElasticSolid
 	{
 	public:
-		OrtothropicSolid() : LinearElasticSolid() 
+		OrthotropicSolid() : LinearElasticSolid() 
 		{
 			material_name_ = "OrtothropicSolid";
 		};
-		OrtothropicSolid(Real rho_0, Real Youngs_modulus, Real poisson)
+		OrthotropicSolid(Real rho_0, Real Youngs_modulus, Real poisson)
 			: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
 		{
 			material_name_ = "OrtothropicSolid";
 		};
-		virtual ~OrtothropicSolid() {};
+		
 		
 	
 		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
 		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
+		/** Volumetric Kirchhoff stress determinate */
+		virtual Real VolumetricKirchhoff(Real J) override;
 	};
 
 	/**

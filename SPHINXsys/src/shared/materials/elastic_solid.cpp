@@ -129,6 +129,19 @@ namespace SPH {
 	{
 		return  0.5 * K0_ * (J * J - 1);
 	}
+
+	//=================================================================================================//
+	Matd OrthotropicSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
+	{
+		Matd strain = 0.5 * (~F * F - Matd(1.0));
+		Matd sigmaPK2 = lambda0_ * strain.trace() * Matd(1.0) + 2.0 * G0_ * strain;
+		return sigmaPK2;
+	}
+	//=================================================================================================//
+	Real OrthotropicSolid::VolumetricKirchhoff(Real J)
+	{
+		return  K0_ * J * (J - 1);
+	}
 	//=================================================================================================//
 	Matd FeneNeoHookeanSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{

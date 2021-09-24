@@ -143,6 +143,14 @@ namespace SPH {
 		return  K0_ * J * (J - 1);
 	}
 	//=================================================================================================//
+	void OrthotropicSolid::assignDerivedMaterialParameters()
+	{
+		ElasticSolid::assignDerivedMaterialParameters();
+		f0f0_ = SimTK::outer(f0_, f0_);
+		f0s0_ = SimTK::outer(f0_, s0_);
+		s0s0_ = SimTK::outer(s0_, s0_);
+	}
+	//=================================================================================================//
 	Matd FeneNeoHookeanSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{
 		Matd right_cauchy = ~F * F;

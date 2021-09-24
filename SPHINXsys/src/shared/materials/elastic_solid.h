@@ -182,12 +182,12 @@ namespace SPH {
 	public:
 		OrthotropicSolid() : LinearElasticSolid() 
 		{
-			material_name_ = "OrtothropicSolid";
+			material_name_ = "OrthotropicSolid";
 		};
 		OrthotropicSolid(Real rho_0, Real Youngs_modulus, Real poisson)
 			: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
 		{
-			material_name_ = "OrtothropicSolid";
+			material_name_ = "OrthotropicSolid";
 		};
 		
 		

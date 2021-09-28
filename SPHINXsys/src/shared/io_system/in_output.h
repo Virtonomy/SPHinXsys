@@ -217,12 +217,11 @@ namespace SPH {
 	class SurfaceOnlyBodyStatesRecordingToVtu : public BodyStatesRecording
 	{
 	public:
-		SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies)
-			: BodyStatesRecording(in_output, bodies) {};
-		virtual ~SurfaceOnlyBodyStatesRecordingToVtu() {};
+		SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies);
 
 	protected:
 		virtual void writeWithFileName(const std::string& sequence) override;
+		StdVec<ShapeSurface> surface_body_layer_vector_;
 	};
 	
 	/**

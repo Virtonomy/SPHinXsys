@@ -123,10 +123,19 @@ namespace SPH
 		}
 	}
 	//=============================================================================================//
+	SurfaceOnlyBodyStatesRecordingToVtu::SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies)
+			: BodyStatesRecording(in_output, bodies),
+			surface_body_layer_vector_({})
+	{
+		for (SPHBody* body : bodies_) surface_body_layer_vector_.push_back(ShapeSurface(body));
+	}
+	//=============================================================================================//
 	void SurfaceOnlyBodyStatesRecordingToVtu::writeWithFileName(const std::string& sequence)
 	{
-		for (SPHBody* body : bodies_)
+		for (size_t i = 0; bodies_.size(); i++)
+		//for (size_t i = 0; surface_body_layer_vector_.size(); i++)
 		{
+			SPHBody* body = bodies_[i];
 			if (body->checkNewlyUpdated())
 			{
 				std::string filefullpath = in_output_.output_folder_ + "/SPHBody_" + body->getBodyName() + "_" + sequence + ".vtu";
@@ -140,8 +149,7 @@ namespace SPH
 				out_file << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
 				out_file << " <UnstructuredGrid>\n";
 
-				ShapeSurface surface_layer(body_);
-				size_t total_surface_particles = surface_layer.body_part_particles_.size();
+				size_t total_surface_particles = surface_body_layer_vector_[i].body_part_particles_.size();
 				out_file << "  <Piece Name =\"" << body->getBodyName() << "\" NumberOfPoints=\"" << total_surface_particles << "\" NumberOfCells=\"0\">\n";
 
 				body->writeSurfaceParticlesToVtuFile(out_file);

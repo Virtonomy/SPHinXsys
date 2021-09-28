@@ -132,7 +132,7 @@ namespace SPH
 	//=============================================================================================//
 	void SurfaceOnlyBodyStatesRecordingToVtu::writeWithFileName(const std::string& sequence)
 	{
-		for (size_t i = 0; bodies_.size(); i++)
+		for (size_t i = 0; i < bodies_.size(); i++)
 		//for (size_t i = 0; surface_body_layer_vector_.size(); i++)
 		{
 			SPHBody* body = bodies_[i];
@@ -150,7 +150,7 @@ namespace SPH
 				out_file << " <UnstructuredGrid>\n";
 
 				size_t total_surface_particles = surface_body_layer_vector_[i].body_part_particles_.size();
-				out_file << "  <Piece Name =\"" << body->getBodyName() << "\" NumberOfPoints=\"" << total_surface_particles << "\" NumberOfCells=\"0\">\n";
+				out_file << "  <Piece Name =\"" << bodies_[i]->getBodyName() << "\" NumberOfPoints=\"" << total_surface_particles << "\" NumberOfCells=\"0\">\n";
 
 				body->writeSurfaceParticlesToVtuFile(out_file);
 

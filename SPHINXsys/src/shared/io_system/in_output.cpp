@@ -123,6 +123,52 @@ namespace SPH
 		}
 	}
 	//=============================================================================================//
+	void SurfaceOnlyBodyStatesRecordingToVtu::writeWithFileName(const std::string& sequence)
+	{
+		for (SPHBody* body : bodies_)
+		{
+			if (body->checkNewlyUpdated())
+			{
+				std::string filefullpath = in_output_.output_folder_ + "/SPHBody_" + body->getBodyName() + "_" + sequence + ".vtu";
+				if (fs::exists(filefullpath))
+				{
+					fs::remove(filefullpath);
+				}
+				std::ofstream out_file(filefullpath.c_str(), std::ios::trunc);
+				//begin of the XML file
+				out_file << "<?xml version=\"1.0\"?>\n";
+				out_file << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
+				out_file << " <UnstructuredGrid>\n";
+
+				ShapeSurface surface_layer(body_);
+				size_t total_surface_particles = surface_layer.body_part_particles_.size();
+				out_file << "  <Piece Name =\"" << body->getBodyName() << "\" NumberOfPoints=\"" << total_surface_particles << "\" NumberOfCells=\"0\">\n";
+
+				body->writeSurfaceParticlesToVtuFile(out_file);
+
+				out_file << "   </PointData>\n";
+
+				//write empty cells
+				out_file << "   <Cells>\n";
+				out_file << "    <DataArray type=\"Int32\"  Name=\"connectivity\"  Format=\"ascii\">\n";
+				out_file << "    </DataArray>\n";
+				out_file << "    <DataArray type=\"Int32\"  Name=\"offsets\"  Format=\"ascii\">\n";
+				out_file << "    </DataArray>\n";
+				out_file << "    <DataArray type=\"types\"  Name=\"offsets\"  Format=\"ascii\">\n";
+				out_file << "    </DataArray>\n";
+				out_file << "   </Cells>\n";
+
+				out_file << "  </Piece>\n";
+
+				out_file << " </UnstructuredGrid>\n";
+				out_file << "</VTKFile>\n";
+
+				out_file.close();
+			}
+			body->setNotNewlyUpdated();
+		}
+	}
+	//=============================================================================================//
 	void BodyStatesRecordingToPlt::writeWithFileName(const std::string& sequence)
 	{
 		for (SPHBody* body : bodies_)

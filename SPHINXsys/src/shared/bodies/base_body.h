@@ -111,6 +111,7 @@ namespace SPH
 		void allocateConfigurationMemoriesForBufferParticles();
 
 		virtual void writeParticlesToVtuFile(std::ofstream &output_file);
+		virtual void writeSurfaceParticlesToVtuFile(std::ofstream &output_file);
 		virtual void writeParticlesToPltFile(std::ofstream &output_file);
 		virtual void writeParticlesToXmlForRestart(std::string &filefullpath);
 		virtual void readParticlesFromXmlForRestart(std::string &filefullpath);

@@ -208,18 +208,17 @@ namespace SPH {
 		output_file << "    </DataArray>\n";
 	}
 	//=================================================================================================//
-	void ElasticSolidParticles::writeSurfaceParticlesToVtuFile(std::ofstream& output_file)
+	void ElasticSolidParticles::writeSurfaceParticlesToVtuFile(std::ofstream& output_file, ShapeSurface& surface_particles)
 	{
-		SolidParticles::writeSurfaceParticlesToVtuFile(output_file);
+		SolidParticles::writeSurfaceParticlesToVtuFile(output_file, surface_particles);
 
-		ShapeSurface surface_layer(body_);
-		size_t total_surface_particles = surface_layer.body_part_particles_.size();
+		size_t total_surface_particles = surface_particles.body_part_particles_.size();
 
 		//write von Mises stress
 		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_layer.body_part_particles_[i];
+			size_t particle_i = surface_particles.body_part_particles_[i];
 			output_file << std::fixed << std::setprecision(9) << von_Mises_stress(particle_i) << " ";
 		}
 		output_file << std::endl;
@@ -229,7 +228,7 @@ namespace SPH {
 		output_file << "    <DataArray Name=\"Displacement\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_layer.body_part_particles_[i];
+			size_t particle_i = surface_particles.body_part_particles_[i];
 			Vecd displacement_vector = displacement(particle_i);
 			output_file << displacement_vector[0] << " " << displacement_vector[1] << " " << displacement_vector[2] << " ";
 		}
@@ -240,7 +239,7 @@ namespace SPH {
 		output_file << "    <DataArray Name=\"Normal Vector\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_layer.body_part_particles_[i];
+			size_t particle_i = surface_particles.body_part_particles_[i];
 			Vecd normal_vector = normal(particle_i);
 			output_file << normal_vector[0] << " " << normal_vector[1] << " " << normal_vector[2] << " ";
 		}
@@ -251,7 +250,7 @@ namespace SPH {
 		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_layer.body_part_particles_[i];
+			size_t particle_i = surface_particles.body_part_particles_[i];
 			output_file << std::fixed << std::setprecision(9) << von_Mises_strain(particle_i) << " ";
 		}
 		output_file << std::endl;

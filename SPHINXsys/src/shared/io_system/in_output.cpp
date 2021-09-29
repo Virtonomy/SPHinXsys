@@ -152,7 +152,7 @@ namespace SPH
 				size_t total_surface_particles = surface_body_layer_vector_[i].body_part_particles_.size();
 				out_file << "  <Piece Name =\"" << bodies_[i]->getBodyName() << "\" NumberOfPoints=\"" << total_surface_particles << "\" NumberOfCells=\"0\">\n";
 
-				body->writeSurfaceParticlesToVtuFile(out_file);
+				body->writeSurfaceParticlesToVtuFile(out_file, surface_body_layer_vector_[i]);
 
 				out_file << "   </PointData>\n";
 

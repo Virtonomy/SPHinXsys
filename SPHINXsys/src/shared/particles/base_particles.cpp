@@ -230,17 +230,16 @@ namespace SPH
 		}
 	}
 	//=================================================================================================//
-	void BaseParticles::writeSurfaceParticlesToVtuFile(std::ofstream& output_file)
+	void BaseParticles::writeSurfaceParticlesToVtuFile(std::ofstream& output_file, ShapeSurface& surface_particles)
 	{
-		ShapeSurface surface_layer(body_);
-		size_t total_surface_particles = surface_layer.body_part_particles_.size();
+		size_t total_surface_particles = surface_particles.body_part_particles_.size();
 
 		//write current/final particle positions first
 		output_file << "   <Points>\n";
 		output_file << "    <DataArray Name=\"Position\" type=\"Float32\"  NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_layer.body_part_particles_[i];
+			size_t particle_i = surface_particles.body_part_particles_[i];
 			Vec3d particle_position = upgradeToVector3D(pos_n_[particle_i]);
 			output_file << particle_position[0] << " " << particle_position[1] << " " << particle_position[2] << " ";
 		}
@@ -255,7 +254,7 @@ namespace SPH
 		output_file << "    <DataArray Name=\"SortedParticle_ID\" type=\"Int32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_layer.body_part_particles_[i];
+			size_t particle_i = surface_particles.body_part_particles_[i];
 			output_file << particle_i << " ";
 		}
 		output_file << std::endl;
@@ -265,7 +264,7 @@ namespace SPH
 		output_file << "    <DataArray Name=\"UnsortedParticle_ID\" type=\"Int32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_layer.body_part_particles_[i];
+			size_t particle_i = surface_particles.body_part_particles_[i];
 			output_file << unsorted_id_[particle_i] << " ";
 		}
 		output_file << std::endl;
@@ -279,7 +278,7 @@ namespace SPH
 			output_file << "    <DataArray Name=\"" << variable_name << "\" type=\"Float32\"  NumberOfComponents=\"9\" Format=\"ascii\">\n";
 			output_file << "    ";
 			for (size_t i = 0; i != total_surface_particles; ++i) {
-				size_t particle_i = surface_layer.body_part_particles_[i];
+				size_t particle_i = surface_particles.body_part_particles_[i];
 				Mat3d matrix_value = upgradeToMatrix3D(variable[particle_i]);
 				for (int k = 0; k != 3; ++k) {
 					Vec3d col_vector = matrix_value.col(k);
@@ -298,7 +297,7 @@ namespace SPH
 			output_file << "    <DataArray Name=\"" << variable_name << "\" type=\"Float32\"  NumberOfComponents=\"3\" Format=\"ascii\">\n";
 			output_file << "    ";
 			for (size_t i = 0; i != total_surface_particles; ++i) {
-				size_t particle_i = surface_layer.body_part_particles_[i];
+				size_t particle_i = surface_particles.body_part_particles_[i];
 				Vec3d vector_value = upgradeToVector3D(variable[particle_i]);
 				output_file << std::fixed << std::setprecision(9) << vector_value[0] << " " << vector_value[1] << " " << vector_value[2] << " ";
 			}
@@ -314,7 +313,7 @@ namespace SPH
 			output_file << "    <DataArray Name=\"" << variable_name << "\" type=\"Float32\" Format=\"ascii\">\n";
 			output_file << "    ";
 			for (size_t i = 0; i != total_surface_particles; ++i) {
-				size_t particle_i = surface_layer.body_part_particles_[i];
+				size_t particle_i = surface_particles.body_part_particles_[i];
 				output_file << std::fixed << std::setprecision(9) << variable[particle_i] << " ";
 			}
 			output_file << std::endl;
@@ -329,7 +328,7 @@ namespace SPH
 			output_file << "    <DataArray Name=\"" << variable_name << "\" type=\"Int32\" Format=\"ascii\">\n";
 			output_file << "    ";
 			for (size_t i = 0; i != total_surface_particles; ++i) {
-				size_t particle_i = surface_layer.body_part_particles_[i];
+				size_t particle_i = surface_particles.body_part_particles_[i];
 				output_file << std::fixed << std::setprecision(9) << variable[particle_i] << " ";
 			}
 			output_file << std::endl;

@@ -158,16 +158,14 @@ namespace SPH {
 	}
 	void OrthotropicSolid::CalculateAllLambda()
 	{
-		Matd C= Matd(Vecd (Lambda_[0]+2*Mu_[0], Lambda_[3], Lambda_[4]),
+		Matd M= Matd(Vecd (Lambda_[0]+2*Mu_[0], Lambda_[3], Lambda_[4]),
 				Vecd(Lambda_[3], Lambda_[1]+2*Mu_[1], Lambda_[5]),
 				Vecd(Lambda_[4], Lambda_[5], Lambda_[2]+2*Mu_[2]));
 
-		Matd C_inv= SimTK::inverse(C);
-		for(int i=0; i<3; i++)
-		{
-			Lambda_[i]=
-		}
-		Matd E= Matd()
+		Matd M_inv= SimTK::inverse(M);
+		Matd Complience= Matd(Vecd(1/E_[1], -poisson_[1]/E_[1], -poisson_[2]/E_[1]),
+					Vecd(-poisson_[1]/E_[2], 1/E_[2], -poisson_[3]/E_[2]),
+					Vecd(-poisson_[2]/E_[3], -poisson_[3]/E_[3], 1/E_[3]));
 	
 	}
 	

@@ -185,7 +185,7 @@ namespace SPH {
 			material_name_ = "OrthotropicSolid";
 		};
 		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson),
-		a_{a}, E_{E}, G_{G}, poisson_{poisson}
+		a_(a), E_(E), G_(G), poisson_(poisson)
 			//: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
 		{
 			material_name_ = "OrthotropicSolid";

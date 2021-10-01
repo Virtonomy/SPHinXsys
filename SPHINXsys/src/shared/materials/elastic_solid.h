@@ -184,9 +184,9 @@ namespace SPH {
 		{
 			material_name_ = "OrthotropicSolid";
 		};
-		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson),
+		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson)
+		: LinearElasticSolid(),
 		a_(a), E_(E), G_(G), poisson_(poisson)
-			//: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
 		{
 			material_name_ = "OrthotropicSolid";
 		};
@@ -209,9 +209,9 @@ namespace SPH {
 		Real Lambda_[6]; //123-main 456-side
 		Real Mu_[3];
 
-		virtual void CalculateAllMu() override;
-		virtual void CalculateAllLambda() override;
-		virtual void CalculateA0() override;
+		virtual void CalculateAllMu();
+		virtual void CalculateAllLambda();
+		virtual void CalculateA0();
 
 	};
 

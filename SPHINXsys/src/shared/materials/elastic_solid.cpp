@@ -145,9 +145,9 @@ namespace SPH {
 	//=================================================================================================//
 	void OrthotropicSolid::CalculateA0()
 	{
-		A_[0] = SimTK::outer(a[0], a[0]);
-		A_[1] = SimTK::outer(a[1], a[1]);
-		A_[2] = SimTK::outer(a[2], a[2]);
+		A_[0] = SimTK::outer(a_[0], a_[0]);
+		A_[1] = SimTK::outer(a_[1], a_[1]);
+		A_[2] = SimTK::outer(a_[2], a_[2]);
 		
 	}
 	void OrthotropicSolid::CalculateAllMu()
@@ -158,15 +158,22 @@ namespace SPH {
 	}
 	void OrthotropicSolid::CalculateAllLambda()
 	{
+		Matd Complience= Matd(Vecd(1/E_[1], -poisson_[1]/E_[1], -poisson_[2]/E_[1]),
+					Vecd(-poisson_[1]/E_[2], 1/E_[2], -poisson_[3]/E_[2]),
+					Vecd(-poisson_[2]/E_[3], -poisson_[3]/E_[3], 1/E_[3]));
+
 		Matd M= Matd(Vecd (Lambda_[0]+2*Mu_[0], Lambda_[3], Lambda_[4]),
 				Vecd(Lambda_[3], Lambda_[1]+2*Mu_[1], Lambda_[5]),
 				Vecd(Lambda_[4], Lambda_[5], Lambda_[2]+2*Mu_[2]));
 
-		Matd M_inv= SimTK::inverse(M);
-		Matd Complience= Matd(Vecd(1/E_[1], -poisson_[1]/E_[1], -poisson_[2]/E_[1]),
-					Vecd(-poisson_[1]/E_[2], 1/E_[2], -poisson_[3]/E_[2]),
-					Vecd(-poisson_[2]/E_[3], -poisson_[3]/E_[3], 1/E_[3]));
-	
+		Matd Compliance_inv= SimTK::inverse(Complience);
+		
+		Lambda_[0]=Compliance_inv[0][0]-2*Mu_[0];
+		Lambda_[1]=Compliance_inv[1][1]-2*Mu_[1];
+		Lambda_[2]=Compliance_inv[1][1]-2*Mu_[2];
+		Lambda_[3]=Compliance_inv[1][2];
+		Lambda_[4]=Compliance_inv[1][3];
+		Lambda_[5]=Compliance_inv[2][3];
 	}
 	
 	//=================================================================================================//

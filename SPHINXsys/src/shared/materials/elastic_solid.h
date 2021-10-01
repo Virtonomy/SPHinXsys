@@ -184,7 +184,8 @@ namespace SPH {
 		{
 			material_name_ = "OrthotropicSolid";
 		};
-		OrthotropicSolid(Real rho_0, Real UnitVect[3], Real E[3], Real G[3], Real poisson[3])
+		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson),
+		a_{a}, E_{E}, G_{G}, poisson_{poisson}
 			//: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
 		{
 			material_name_ = "OrthotropicSolid";
@@ -200,9 +201,13 @@ namespace SPH {
 		protected:
 		//Vecd f0_, s0_; 				/**< Reference fiber and sheet directions as basic parameter. */
 		//Matd f0f0_, s0s0_, f0s0_;	/**< Tensor products of fiber and sheet directions as basic parameter.. */
-		Vecd a0, a1, a3;
-		Real Lambda[6];
-		Real Mu[3];
+		std::array<Vecd, 3> a_;
+		std::array<Real, 3> E_;
+		std::array<Real, 3> G_;
+		std::array<Real, 3> poisson_;
+		Matd A_[3];
+		Real Lambda_[6]; //123-main 456-side
+		Real Mu_[3];
 
 		virtual void CalculateAllMu() override;
 		virtual void CalculateAllLambda() override;

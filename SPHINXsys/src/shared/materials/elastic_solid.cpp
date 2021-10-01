@@ -145,20 +145,32 @@ namespace SPH {
 	//=================================================================================================//
 	void OrthotropicSolid::CalculateA0()
 	{
-		Matd A[3];
-		A[0] = SimTK::outer(a0, a0);
-		A[1] = SimTK::outer(a0, a1);
-		A[2] = SimTK::outer(a1, a1);
-		
-	}
-	void OrthotropicSolid::CalculateAllLambda()
-	{
+		A_[0] = SimTK::outer(a[0], a[0]);
+		A_[1] = SimTK::outer(a[1], a[1]);
+		A_[2] = SimTK::outer(a[2], a[2]);
 		
 	}
 	void OrthotropicSolid::CalculateAllMu()
 	{
-		
+		G_[0]=2/(Mu_[0]+Mu_[1]);
+		G_[1]=2/(Mu_[1]+Mu_[2]);
+		G_[2]=2/(Mu_[2]+Mu_[0]);
 	}
+	void OrthotropicSolid::CalculateAllLambda()
+	{
+		Matd C= Matd(Vecd (Lambda_[0]+2*Mu_[0], Lambda_[3], Lambda_[4]),
+				Vecd(Lambda_[3], Lambda_[1]+2*Mu_[1], Lambda_[5]),
+				Vecd(Lambda_[4], Lambda_[5], Lambda_[2]+2*Mu_[2]));
+
+		Matd C_inv= SimTK::inverse(C);
+		for(int i=0; i<3; i++)
+		{
+			Lambda_[i]=
+		}
+		Matd E= Matd()
+	
+	}
+	
 	//=================================================================================================//
 	Matd FeneNeoHookeanSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{

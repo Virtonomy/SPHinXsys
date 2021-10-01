@@ -184,8 +184,8 @@ namespace SPH {
 		{
 			material_name_ = "OrthotropicSolid";
 		};
-		OrthotropicSolid(Real rho_0, Real Youngs_modulus, Real poisson)
-			: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
+		OrthotropicSolid(Real rho_0, Real UnitVect[3], Real E[3], Real G[3], Real poisson[3])
+			//: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
 		{
 			material_name_ = "OrthotropicSolid";
 		};
@@ -198,10 +198,16 @@ namespace SPH {
 		virtual Real VolumetricKirchhoff(Real J) override;
 
 		protected:
-		Vecd f0_, s0_; 				/**< Reference fiber and sheet directions as basic parameter. */
-		Matd f0f0_, s0s0_, f0s0_;	/**< Tensor products of fiber and sheet directions as basic parameter.. */
+		//Vecd f0_, s0_; 				/**< Reference fiber and sheet directions as basic parameter. */
+		//Matd f0f0_, s0s0_, f0s0_;	/**< Tensor products of fiber and sheet directions as basic parameter.. */
+		Vecd a0, a1, a3;
+		Real Lambda[6];
+		Real Mu[3];
 
-		virtual void assignDerivedMaterialParameters() override;
+		virtual void CalculateAllMu() override;
+		virtual void CalculateAllLambda() override;
+		virtual void CalculateA0() override;
+
 	};
 
 	/**

@@ -143,12 +143,21 @@ namespace SPH {
 		return  K0_ * J * (J - 1);
 	}
 	//=================================================================================================//
-	void OrthotropicSolid::assignDerivedMaterialParameters()
+	void OrthotropicSolid::CalculateA0()
 	{
-		ElasticSolid::assignDerivedMaterialParameters();
-		f0f0_ = SimTK::outer(f0_, f0_);
-		f0s0_ = SimTK::outer(f0_, s0_);
-		s0s0_ = SimTK::outer(s0_, s0_);
+		Matd A[3];
+		A[0] = SimTK::outer(a0, a0);
+		A[1] = SimTK::outer(a0, a1);
+		A[2] = SimTK::outer(a1, a1);
+		
+	}
+	void OrthotropicSolid::CalculateAllLambda()
+	{
+		
+	}
+	void OrthotropicSolid::CalculateAllMu()
+	{
+		
 	}
 	//=================================================================================================//
 	Matd FeneNeoHookeanSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)

@@ -23,4 +23,4 @@ if(BUILD_3D_EXAMPLES)
 	ADD_SUBDIRECTORY(3d_examples)
 endif()
 
-
+ADD_SUBDIRECTORY(modules)

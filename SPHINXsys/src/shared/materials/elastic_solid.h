@@ -199,14 +199,12 @@ namespace SPH {
 		virtual Real VolumetricKirchhoff(Real J) override;
 
 		protected:
-		//Vecd f0_, s0_; 				/**< Reference fiber and sheet directions as basic parameter. */
-		//Matd f0f0_, s0s0_, f0s0_;	/**< Tensor products of fiber and sheet directions as basic parameter.. */
 		std::array<Vecd, 3> a_;
 		std::array<Real, 3> E_;
 		std::array<Real, 3> G_;
 		std::array<Real, 3> poisson_;
 		Matd A_[3];
-		Real Lambda_[6]; //123-main 456-side
+		Real Lambda_[6]; //3x3 matrix, where indexes 123-are the main three lambdas, and 456-are the side values where 6 is [2][3]
 		Real Mu_[3];
 
 		virtual void CalculateAllMu();

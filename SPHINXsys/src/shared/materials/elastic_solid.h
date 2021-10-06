@@ -204,7 +204,7 @@ namespace SPH {
 		std::array<Real, 3> G_;
 		std::array<Real, 3> poisson_;
 		Matd A_[3];
-		Real Lambda_[6]; //3x3 matrix, where indexes 123-are the main three lambdas, and 456-are the side values where 6 is [2][3]
+		Real Lambda_[6]; //3x3 matrix, where indexes 012-are the diagonal three lambdas, and 345-are the non-diagonal elements
 		Real Mu_[3];
 
 		virtual void CalculateAllMu();

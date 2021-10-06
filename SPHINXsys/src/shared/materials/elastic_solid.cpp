@@ -154,12 +154,19 @@ namespace SPH {
 	}
 	void OrthotropicSolid::CalculateAllMu()
 	{
-		G_[0]=2/(Mu_[0]+Mu_[1]);
-		G_[1]=2/(Mu_[1]+Mu_[2]);
-		G_[2]=2/(Mu_[2]+Mu_[0]);
+		// the equations of G_, to calculate Mu the equations must be solved for Mu[0,1,2]
+		// G_[0]=2/(Mu_[0]+Mu_[1]);
+		// G_[1]=2/(Mu_[1]+Mu_[2]);
+		// G_[2]=2/(Mu_[2]+Mu_[0]);
+
+		Mu_[0]=3/G_[0]-1/G_[2]-1/G_[1];
+		Mu_[1]=1/G_[1]+1/G_[0]-1/G_[2];
+		Mu_[2]=1/G_[2]-1/G_[0]+1/G_[1];
+
 	}
 	void OrthotropicSolid::CalculateAllLambda()
 	{
+		//poisson_[1]= nu_12 and nu_21, poisson_[2]= nu_13 and nu_32, poisson_[3]= nu_23 and nu_32
 		Matd Complience= Matd(Vecd(1/E_[1], -poisson_[1]/E_[1], -poisson_[2]/E_[1]),
 					Vecd(-poisson_[1]/E_[2], 1/E_[2], -poisson_[3]/E_[2]),
 					Vecd(-poisson_[2]/E_[3], -poisson_[3]/E_[3], 1/E_[3]));
@@ -170,7 +177,8 @@ namespace SPH {
 		// 		Vecd(Lambda_[4], Lambda_[5], Lambda_[2]+2*Mu_[2]));
 
 		Matd Compliance_inv= SimTK::inverse(Complience);
-		
+		//Lambda_ is a 3x3 matrix, where indexes 012-are the diagonal three lambdas, and 345-are the non-diagonal elements
+		//Lambda_[3]= lambda_12 and lambda_21, Lambda_[4]= lambda_13 and lambda_31, Lambda_[5]= lambda_23 and lambda_32
 		Lambda_[0]=Compliance_inv[0][0]-2*Mu_[0];
 		Lambda_[1]=Compliance_inv[1][1]-2*Mu_[1];
 		Lambda_[2]=Compliance_inv[2][2]-2*Mu_[2];

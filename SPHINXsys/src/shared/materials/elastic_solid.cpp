@@ -155,10 +155,10 @@ namespace SPH {
 				if(i+j==3 ){ k = 2; }
 				if(i==1 && j==1 ){ k = 1; }
 
-				Summa2 = Lambda_[k]*();
+				Summa2 = Lambda_[k]*(CalculateDDot(A_,E_)*A_+CalculateDDot(A_,E_)*A_); //itt az egyenletben a két megszorzott A_, A_b0 és A_a0 van, mi a különbség?
 			}
 			
-			sigmaPK2 = Mu_[i]*((SimTK::dot(A_,E_)+(SimTK::dot(E_,A_))+1/2*(Summa2);
+			sigmaPK2 = Mu_[i]*((SimTK::dot(A_,E_)+SimTK::dot(E_,A_))+1/2*(Summa2));//itt ahhoz, hogy a két mátrixot össze lehessen szorozni az E-nek E_T-nek kellene lenni?
 		}
 
 		return sigmaPK2;
@@ -171,14 +171,16 @@ namespace SPH {
 	//=================================================================================================//
 	Matd OrthotropicSolid::CalculateDDot(Matd Matrix1, Matd Matrix2 )
 	{
+		//calcutation of Matrix1 : Matrix2, both matrices dimension is 3x3
+		Matd Product;
 		for(int i=0; i<3; i++)
 		{
 			for(int j=0; j<3; j++)
 			{
-				
+				Product[i][j] = Matrix1[i][j] * Matrix2[i][j];
 			}
 		}
-		
+		return Product;
 	}
 	void OrthotropicSolid::CalculateA0()
 	{

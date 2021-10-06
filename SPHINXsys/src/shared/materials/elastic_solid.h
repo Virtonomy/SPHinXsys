@@ -189,6 +189,9 @@ namespace SPH {
 		a_(a), E_(E), G_(G), poisson_(poisson)
 		{
 			material_name_ = "OrthotropicSolid";
+			CalculateA0();
+			CalculateAllMu();
+			CalculateAllLambda();
 		};
 		
 		
@@ -210,6 +213,7 @@ namespace SPH {
 		virtual void CalculateAllMu();
 		virtual void CalculateAllLambda();
 		virtual void CalculateA0();
+		virtual Matd CalculateDDot(Matd Matrix1, Matd Matrix2 );
 
 	};
 

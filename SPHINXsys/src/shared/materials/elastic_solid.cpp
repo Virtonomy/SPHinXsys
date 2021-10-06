@@ -134,9 +134,33 @@ namespace SPH {
 	Matd OrthotropicSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{
 		Matd strain = 0.5 * (~F * F - Matd(1.0));
-		Matd Summa2=;
+		Matd Summa2;
 		//Matd sigmaPK2 = lambda0_ * strain.trace() * Matd(1.0) + 2.0 * G0_ * strain;
 		Matd sigmaPK2 = Mu_[0]*((SimTK::dot(A_,E_)+(SimTK::dot(E_,A_))+1/2*(Summa2);
+
+
+
+		for(int i=0; i<3; i++)
+		{
+			//outer sum (a{1-3})
+			int k;
+			for(int j=0; j<3; j++)
+			{
+				//inner sum (b{1-3})
+				//k determines the value of lambda needed for the equation
+				if(i+j==0 ){ k = 0; }
+				if(i+j==1 ){ k = 3; }
+				if(i+j==2 ){ k = 4; }
+				if(i+j==3 ){ k = 5; }
+				if(i+j==3 ){ k = 2; }
+				if(i==1 && j==1 ){ k = 1; }
+
+				Summa2 = Lambda_[k]*();
+			}
+			
+			sigmaPK2 = Mu_[i]*((SimTK::dot(A_,E_)+(SimTK::dot(E_,A_))+1/2*(Summa2);
+		}
+
 		return sigmaPK2;
 	}
 	//=================================================================================================//
@@ -145,6 +169,17 @@ namespace SPH {
 		return  K0_ * J * (J - 1);
 	}
 	//=================================================================================================//
+	Matd OrthotropicSolid::CalculateDDot(Matd Matrix1, Matd Matrix2 )
+	{
+		for(int i=0; i<3; i++)
+		{
+			for(int j=0; j<3; j++)
+			{
+				
+			}
+		}
+		
+	}
 	void OrthotropicSolid::CalculateA0()
 	{
 		A_[0] = SimTK::outer(a_[0], a_[0]);
@@ -166,10 +201,10 @@ namespace SPH {
 	}
 	void OrthotropicSolid::CalculateAllLambda()
 	{
-		//poisson_[1]= nu_12 and nu_21, poisson_[2]= nu_13 and nu_32, poisson_[3]= nu_23 and nu_32
-		Matd Complience= Matd(Vecd(1/E_[1], -poisson_[1]/E_[1], -poisson_[2]/E_[1]),
-					Vecd(-poisson_[1]/E_[2], 1/E_[2], -poisson_[3]/E_[2]),
-					Vecd(-poisson_[2]/E_[3], -poisson_[3]/E_[3], 1/E_[3]));
+		//poisson_[0]= nu_12 and nu_21, poisson_[1]= nu_13 and nu_32, poisson_[2]= nu_23 and nu_32
+		Matd Complience= Matd(Vecd(1/E_[0], -poisson_[0]/E_[0], -poisson_[1]/E_[0]),
+					Vecd(-poisson_[0]/E_[1], 1/E_[1], -poisson_[2]/E_[1]),
+					Vecd(-poisson_[1]/E_[2], -poisson_[2]/E_[2], 1/E_[2]));
 
 		//the M matrix from which the lambdas are derived is the following:
 		// Matd M= Matd(Vecd (Lambda_[0]+2*Mu_[0], Lambda_[3], Lambda_[4]),

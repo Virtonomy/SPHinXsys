@@ -177,15 +177,13 @@ namespace SPH {
 	* @class OrthotropicSolid
 	* @brief Ortothropic solid
 	*/
+	Real CalculateDDot(Matd Matrix1, Matd Matrix2 ); //calculate double dot
+
 	class OrthotropicSolid : public LinearElasticSolid
 	{
 	public:
-		OrthotropicSolid() : LinearElasticSolid() 
-		{
-			material_name_ = "OrthotropicSolid";
-		};
 		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson)
-		: LinearElasticSolid(),
+			: LinearElasticSolid(rho_0, E[0], poisson[0]),
 		a_(a), E_(E), G_(G), poisson_(poisson)
 		{
 			material_name_ = "OrthotropicSolid";
@@ -213,7 +211,7 @@ namespace SPH {
 		virtual void CalculateAllMu();
 		virtual void CalculateAllLambda();
 		virtual void CalculateA0();
-		virtual Matd CalculateDDot(Matd Matrix1, Matd Matrix2 );
+
 
 	};
 

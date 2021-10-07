@@ -135,15 +135,15 @@ namespace SPH {
 	{
 		Matd strain = 0.5 * (~F * F - Matd(1.0));
 		Matd Summa2;
-		//Matd sigmaPK2 = lambda0_ * strain.trace() * Matd(1.0) + 2.0 * G0_ * strain;
-		Matd sigmaPK2 = Mu_[0]*((SimTK::dot(A_,E_)+(SimTK::dot(E_,A_))+1/2*(Summa2);
+		Matd sigmaPK2;
 
 
-
+		sigmaPK2 = Matd(0);
 		for(int i=0; i<3; i++)
 		{
 			//outer sum (a{1-3})
 			int k;
+			Summa2 = Matd(0);
 			for(int j=0; j<3; j++)
 			{
 				//inner sum (b{1-3})
@@ -152,13 +152,13 @@ namespace SPH {
 				if(i+j==1 ){ k = 3; }
 				if(i+j==2 ){ k = 4; }
 				if(i+j==3 ){ k = 5; }
-				if(i+j==3 ){ k = 2; }
+				if(i+j==4 ){ k = 2; }
 				if(i==1 && j==1 ){ k = 1; }
 
-				Summa2 = Lambda_[k]*(CalculateDDot(A_,E_)*A_+CalculateDDot(A_,E_)*A_); //itt az egyenletben a két megszorzott A_, A_b0 és A_a0 van, mi a különbség?
+				Summa2 += Lambda_[k]*(CalculateDDot(A_[i],strain)*A_[j]+CalculateDDot(A_[j],strain)*A_[i]);
 			}
 			
-			sigmaPK2 = Mu_[i]*((SimTK::dot(A_,E_)+SimTK::dot(E_,A_))+1/2*(Summa2));//itt ahhoz, hogy a két mátrixot össze lehessen szorozni az E-nek E_T-nek kellene lenni?
+			sigmaPK2 += Mu_[i]*(((A_[i]*strain)+(strain*A_[i]))+1/2*(Summa2));
 		}
 
 		return sigmaPK2;
@@ -169,15 +169,15 @@ namespace SPH {
 		return  K0_ * J * (J - 1);
 	}
 	//=================================================================================================//
-	Matd OrthotropicSolid::CalculateDDot(Matd Matrix1, Matd Matrix2 )
+	Real CalculateDDot(Matd Matrix1, Matd Matrix2 ) //egy skalar
 	{
 		//calcutation of Matrix1 : Matrix2, both matrices dimension is 3x3
-		Matd Product;
+		Real Product = 0;
 		for(int i=0; i<3; i++)
 		{
 			for(int j=0; j<3; j++)
 			{
-				Product[i][j] = Matrix1[i][j] * Matrix2[i][j];
+				Product += Matrix1[i][j] * Matrix2[i][j];
 			}
 		}
 		return Product;
@@ -196,9 +196,9 @@ namespace SPH {
 		// G_[1]=2/(Mu_[1]+Mu_[2]);
 		// G_[2]=2/(Mu_[2]+Mu_[0]);
 
-		Mu_[0]=3/G_[0]-1/G_[2]-1/G_[1];
+		Mu_[0]=1/G_[0]+1/G_[2]-1/G_[1];
 		Mu_[1]=1/G_[1]+1/G_[0]-1/G_[2];
-		Mu_[2]=1/G_[2]-1/G_[0]+1/G_[1];
+		Mu_[2]=1/G_[2]+1/G_[1]-1/G_[0];
 
 	}
 	void OrthotropicSolid::CalculateAllLambda()
@@ -219,9 +219,9 @@ namespace SPH {
 		Lambda_[0]=Compliance_inv[0][0]-2*Mu_[0];
 		Lambda_[1]=Compliance_inv[1][1]-2*Mu_[1];
 		Lambda_[2]=Compliance_inv[2][2]-2*Mu_[2];
-		Lambda_[3]=Compliance_inv[1][2];
-		Lambda_[4]=Compliance_inv[1][3];
-		Lambda_[5]=Compliance_inv[2][3];
+		Lambda_[3]=Compliance_inv[0][1];
+		Lambda_[4]=Compliance_inv[0][2];
+		Lambda_[5]=Compliance_inv[1][2];
 	}
 	
 	//=================================================================================================//

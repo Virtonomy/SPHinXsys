@@ -17,6 +17,7 @@ namespace SPH
 		polymesh.scaleMesh(scale_factor);
 		triangle_mesh_ = generateTriangleMesh(polymesh.transformMesh(translation));
 	}
+#ifdef __EMSCRIPTEN__
 	//=================================================================================================//
 	TriangleMeshShape::TriangleMeshShape(const uint8_t* buffer, Vec3d translation, Real scale_factor)
 		: Shape("TriangleMeshShape")
@@ -26,6 +27,7 @@ namespace SPH
 		polymesh.scaleMesh(scale_factor);
 		triangle_mesh_ = generateTriangleMesh(polymesh.transformMesh(translation));
 	}
+#endif
 	//=================================================================================================//
 	TriangleMeshShape::TriangleMeshShape(Vec3d halfsize, int resolution, Vec3d translation)
 		: Shape("TriangleMeshShape")

@@ -322,6 +322,7 @@ namespace SPH
 		* Can be used for outer or inner surface of a shell structure ofr example.
 		* The spring force is calculated based on the difference from the particle's initial position.
 		* Only for 3D applications
+		* Only for uniform surface particle size.
 		*/
 		class SpringNormalOnSurfaceParticles 
 			: public PartSimpleDynamicsByParticle, public SolidDataSimple
@@ -339,6 +340,32 @@ namespace SPH
 
 			virtual Vecd getSpringForce(size_t index_i, Vecd disp);
 			virtual Vecd getDampingForce(size_t index_i);
+			virtual void Update(size_t index_i, Real dt = 0.0) override;
+		};
+		/**
+		* @class SpringOnSurfaceParticles
+		* @brief Exerts spring force force on the surface in the form of acceleration to each particle.
+		* The input stiffness should be defined in Pa/m. The stiffness is scaled by the surface area of the particle to get N/m
+		* The force is applied to all the surface particles.
+		* The spring force is calculated based on the difference from the particle's initial position.
+		* Only for 3D applications
+		* BodyPartByParticle define the ody part that the spring is applied to.
+		* Only for uniform surface particle size.
+		*/
+		class SpringOnSurfaceParticles
+			: public PartSimpleDynamicsByParticle, public SolidDataSimple
+		{
+		public:
+			SpringOnSurfaceParticles(SolidBody* body, BodyPartByParticle* body_part, Real stiffness, Real damping_ratio = 0.05);
+
+			StdLargeVec<bool>& GetApplySpringForceToParticle(){ return apply_spring_force_to_particle_; }
+		protected:
+			StdLargeVec<Vecd>& pos_n_,& pos_0_,& vel_n_,& dvel_dt_prior_;
+			StdLargeVec<Real>& mass_;
+			Real stiffness_;
+			Real damping_coeff_; // damping component parallel to the spring force component
+			StdLargeVec<bool> apply_spring_force_to_particle_;
+
 			virtual void Update(size_t index_i, Real dt = 0.0) override;
 		};
 		/**

@@ -514,8 +514,8 @@ namespace SPH
 		}
 		//=================================================================================================//
 		SpringOnSurfaceParticles::
-			SpringOnSurfaceParticles(SolidBody *body, BodyPartByParticle* body_part, Real stiffness, Real damping_ratio)
-			: PartSimpleDynamicsByParticle(body, body_part), SolidDataSimple(body),
+			SpringOnSurfaceParticles(SolidBody *body, Real stiffness, Real damping_ratio)
+			: ParticleDynamicsSimple(body), SolidDataSimple(body),
 			  pos_n_(particles_->pos_n_),
 			  pos_0_(particles_->pos_0_),
 			  vel_n_(particles_->vel_n_),

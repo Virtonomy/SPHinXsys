@@ -374,10 +374,10 @@ namespace SPH
 		* Only for uniform surface particle size.
 		*/
 		class SpringOnSurfaceParticles
-			: public PartSimpleDynamicsByParticle, public SolidDataSimple
+			: public ParticleDynamicsSimple, public SolidDataSimple
 		{
 		public:
-			SpringOnSurfaceParticles(SolidBody* body, BodyPartByParticle* body_part, Real stiffness, Real damping_ratio = 0.05);
+			SpringOnSurfaceParticles(SolidBody* body, Real stiffness, Real damping_ratio = 0.05);
 
 			StdLargeVec<bool>& GetApplySpringForceToParticle(){ return apply_spring_force_to_particle_; }
 		protected:

@@ -79,6 +79,30 @@ namespace SPH
 			dvel_dt_ave_[index_i] = dvel_dt_[index_i];
 		}
 		//=================================================================================================//
+		ConstrainSolidBodySurfaceRegion::
+			ConstrainSolidBodySurfaceRegion(SPHBody *body, BodyPartByParticle *body_part)
+			: PartSimpleDynamicsByParticle(body, body_part), SolidDataSimple(body),
+			  pos_n_(particles_->pos_n_), pos_0_(particles_->pos_0_),
+			  vel_n_(particles_->vel_n_), dvel_dt_(particles_->dvel_dt_),
+			  apply_constrain_to_particle_(StdLargeVec<bool>(pos_0_.size(), false))
+		{
+			// get the surface layer of particles
+			ShapeSurface surface_layer(body);
+			// select which particles the spring is applied to
+			// if the particle is in the surface layer, the force is applied
+			for (size_t particle_i: surface_layer.body_part_particles_) apply_constrain_to_particle_[particle_i] = true;
+		}
+		//=================================================================================================//
+		void ConstrainSolidBodySurfaceRegion::Update(size_t index_i, Real dt)
+		{
+			if(apply_constrain_to_particle_[index_i])
+			{
+				pos_n_[index_i] = pos_0_[index_i];
+				vel_n_[index_i] = Vecd(0);
+				dvel_dt_[index_i] = Vecd(0);
+			}
+		}
+		//=================================================================================================//
 		PositionSolidBody::
 			PositionSolidBody(SPHBody *body, BodyPartByParticle *body_part,
 							  Real start_time, Real end_time, Vecd pos_end_center)

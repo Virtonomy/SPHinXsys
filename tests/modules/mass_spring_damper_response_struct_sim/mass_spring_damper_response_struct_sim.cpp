@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "test_structural_simulation_class.h"
+#include "structural_simulation_class.h"
 
 TEST(StructuralSimulation, MassSpringDamperResponse)
 {
@@ -38,8 +38,8 @@ TEST(StructuralSimulation, MassSpringDamperResponse)
 	input.spring_damper_tuple_ = { SpringDamperTuple(0, Vec3d(0, 0, spring_coeff), spring_damper_ratio) };
 
 	//=================================================================================================//
-	TestStructuralSimulation sim (input);
-	sim.TestRunSimulation(end_time);
+	StructuralSimulation sim(input);
+	sim.runSimulation(end_time);
 	//=================================================================================================//
 
 	StdLargeVec<Vecd>& pos_0 = sim.get_solid_body_list_()[0].get()->getElasticSolidParticles()->pos_0_;

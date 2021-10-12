@@ -1,3 +1,11 @@
+/**
+* @file 	structural_simulation_class.cpp
+* @brief 	The structural simulation module is licensed under the Aladdin Free Public License (https://spdx.org/licenses/Aladdin.html) regarding usage for medical device development.
+* Commercial use for medical device development is not permitted. This does not apply to applications in other fields.
+* @details	solid structural simulation class for general structural simulations
+* @author 	Bence Z. Rochlitz - Virtonomy GmbH
+*/
+
 #include "structural_simulation_class.h"
 
 ////////////////////////////////////////////////////
@@ -986,4 +994,17 @@ double StructuralSimulation::runSimulationFixedDurationJS(int number_of_steps)
 	tick_count::interval_t tt;
 	tt = t4 - t1 - interval;
 	return tt.seconds();
+}
+
+Real StructuralSimulation::getMaxDisplacement(int body_index)
+{
+	StdLargeVec<Vecd>& pos_0 = solid_body_list_[body_index].get()->getElasticSolidParticles()->pos_0_;
+	StdLargeVec<Vecd>& pos_n = solid_body_list_[body_index].get()->getElasticSolidParticles()->pos_n_;
+	Real displ_max = 0;
+	for (size_t i = 0; i < pos_0.size(); i++)
+	{
+		Real displ = (pos_n[i] - pos_0[i]).norm();
+		if (displ > displ_max) displ_max = displ;
+	}
+	return displ_max;
 }

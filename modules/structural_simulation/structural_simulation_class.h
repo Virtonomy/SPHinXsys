@@ -1,8 +1,9 @@
 /**
 * @file 	structural_simulation_class.h
-* @brief 	solid structural simulation class definition
+* @brief 	The structural simulation module is licensed under the Aladdin Free Public License (https://spdx.org/licenses/Aladdin.html) regarding usage for medical device development.
+* Commercial use for medical device development is not permitted. This does not apply to applications in other fields.
 * @details	solid structural simulation class for general structural simulations
-* @author 	Bence Z. Rochlitz
+* @author 	Bence Z. Rochlitz - Virtonomy GmbH
 */
 
 #ifndef SOLID_STRUCTURAL_SIMULATION_CLASS_H
@@ -277,6 +278,9 @@ class StructuralSimulation
 	public:
 		StructuralSimulation(StructuralSimulationInput& input);
 		~StructuralSimulation();
+
+		StdVec<shared_ptr<SolidBodyForSimulation>> get_solid_body_list_(){ return solid_body_list_; };
+		Real getMaxDisplacement(int body_index);
 
 		//For c++
 		void runSimulation(Real end_time);

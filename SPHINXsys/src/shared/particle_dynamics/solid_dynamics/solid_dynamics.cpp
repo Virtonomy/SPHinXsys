@@ -855,7 +855,8 @@ namespace SPH
 
 			for (int i = 0; i < 3; i++){
 				if (std::isnan(acceleration[i])){
-					throw std::runtime_error(std::string("acceleration is Not A Number"));
+					throw std::runtime_error(std::string("acceleration is Not A Number! SPHBody: ") + this->body_->getBodyName() 
+						+ " particle ID: " + std::to_string(index_i));
 				}
 			}
 		}

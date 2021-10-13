@@ -129,7 +129,6 @@ namespace SPH {
 	{
 		return  0.5 * K0_ * (J * J - 1);
 	}
-
 	//=================================================================================================//
 	OrthotropicSolid::OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson)
 	// we take the max. E and max. possion to approxiamte the maximum of the Bulk modulus --> for time step size calculation

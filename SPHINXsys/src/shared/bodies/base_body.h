@@ -52,6 +52,7 @@ namespace SPH
 	class BaseParticles;
 	class BaseCellLinkedList;
 	class SPHBodyRelation;
+	class ShapeSurface;
 
 	/**
 	 * @class SPHBody
@@ -110,7 +111,8 @@ namespace SPH
 		virtual void assignBaseParticles(BaseParticles *base_particles);
 		void allocateConfigurationMemoriesForBufferParticles();
 
-		virtual void writeParticlesToVtuFile(std::ofstream &output_file);
+		virtual void writeParticlesToVtuFile(std::ostream &output_file);
+		virtual void writeSurfaceParticlesToVtuFile(std::ofstream &output_file, ShapeSurface& surface_particles);
 		virtual void writeParticlesToPltFile(std::ofstream &output_file);
 		virtual void writeParticlesToXmlForRestart(std::string &filefullpath);
 		virtual void readParticlesFromXmlForRestart(std::string &filefullpath);

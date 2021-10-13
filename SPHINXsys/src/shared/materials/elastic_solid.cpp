@@ -131,6 +131,17 @@ namespace SPH {
 	}
 
 	//=================================================================================================//
+	OrthotropicSolid::OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson)
+	// we take the max. E and max. possion to approxiamte the maximum of the Bulk modulus --> for time step size calculation
+		: LinearElasticSolid(rho_0, std::max(E[0], E[1], E[2]), std::max(poisson[0], poisson[1], poisson[2])),
+	a_(a), E_(E), G_(G), poisson_(poisson)
+	{
+		material_name_ = "OrthotropicSolid";
+		CalculateA0();
+		CalculateAllMu();
+		CalculateAllLambda();
+	};
+	//=================================================================================================//
 	Matd OrthotropicSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{
 		Matd strain = 0.5 * (~F * F - Matd(1.0));
@@ -180,7 +191,6 @@ namespace SPH {
 		Mu_[0]=1/G_[0]+1/G_[2]-1/G_[1];
 		Mu_[1]=1/G_[1]+1/G_[0]-1/G_[2];
 		Mu_[2]=1/G_[2]+1/G_[1]-1/G_[0];
-
 	}
 	//=================================================================================================//
 	void OrthotropicSolid::CalculateAllLambda()

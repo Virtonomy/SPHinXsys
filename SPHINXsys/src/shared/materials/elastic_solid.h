@@ -183,23 +183,14 @@ namespace SPH {
 	class OrthotropicSolid : public LinearElasticSolid
 	{
 	public:
-		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson)
-		// we take the max. E and max. possion to approxiamte the maximum of the Bulk modulus --> for time step size calculation
-			: LinearElasticSolid(rho_0, std::max(E[0], E[1], E[2]), std::max(poisson[0], poisson[1], poisson[2])),
-		a_(a), E_(E), G_(G), poisson_(poisson)
-		{
-			material_name_ = "OrthotropicSolid";
-			CalculateA0();
-			CalculateAllMu();
-			CalculateAllLambda();
-		};
+		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson);
 
 		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
 		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;
 
-		protected:
+	protected:
 		std::array<Vecd, 3> a_;
 		std::array<Real, 3> E_;
 		std::array<Real, 3> G_;

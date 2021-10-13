@@ -134,20 +134,16 @@ namespace SPH {
 	Matd OrthotropicSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{
 		Matd strain = 0.5 * (~F * F - Matd(1.0));
-		Matd Summa2;
-		Matd sigmaPK2;
-
-
-		sigmaPK2 = Matd(0);
+		Matd sigmaPK2 = Matd(0);
 		for(int i=0; i<3; i++)
 		{
 			//outer sum (a{1-3})
 			int k;
-			Summa2 = Matd(0);
+			Matd Summa2 = Matd(0);
 			for(int j=0; j<3; j++)
 			{
-				//inner sum (b{1-3})
-				//k determines the value of lambda needed for the equation
+				// inner sum (b{1-3})
+				// k determines the value of lambda needed for the equation
 				if(i+j==0 ){ k = 0; }
 				if(i+j==1 ){ k = 3; }
 				if(i+j==2 ){ k = 4; }
@@ -155,12 +151,10 @@ namespace SPH {
 				if(i+j==4 ){ k = 2; }
 				if(i==1 && j==1 ){ k = 1; }
 
-				Summa2 += Lambda_[k]*(CalculateDDot(A_[i],strain)*A_[j]+CalculateDDot(A_[j],strain)*A_[i]);
+				Summa2 += Lambda_[k]*(CalculateDoubleDotProduct(A_[i],strain)*A_[j]+CalculateDoubleDotProduct(A_[j],strain)*A_[i]);
 			}
-			
 			sigmaPK2 += Mu_[i]*(((A_[i]*strain)+(strain*A_[i]))+1/2*(Summa2));
 		}
-
 		return sigmaPK2;
 	}
 	//=================================================================================================//
@@ -169,26 +163,13 @@ namespace SPH {
 		return  K0_ * J * (J - 1);
 	}
 	//=================================================================================================//
-	Real CalculateDDot(Matd Matrix1, Matd Matrix2 ) //egy skalar
-	{
-		//calcutation of Matrix1 : Matrix2, both matrices dimension is 3x3
-		Real Product = 0;
-		for(int i=0; i<3; i++)
-		{
-			for(int j=0; j<3; j++)
-			{
-				Product += Matrix1[i][j] * Matrix2[i][j];
-			}
-		}
-		return Product;
-	}
 	void OrthotropicSolid::CalculateA0()
 	{
 		A_[0] = SimTK::outer(a_[0], a_[0]);
 		A_[1] = SimTK::outer(a_[1], a_[1]);
 		A_[2] = SimTK::outer(a_[2], a_[2]);
-		
 	}
+	//=================================================================================================//
 	void OrthotropicSolid::CalculateAllMu()
 	{
 		// the equations of G_, to calculate Mu the equations must be solved for Mu[0,1,2]
@@ -201,6 +182,7 @@ namespace SPH {
 		Mu_[2]=1/G_[2]+1/G_[1]-1/G_[0];
 
 	}
+	//=================================================================================================//
 	void OrthotropicSolid::CalculateAllLambda()
 	{
 		//poisson_[0]= nu_12 and nu_21, poisson_[1]= nu_13 and nu_32, poisson_[2]= nu_23 and nu_32
@@ -222,8 +204,7 @@ namespace SPH {
 		Lambda_[3]=Compliance_inv[0][1];
 		Lambda_[4]=Compliance_inv[0][2];
 		Lambda_[5]=Compliance_inv[1][2];
-	}
-	
+	}	
 	//=================================================================================================//
 	Matd FeneNeoHookeanSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{

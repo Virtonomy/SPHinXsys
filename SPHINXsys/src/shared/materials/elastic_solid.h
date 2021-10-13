@@ -172,18 +172,20 @@ namespace SPH {
 		virtual Real VolumetricKirchhoff(Real J) override;
 	};
 
-	//preparation for the implementation of the aorta material model
 	/**
 	* @class OrthotropicSolid
-	* @brief Ortothropic solid
+	* @brief Ortothropic solid - generic definition with 3 orthogonal directions + 9 independent parameters
+	* @param "a" --> 3 principal direction vectors
+	* @param "E" --> 3 principal Young's moduli
+	* @param "G" --> 3 principal shear moduli
+	* @param "poisson" --> 3 principal Poisson's ratios
 	*/
-	Real CalculateDDot(Matd Matrix1, Matd Matrix2 ); //calculate double dot
-
 	class OrthotropicSolid : public LinearElasticSolid
 	{
 	public:
 		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson)
-			: LinearElasticSolid(rho_0, E[0], poisson[0]),
+		// we take the max. E and max. possion to approxiamte the maximum of the Bulk modulus --> for time step size calculation
+			: LinearElasticSolid(rho_0, std::max(E[0], E[1], E[2]), std::max(poisson[0], poisson[1], poisson[2])),
 		a_(a), E_(E), G_(G), poisson_(poisson)
 		{
 			material_name_ = "OrthotropicSolid";
@@ -191,9 +193,7 @@ namespace SPH {
 			CalculateAllMu();
 			CalculateAllLambda();
 		};
-		
-		
-	
+
 		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
 		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress determinate */
@@ -211,8 +211,6 @@ namespace SPH {
 		virtual void CalculateAllMu();
 		virtual void CalculateAllLambda();
 		virtual void CalculateA0();
-
-
 	};
 
 	/**

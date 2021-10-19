@@ -95,50 +95,6 @@ namespace SPH {
 		addAVariableNameToList<indexMatrix, Matd>(variables_to_restart_, "DeformationGradient");
 	}
 	//=================================================================================================//
-	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStress()
-	{
-		StdLargeVec<Real> von_Mises_stress_vector = {};
-		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
-		{
-			von_Mises_stress_vector.push_back(von_Mises_stress(index_i));
-		}
-		return von_Mises_stress_vector;
-	}
-	//=================================================================================================//
-	Real ElasticSolidParticles::getMaxVonMisesStress()
-	{
-		Real von_Mises_stress_max = 0;
-		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
-		{
-			Real von_Mises_stress_i = von_Mises_stress(index_i);
-			if (von_Mises_stress_max < von_Mises_stress_i)
-			{
-				von_Mises_stress_max = von_Mises_stress_i;
-			}
-		}
-		return von_Mises_stress_max;
-	}
-	//=================================================================================================//
-	StdLargeVec<Vecd> ElasticSolidParticles::getDisplacement()
-	{
-		StdLargeVec<Vecd> displacement_vector = {};
-		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
-		{
-			displacement_vector.push_back(displacement(index_i));
-		}
-		return displacement_vector;
-	}
-	//=================================================================================================//
-	StdLargeVec<Vecd> ElasticSolidParticles::getNormal()
-	{
-		StdLargeVec<Vecd> normal_vector = {};
-		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
-		{
-			normal_vector.push_back(normal(index_i));
-		}
-		return normal_vector;
-	}
-	//=================================================================================================//
 	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrain()
 	{
 		StdLargeVec<Real> von_Mises_strain_vector = {};
@@ -163,6 +119,50 @@ namespace SPH {
 		return von_Mises_strain_max;
 	}
 	//=================================================================================================//
+	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStressVector()
+	{
+		StdLargeVec<Real> von_Mises_stress_Cauchy_vector = {};
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			von_Mises_stress_Cauchy_vector.push_back(von_Mises_stress_Cauchy(index_i));
+		}
+		return von_Mises_stress_Cauchy_vector;
+	}
+	//=================================================================================================//
+	Real ElasticSolidParticles::getVonMisesStressMax()
+	{
+		Real von_Mises_stress_Cauchy_max = 0;
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			Real von_Mises_stress_Cauchy_i = von_Mises_stress_Cauchy(index_i);
+			if (von_Mises_stress_Cauchy_max < von_Mises_stress_Cauchy_i)
+			{
+				von_Mises_stress_Cauchy_max = von_Mises_stress_Cauchy_i;
+			}
+		}
+		return von_Mises_stress_Cauchy_max;
+	}
+	//=================================================================================================//
+	StdLargeVec<Vecd> ElasticSolidParticles::getDisplacement()
+	{
+		StdLargeVec<Vecd> displacement_vector = {};
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			displacement_vector.push_back(displacement(index_i));
+		}
+		return displacement_vector;
+	}
+	//=================================================================================================//
+	StdLargeVec<Vecd> ElasticSolidParticles::getNormal()
+	{
+		StdLargeVec<Vecd> normal_vector = {};
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			normal_vector.push_back(normal(index_i));
+		}
+		return normal_vector;
+	}
+	//=================================================================================================//
 	void ElasticSolidParticles::writeParticlesToVtuFile(std::ostream& output_file)
 	{
 		SolidParticles::writeParticlesToVtuFile(output_file);
@@ -173,7 +173,7 @@ namespace SPH {
 		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_real_particles; ++i) {
-			output_file << std::fixed << std::setprecision(9) << von_Mises_stress(i) << " ";
+			output_file << std::fixed << std::setprecision(9) << von_Mises_stress_Cauchy(i) << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -219,7 +219,7 @@ namespace SPH {
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
 			size_t particle_i = surface_particles.body_part_particles_[i];
-			output_file << std::fixed << std::setprecision(9) << von_Mises_stress(particle_i) << " ";
+			output_file << std::fixed << std::setprecision(9) << von_Mises_stress_Cauchy(particle_i) << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -271,7 +271,7 @@ namespace SPH {
 	{
 		SolidParticles::writePltFileParticleData(output_file, index_i);
 		
-		output_file << von_Mises_stress(index_i) << " ";
+		output_file << von_Mises_stress_Cauchy(index_i) << " ";
 		Vecd displacement_vector = displacement(index_i);
 		output_file << displacement_vector[0] << " " << displacement_vector[1] << " " << displacement_vector[2] << " "
 			<< index_i << " ";

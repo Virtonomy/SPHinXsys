@@ -100,10 +100,14 @@ namespace SPH {
 		StdLargeVec<Matd>	dF_dt_;		/**<  deformation tensor change rate */
 		StdLargeVec<Matd>	stress_PK1_;	/**<  first Piola-Kirchhoff stress tensor */
 
-		/**< Computing von_Mises_stress. */
-		Real von_Mises_stress(size_t particle_i);
-		StdLargeVec<Real> getVonMisesStress();
-		Real getMaxVonMisesStress();
+		/**< Computing von_Mises_stress_Cauchy. */
+		Real von_Mises_stress_Cauchy(size_t particle_i);
+		/**< Computing von_Mises_stress_PK2. */
+		Real von_Mises_stress_PK2(size_t particle_i);
+		/**< Computing von Mises stress for all particles. */
+		StdLargeVec<Real> getVonMisesStressVector(std::string stress_measure = "Cauchy");
+		/**< Computing maximum von Mises stress from all particles. */
+		Real getVonMisesStressMax();
 
 		/**< Computing displacemnt. */
 		Vecd displacement(size_t particle_i);

@@ -296,4 +296,51 @@ namespace SPH {
 			+ 3.0 * (sigmaxy * sigmaxy + sigmaxz * sigmaxz + sigmayz * sigmayz));
 	}
 	//=================================================================================================//
+	Vec2d getPrincipalValuesFromMatrix(const Mat2d& A)
+	{
+		int n = 2;
+		Eigen::MatrixXd matrix(n,n);
+		for(int row=0;row<n;row++) {
+			for(int col=0;col<n;col++)  {
+				matrix(row,col) = A[row][col];
+			}
+		}
+		Eigen::ComplexEigenSolver<Eigen::MatrixXd> ces(matrix, /* computeEigenvectors = */ false);
+		auto eigen_values = ces.eigenvalues();
+
+		std::vector<Real> sorted_values = {
+			Real(eigen_values(0).real()),
+			Real(eigen_values(1).real())
+		};
+		// first sort into ascending order, and then reverse them
+		std::sort(sorted_values.begin(), sorted_values.end());
+		std::reverse(sorted_values.begin(), sorted_values.end());
+
+		return {sorted_values[0], sorted_values[1]};
+	}
+	//=================================================================================================//
+	Vec3d getPrincipalValuesFromMatrix(const Mat3d& A)
+	{
+		int n = 3;
+		Eigen::MatrixXd matrix(n,n);
+		for(int row=0;row<n;row++) {
+			for(int col=0;col<n;col++)  {
+				matrix(row,col) = A[row][col];
+			}
+		}
+		Eigen::ComplexEigenSolver<Eigen::MatrixXd> ces(matrix, /* computeEigenvectors = */ false);
+		auto eigen_values = ces.eigenvalues();
+
+		std::vector<Real> sorted_values = {
+			Real(eigen_values(0).real()),
+			Real(eigen_values(1).real()),
+			Real(eigen_values(2).real())
+		};
+		// first sort into ascending order, and then reverse them
+		std::sort(sorted_values.begin(), sorted_values.end());
+		std::reverse(sorted_values.begin(), sorted_values.end());
+
+		return {sorted_values[0], sorted_values[1], sorted_values[2]};
+	}
+	//=================================================================================================//
 }

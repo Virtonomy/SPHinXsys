@@ -17,7 +17,7 @@ namespace SPH {
 		Real J = rho0_ / rho_n_[particle_i];
 		Mat3d F = F_[particle_i];
 		Mat3d stress = stress_PK1_[particle_i];
-		Mat3d sigma = (stress * ~F) / J;
+		Mat3d sigma = (stress * ~F) / J; // Cauchy stress
 
 		return getVonMisesStressFromMatrix(sigma);
 	}

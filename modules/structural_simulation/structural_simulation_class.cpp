@@ -250,8 +250,8 @@ StructuralSimulation::StructuralSimulation(StructuralSimulationInput& input):
 	iteration_(0),
 
 	// data storage
-	von_Mises_stress_Cauchy_max_({}),
-	von_Mises_stress_Cauchy_particles_({})
+	von_mises_stress_max_({}),
+	von_mises_stress_particles_({})
 
 {
 	// scaling of translation and resolution
@@ -947,8 +947,8 @@ void StructuralSimulation::runSimulation(Real end_time)
 		}
 		tick_count t2 = tick_count::now();
 		// record data for test
-		von_Mises_stress_Cauchy_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressMax());
-		von_Mises_stress_Cauchy_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressVector());
+		von_mises_stress_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressMax());
+		von_mises_stress_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressVector());
 		
 		von_mises_strain_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getMaxVonMisesStrain());
 		von_mises_strain_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrain());

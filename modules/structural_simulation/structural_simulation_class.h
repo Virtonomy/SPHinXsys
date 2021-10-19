@@ -218,8 +218,8 @@ class StructuralSimulation
 		int iteration_;
 
 		// data storage
-		vector<Real> von_Mises_stress_Cauchy_max_;
-		StdLargeVec<StdLargeVec<Real>> von_Mises_stress_Cauchy_particles_;
+		vector<Real> von_mises_stress_max_;
+		StdLargeVec<StdLargeVec<Real>> von_mises_stress_particles_;
 
 		vector<Real> von_mises_strain_max_;
 		StdLargeVec<StdLargeVec<Real>> von_mises_strain_particles_;

@@ -29,7 +29,6 @@ namespace SPH {
 	//=================================================================================================//
 	Real ElasticSolidParticles::von_Mises_stress_PK2(size_t particle_i)
 	{
-		Real J = rho0_ / rho_n_[particle_i];
 		Mat2d F = F_[particle_i];
 		Mat2d stress = stress_PK1_[particle_i];
 		Mat2d sigma = SimTK::inverse(F) * stress; // Second Piola-Kirchhof stress

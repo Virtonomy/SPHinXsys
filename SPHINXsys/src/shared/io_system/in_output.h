@@ -246,7 +246,7 @@ namespace SPH {
 
 		const VtuStringDataRunTime& GetVtuDataRunTime() const;
 	protected:
-		virtual void writeWithFileName(const std::string& sequence) override;
+		void writeWithFileName(const std::string& sequence) override;
 	private:
 		VtuStringDataRunTime _vtuDataRunTime;
 	};

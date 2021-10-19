@@ -119,8 +119,8 @@ namespace SPH {
 
 		/**< Computing von Mises equivalent stress. */
 		Real von_Mises_strain (size_t particle_i);
-		StdLargeVec<Real> getVonMisesStrain();
-		Real getMaxVonMisesStrain();
+		StdLargeVec<Real> getVonMisesStrainVector();
+		Real getVonMisesStrainVectorMax();
 
 		virtual void writeParticlesToVtuFile(std::ostream &output_file) override;
 		/** Write only surface particle data in VTU format for Paraview. */

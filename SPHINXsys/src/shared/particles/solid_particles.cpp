@@ -95,7 +95,7 @@ namespace SPH {
 		addAVariableNameToList<indexMatrix, Matd>(variables_to_restart_, "DeformationGradient");
 	}
 	//=================================================================================================//
-	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrain()
+	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrainVector()
 	{
 		StdLargeVec<Real> von_Mises_strain_vector = {};
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
@@ -105,7 +105,7 @@ namespace SPH {
 		return von_Mises_strain_vector;
 	}
 	//=================================================================================================//
-	Real ElasticSolidParticles::getMaxVonMisesStrain()
+	Real ElasticSolidParticles::getVonMisesStrainVectorMax()
 	{
 		Real von_Mises_strain_max = 0;
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)

@@ -24,12 +24,7 @@ namespace SPH {
 		Mat2d stress = stress_PK1_[particle_i];
 		Mat2d sigma = (stress * ~F) / J; // Cauchy stress
 
-		Real sigmaxx = sigma(0, 0);
-		Real sigmayy = sigma(1, 1);
-		Real sigmaxy = sigma(0, 1);
-
-		return sqrt(sigmaxx * sigmaxx + sigmayy * sigmayy - sigmaxx * sigmayy
-			+ 3.0 * sigmaxy * sigmaxy);
+		return getVonMisesStressFromMatrix(sigma);
 	}
 	//=================================================================================================//
 	Real ElasticSolidParticles::von_Mises_stress_PK2(size_t particle_i)
@@ -39,12 +34,7 @@ namespace SPH {
 		Mat2d stress = stress_PK1_[particle_i];
 		Mat2d sigma = SimTK::inverse(F) * stress; // Second Piola-Kirchhof stress
 
-		Real sigmaxx = sigma(0, 0);
-		Real sigmayy = sigma(1, 1);
-		Real sigmaxy = sigma(0, 1);
-
-		return sqrt(sigmaxx * sigmaxx + sigmayy * sigmayy - sigmaxx * sigmayy
-			+ 3.0 * sigmaxy * sigmaxy);
+		return getVonMisesStressFromMatrix(sigma);
 	}
 	//=================================================================================================//
 	Vecd ElasticSolidParticles::displacement(size_t particle_i) //not tested in 2D

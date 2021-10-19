@@ -272,4 +272,28 @@ namespace SPH {
 		return proj_vector_1;
 	}
 	//=================================================================================================//
+	Real getVonMisesStressFromMatrix(const Mat2d& sigma)
+	{
+		Real sigmaxx = sigma(0, 0);
+		Real sigmayy = sigma(1, 1);
+		Real sigmaxy = sigma(0, 1);
+
+		return sqrt(sigmaxx * sigmaxx + sigmayy * sigmayy - sigmaxx * sigmayy
+			+ 3.0 * sigmaxy * sigmaxy);
+	}
+	//=================================================================================================//
+	Real getVonMisesStressFromMatrix(const Mat3d& sigma)
+	{
+		Real sigmaxx = sigma(0, 0);
+		Real sigmayy = sigma(1, 1);
+		Real sigmazz = sigma(2, 2);
+		Real sigmaxy = sigma(0, 1);
+		Real sigmaxz = sigma(0, 2);
+		Real sigmayz = sigma(1, 2);
+
+		return sqrt(sigmaxx * sigmaxx + sigmayy * sigmayy + sigmazz * sigmazz
+			- sigmaxx * sigmayy - sigmaxx * sigmazz - sigmayy * sigmazz
+			+ 3.0 * (sigmaxy * sigmaxy + sigmaxz * sigmaxz + sigmayz * sigmayz));
+	}
+	//=================================================================================================//
 }

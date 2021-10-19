@@ -81,7 +81,7 @@ namespace SPH {
 
 		virtual SolidParticles* ThisObjectPtr() override {return this;};
 	};
-	
+
 	/**
 	 * @class ElasticSolidParticles
 	 * @brief A group of particles with elastic body particle data.

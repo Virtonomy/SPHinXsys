@@ -82,6 +82,11 @@ namespace SPH {
 	/** get orthogonal projection of a vactor. */
 	Vec2d getVectorProjectionOfVector (Vec2d vector_1, Vec2d vector_2);
 	Vec3d getVectorProjectionOfVector (Vec3d vector_1, Vec3d vector_2);
+
+	/** von Mises stress from stress matrix */
+	Real getVonMisesStressFromMatrix(const Mat2d& sigma);
+	Real getVonMisesStressFromMatrix(const Mat3d& sigma);
+
 }
 
 #endif //SMALL_VECTORS_H

@@ -105,9 +105,9 @@ namespace SPH {
 		/**< Computing von_Mises_stress_PK2. */
 		Real von_Mises_stress_PK2(size_t particle_i);
 		/**< Computing von Mises stress for all particles. */
-		StdLargeVec<Real> getVonMisesStressVector(std::string stress_measure = "Cauchy");
+		StdLargeVec<Real> getVonMisesStressVector(std::string stress_measure = "Cauchy"); // "Cauchy" or "PK2"
 		/**< Computing maximum von Mises stress from all particles. */
-		Real getVonMisesStressMax();
+		Real getVonMisesStressMax(std::string stress_measure = "Cauchy"); // "Cauchy" or "PK2"
 
 		/**< Computing displacemnt. */
 		Vecd displacement(size_t particle_i);

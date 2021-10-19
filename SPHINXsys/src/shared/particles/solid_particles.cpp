@@ -119,28 +119,33 @@ namespace SPH {
 		return von_Mises_strain_max;
 	}
 	//=================================================================================================//
-	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStressVector()
+	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStressVector(std::string stress_measure)
 	{
 		StdLargeVec<Real> von_Mises_stress_Cauchy_vector = {};
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			von_Mises_stress_Cauchy_vector.push_back(von_Mises_stress_Cauchy(index_i));
+			Real stress = 0.0;
+			if (stress_measure == "Cauchy") stress = von_Mises_stress_Cauchy(index_i);
+			if (stress_measure == "PK2") stress = von_Mises_stress_PK2(index_i);
+			von_Mises_stress_Cauchy_vector.push_back(stress);
 		}
 		return von_Mises_stress_Cauchy_vector;
 	}
 	//=================================================================================================//
-	Real ElasticSolidParticles::getVonMisesStressMax()
+	Real ElasticSolidParticles::getVonMisesStressMax(std::string stress_measure)
 	{
-		Real von_Mises_stress_Cauchy_max = 0;
+		Real stress_max = 0.0;
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			Real von_Mises_stress_Cauchy_i = von_Mises_stress_Cauchy(index_i);
-			if (von_Mises_stress_Cauchy_max < von_Mises_stress_Cauchy_i)
+			Real stress = 0.0;
+			if (stress_measure == "Cauchy") stress = von_Mises_stress_Cauchy(index_i);
+			if (stress_measure == "PK2") stress = von_Mises_stress_PK2(index_i);
+			if (stress_max < stress)
 			{
-				von_Mises_stress_Cauchy_max = von_Mises_stress_Cauchy_i;
+				stress_max = stress;
 			}
 		}
-		return von_Mises_stress_Cauchy_max;
+		return stress_max;
 	}
 	//=================================================================================================//
 	StdLargeVec<Vecd> ElasticSolidParticles::getDisplacement()

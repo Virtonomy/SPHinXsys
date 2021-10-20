@@ -137,9 +137,9 @@ namespace SPH {
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
 			Real stress = 0.0;
-			if (stress_measure == "static") {
+			if (stress_measure == "Cauchy") {
 				stress = von_Mises_stress_Cauchy(index_i);
-			} else if (stress_measure == "dynamic") {
+			} else if (stress_measure == "PK2") {
 				stress = von_Mises_stress_PK2(index_i);
 			} else {
 				throw std::runtime_error("getVonMisesStressVector: wrong input");
@@ -155,9 +155,9 @@ namespace SPH {
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
 			Real stress = 0.0;
-			if (stress_measure == "static") {
+			if (stress_measure == "Cauchy") {
 				stress = von_Mises_stress_Cauchy(index_i);
-			} else if (stress_measure == "dynamic") {
+			} else if (stress_measure == "PK2") {
 				stress = von_Mises_stress_PK2(index_i);
 			} else {
 				throw std::runtime_error("getVonMisesStressMax: wrong input");

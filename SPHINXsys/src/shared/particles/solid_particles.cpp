@@ -95,41 +95,58 @@ namespace SPH {
 		addAVariableNameToList<indexMatrix, Matd>(variables_to_restart_, "DeformationGradient");
 	}
 	//=================================================================================================//
-	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrainVector(std::string stress_measure)
+	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrainVector(std::string strain_measure, Real poisson)
 	{
-		StdLargeVec<Real> von_Mises_strain_static_vector = {};
+		StdLargeVec<Real> strain_vector = {};
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			von_Mises_strain_static_vector.push_back(von_Mises_strain_static(index_i));
+			Real strain = 0.0;
+			if (strain_measure == "static") {
+				strain = von_Mises_strain_static(index_i);
+			} else if (strain_measure == "dynamic") {
+				strain = von_Mises_strain_dynamic(index_i, poisson);
+			} else {
+				throw std::runtime_error("getVonMisesStrainVector: wrong input");
+			}
+			strain_vector.push_back(strain);
 		}
-		return von_Mises_strain_static_vector;
+		return strain_vector;
 	}
 	//=================================================================================================//
-	Real ElasticSolidParticles::getVonMisesStrainMax(std::string stress_measure)
+	Real ElasticSolidParticles::getVonMisesStrainMax(std::string strain_measure, Real poisson)
 	{
-		Real von_Mises_strain_static_max = 0;
+		Real strain_max = 0;
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			Real von_Mises_strain_static_i = von_Mises_strain_static(index_i);
-			if (von_Mises_strain_static_max < von_Mises_strain_static_i)
-			{
-				von_Mises_strain_static_max = von_Mises_strain_static_i;
+			Real strain = 0.0;
+			if (strain_measure == "static") {
+				strain = von_Mises_strain_static(index_i);
+			} else if (strain_measure == "dynamic") {
+				strain = von_Mises_strain_dynamic(index_i, poisson);
+			} else {
+				throw std::runtime_error("getVonMisesStrainMax: wrong input");
 			}
+			if (strain_max < strain) strain_max = strain;
 		}
-		return von_Mises_strain_static_max;
+		return strain_max;
 	}
 	//=================================================================================================//
 	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStressVector(std::string stress_measure)
 	{
-		StdLargeVec<Real> von_Mises_stress_Cauchy_vector = {};
+		StdLargeVec<Real> stress_vector = {};
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
 			Real stress = 0.0;
-			if (stress_measure == "Cauchy") stress = von_Mises_stress_Cauchy(index_i);
-			if (stress_measure == "PK2") stress = von_Mises_stress_PK2(index_i);
-			von_Mises_stress_Cauchy_vector.push_back(stress);
+			if (stress_measure == "static") {
+				stress = von_Mises_stress_Cauchy(index_i);
+			} else if (stress_measure == "dynamic") {
+				stress = von_Mises_stress_PK2(index_i);
+			} else {
+				throw std::runtime_error("getVonMisesStressVector: wrong input");
+			}
+			stress_vector.push_back(stress);
 		}
-		return von_Mises_stress_Cauchy_vector;
+		return stress_vector;
 	}
 	//=================================================================================================//
 	Real ElasticSolidParticles::getVonMisesStressMax(std::string stress_measure)
@@ -138,12 +155,14 @@ namespace SPH {
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
 			Real stress = 0.0;
-			if (stress_measure == "Cauchy") stress = von_Mises_stress_Cauchy(index_i);
-			if (stress_measure == "PK2") stress = von_Mises_stress_PK2(index_i);
-			if (stress_max < stress)
-			{
-				stress_max = stress;
+			if (stress_measure == "static") {
+				stress = von_Mises_stress_Cauchy(index_i);
+			} else if (stress_measure == "dynamic") {
+				stress = von_Mises_stress_PK2(index_i);
+			} else {
+				throw std::runtime_error("getVonMisesStressMax: wrong input");
 			}
+			if (stress_max < stress) stress_max = stress;
 		}
 		return stress_max;
 	}

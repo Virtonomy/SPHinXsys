@@ -105,9 +105,9 @@ namespace SPH {
 		/**< Computing von Mises equivalent strain from a dynamic formulation. This depends on the Poisson's ratio (from Ansys Help). */
 		Real von_Mises_strain_dynamic(size_t particle_i, Real poisson);
 		/**< Computing von Mises strain for all particles. */
-		StdLargeVec<Real> getVonMisesStrainVector(std::string strain_measure = "static");
+		StdLargeVec<Real> getVonMisesStrainVector(std::string strain_measure = "static", Real poisson = 0.5);
 		/**< Computing maximum von Mises strain from all particles. */
-		Real getVonMisesStrainMax(std::string strain_measure = "static");
+		Real getVonMisesStrainMax(std::string strain_measure = "static", Real poisson = 0.5);
 
 		/**< Computing von_Mises_stress_Cauchy. */
 		Real von_Mises_stress_Cauchy(size_t particle_i);

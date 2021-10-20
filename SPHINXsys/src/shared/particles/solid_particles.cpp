@@ -95,28 +95,28 @@ namespace SPH {
 		addAVariableNameToList<indexMatrix, Matd>(variables_to_restart_, "DeformationGradient");
 	}
 	//=================================================================================================//
-	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrainVector()
+	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrainVector(std::string stress_measure)
 	{
-		StdLargeVec<Real> von_Mises_strain_vector = {};
+		StdLargeVec<Real> von_Mises_strain_static_vector = {};
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			von_Mises_strain_vector.push_back(von_Mises_strain(index_i));
+			von_Mises_strain_static_vector.push_back(von_Mises_strain_static(index_i));
 		}
-		return von_Mises_strain_vector;
+		return von_Mises_strain_static_vector;
 	}
 	//=================================================================================================//
-	Real ElasticSolidParticles::getVonMisesStrainVectorMax()
+	Real ElasticSolidParticles::getVonMisesStrainMax(std::string stress_measure)
 	{
-		Real von_Mises_strain_max = 0;
+		Real von_Mises_strain_static_max = 0;
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			Real von_Mises_strain_i = von_Mises_strain(index_i);
-			if (von_Mises_strain_max < von_Mises_strain_i)
+			Real von_Mises_strain_static_i = von_Mises_strain_static(index_i);
+			if (von_Mises_strain_static_max < von_Mises_strain_static_i)
 			{
-				von_Mises_strain_max = von_Mises_strain_i;
+				von_Mises_strain_static_max = von_Mises_strain_static_i;
 			}
 		}
-		return von_Mises_strain_max;
+		return von_Mises_strain_static_max;
 	}
 	//=================================================================================================//
 	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStressVector(std::string stress_measure)
@@ -207,7 +207,7 @@ namespace SPH {
 		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_real_particles; ++i) {
-			output_file << std::fixed << std::setprecision(9) << von_Mises_strain(i) << " ";
+			output_file << std::fixed << std::setprecision(9) << von_Mises_strain_static(i) << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -256,7 +256,7 @@ namespace SPH {
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
 			size_t particle_i = surface_particles.body_part_particles_[i];
-			output_file << std::fixed << std::setprecision(9) << von_Mises_strain(particle_i) << " ";
+			output_file << std::fixed << std::setprecision(9) << von_Mises_strain_static(particle_i) << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -280,7 +280,7 @@ namespace SPH {
 		Vecd displacement_vector = displacement(index_i);
 		output_file << displacement_vector[0] << " " << displacement_vector[1] << " " << displacement_vector[2] << " "
 			<< index_i << " ";
-		output_file << von_Mises_strain(index_i) << " ";
+		output_file << von_Mises_strain_static(index_i) << " ";
 	}
 	//=============================================================================================//
 	void ActiveMuscleParticles::initializeActiveMuscleParticleData()

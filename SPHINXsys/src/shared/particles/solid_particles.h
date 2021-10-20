@@ -100,6 +100,15 @@ namespace SPH {
 		StdLargeVec<Matd>	dF_dt_;		/**<  deformation tensor change rate */
 		StdLargeVec<Matd>	stress_PK1_;	/**<  first Piola-Kirchhoff stress tensor */
 
+		/**< Computing von Mises equivalent strain from a static (constant) formulation. */
+		Real von_Mises_strain_static(size_t particle_i);
+		/**< Computing von Mises equivalent strain from a dynamic formulation. This depends on the Poisson's ratio (from Ansys Help). */
+		Real von_Mises_strain_dynamic(size_t particle_i, Real poisson);
+		/**< Computing von Mises strain for all particles. */
+		StdLargeVec<Real> getVonMisesStrainVector(std::string strain_measure = "static");
+		/**< Computing maximum von Mises strain from all particles. */
+		Real getVonMisesStrainMax(std::string strain_measure = "static");
+
 		/**< Computing von_Mises_stress_Cauchy. */
 		Real von_Mises_stress_Cauchy(size_t particle_i);
 		/**< Computing von_Mises_stress_PK2. */
@@ -116,11 +125,6 @@ namespace SPH {
 		/**< Computing normal vector. */
 		Vecd normal (size_t particle_i);
 		StdLargeVec<Vecd> getNormal();
-
-		/**< Computing von Mises equivalent stress. */
-		Real von_Mises_strain (size_t particle_i);
-		StdLargeVec<Real> getVonMisesStrainVector();
-		Real getVonMisesStrainVectorMax();
 
 		virtual void writeParticlesToVtuFile(std::ostream &output_file) override;
 		/** Write only surface particle data in VTU format for Paraview. */

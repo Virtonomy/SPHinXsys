@@ -160,6 +160,7 @@ namespace SPH
 	//=============================================================================================//
 	void BodyStatesRecordingToVtuStringRunTime::writeWithFileName(const std::string& sequence)
 	{
+		_vtuDataRunTime.clear();
 		for (SPHBody* body : bodies_)
 		{
 			if (body->checkNewlyUpdated())

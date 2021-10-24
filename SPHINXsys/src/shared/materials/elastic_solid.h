@@ -129,6 +129,11 @@ namespace SPH {
 		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;
+
+		/** get methods */
+		Real getYoungsModulus() { return youngs_modulus_; };
+		Real getPoissonRatio() { return poisson_ratio_; };
+		Real getDensity() { return rho0_; };
 	protected:
 		Real youngs_modulus_; 		/*< Youngs modules as basic inpiut parameter */
 		Real poisson_ratio_; 		/*< Poisson ratio as basic inpiut parameter */
@@ -183,7 +188,7 @@ namespace SPH {
 	class OrthotropicSolid : public LinearElasticSolid
 	{
 	public:
-		OrthotropicSolid(Real rho_0, Vecd a[3], Real E[3], Real G[3], Real poisson[3]);
+		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G, std::array<Real, 3> poisson);
 
 		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
 		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
@@ -192,10 +197,10 @@ namespace SPH {
 
 	protected:
 		// input data
-		Vecd a_[3];
-		Real E_[3];
-		Real G_[3];
-		Real poisson_[3];
+		std::array<Vecd, 3> a_;
+		std::array<Real, 3> E_;
+		std::array<Real, 3> G_;
+		std::array<Real, 3> poisson_;
 		// calculated data
 		Real Mu_[3];
 		Matd Lambda_;

@@ -130,7 +130,7 @@ namespace SPH {
 		return  0.5 * K0_ * (J * J - 1);
 	}
 	//=================================================================================================//
-	OrthotropicSolid::OrthotropicSolid(Real rho_0, Vecd a[3], Real E[3], Real G[3], Real poisson[3])
+	OrthotropicSolid::OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G, std::array<Real, 3> poisson)
 	// set parameters for parent class: LinearElasticSolid
 	// we take the max. E and max. possion to approxiamte the maximum of the Bulk modulus --> for time step size calculation
 		: LinearElasticSolid(rho_0, std::max({E[0], E[1], E[2]}), std::max({poisson[0], poisson[1], poisson[2]})),

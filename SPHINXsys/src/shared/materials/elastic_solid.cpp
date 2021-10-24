@@ -149,21 +149,12 @@ namespace SPH {
 		Matd sigmaPK2 = Matd(0);
 		for(int i=0; i<3; i++)
 		{
-			//outer sum (a{1-3})
-			int k;
+			// outer sum (a{1-3})
 			Matd Summa2 = Matd(0);
 			for(int j=0; j<3; j++)
 			{
 				// inner sum (b{1-3})
-				// k determines the value of lambda needed for the equation
-				if(i+j==0 ){ k = 0; }
-				if(i+j==1 ){ k = 3; }
-				if(i+j==2 ){ k = 4; }
-				if(i+j==3 ){ k = 5; }
-				if(i+j==4 ){ k = 2; }
-				if(i==1 && j==1 ){ k = 1; }
-
-				Summa2 += Lambda_[k]*(CalculateDoubleDotProduct(A_[i],strain)*A_[j]+CalculateDoubleDotProduct(A_[j],strain)*A_[i]);
+				Summa2 += Lambda_[i][j]*(CalculateDoubleDotProduct(A_[i],strain)*A_[j]+CalculateDoubleDotProduct(A_[j],strain)*A_[i]);
 			}
 			sigmaPK2 += Mu_[i]*(((A_[i]*strain)+(strain*A_[i]))+1/2*(Summa2));
 		}
@@ -196,25 +187,26 @@ namespace SPH {
 	//=================================================================================================//
 	void OrthotropicSolid::CalculateAllLambda()
 	{
-		//poisson_[0]= nu_12 and nu_21, poisson_[1]= nu_13 and nu_32, poisson_[2]= nu_23 and nu_32
-		Matd Complience= Matd(Vecd(1/E_[0], -poisson_[0]/E_[0], -poisson_[1]/E_[0]),
-					Vecd(-poisson_[0]/E_[1], 1/E_[1], -poisson_[2]/E_[1]),
-					Vecd(-poisson_[1]/E_[2], -poisson_[2]/E_[2], 1/E_[2]));
+		// first we calculate the upper left part, a 3x3 matrix of the full compliance matrix
+		Matd Complience= Matd(
+			Vecd(1/E_[0], -poisson_[0]/E_[0], -poisson_[1]/E_[0]),
+			Vecd(-poisson_[0]/E_[1], 1/E_[1], -poisson_[2]/E_[1]),
+			Vecd(-poisson_[1]/E_[2], -poisson_[2]/E_[2], 1/E_[2])
+		);
 
-		//the M matrix from which the lambdas are derived is the following:
-		// Matd M= Matd(Vecd (Lambda_[0]+2*Mu_[0], Lambda_[3], Lambda_[4]),
-		// 		Vecd(Lambda_[3], Lambda_[1]+2*Mu_[1], Lambda_[5]),
-		// 		Vecd(Lambda_[4], Lambda_[5], Lambda_[2]+2*Mu_[2]));
-
+		// we calculate the inverse of the Complience matrix, and calculate the lambdas elementwise
 		Matd Compliance_inv= SimTK::inverse(Complience);
-		//Lambda_ is a 3x3 matrix, where indexes 012-are the diagonal three lambdas, and 345-are the non-diagonal elements
-		//Lambda_[3]= lambda_12 and lambda_21, Lambda_[4]= lambda_13 and lambda_31, Lambda_[5]= lambda_23 and lambda_32
-		Lambda_[0]=Compliance_inv[0][0]-2*Mu_[0];
-		Lambda_[1]=Compliance_inv[1][1]-2*Mu_[1];
-		Lambda_[2]=Compliance_inv[2][2]-2*Mu_[2];
-		Lambda_[3]=Compliance_inv[0][1];
-		Lambda_[4]=Compliance_inv[0][2];
-		Lambda_[5]=Compliance_inv[1][2];
+		//Lambda_ is a 3x3 matrix
+		Lambda_[0][0]=Compliance_inv[0][0]-2*Mu_[0];
+		Lambda_[1][1]=Compliance_inv[1][1]-2*Mu_[1];
+		Lambda_[2][2]=Compliance_inv[2][2]-2*Mu_[2];
+		Lambda_[0][1]=Compliance_inv[0][1];
+		Lambda_[0][2]=Compliance_inv[0][2];
+		Lambda_[1][2]=Compliance_inv[1][2];
+		// the matrix is symmetric
+		Lambda_[1][0] = Lambda_[0][1];
+		Lambda_[2][0] = Lambda_[0][2];
+		Lambda_[2][1] = Lambda_[1][2];		
 	}	
 	//=================================================================================================//
 	Matd FeneNeoHookeanSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)

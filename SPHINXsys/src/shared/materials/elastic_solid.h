@@ -174,7 +174,7 @@ namespace SPH {
 
 	/**
 	* @class OrthotropicSolid
-	* @brief Ortothropic solid - generic definition with 3 orthogonal directions + 9 independent parameters
+	* @brief Ortothropic solid - generic definition with 3 orthogonal directions + 9 independent parameters, ONLY for 3D applications
 	* @param "a" --> 3 principal direction vectors
 	* @param "E" --> 3 principal Young's moduli
 	* @param "G" --> 3 principal shear moduli
@@ -183,7 +183,7 @@ namespace SPH {
 	class OrthotropicSolid : public LinearElasticSolid
 	{
 	public:
-		OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G,std::array<Real, 3> poisson);
+		OrthotropicSolid(Real rho_0, Vecd a[3], Real E[3], Real G[3], Real poisson[3]);
 
 		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
 		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
@@ -191,13 +191,15 @@ namespace SPH {
 		virtual Real VolumetricKirchhoff(Real J) override;
 
 	protected:
-		std::array<Vecd, 3> a_;
-		std::array<Real, 3> E_;
-		std::array<Real, 3> G_;
-		std::array<Real, 3> poisson_;
-		Matd A_[3];
-		Real Lambda_[6]; //3x3 matrix, where indexes 012-are the diagonal three lambdas, and 345-are the non-diagonal elements
+		// input data
+		Vecd a_[3];
+		Real E_[3];
+		Real G_[3];
+		Real poisson_[3];
+		// calculated data
 		Real Mu_[3];
+		Matd Lambda_;
+		Matd A_[3];
 
 		virtual void CalculateAllMu();
 		virtual void CalculateAllLambda();

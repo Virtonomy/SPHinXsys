@@ -130,12 +130,12 @@ namespace SPH {
 		return  0.5 * K0_ * (J * J - 1);
 	}
 	//=================================================================================================//
-	OrthotropicSolid::OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G, std::array<Real, 3> poisson)
-		: LinearElasticSolid(rho_0, std::max({E[0], E[1], E[2]}), std::max({poisson[0], poisson[1], poisson[2]})), a_(a), E_(E), G_(G), poisson_(poisson)
+	OrthotropicSolid::OrthotropicSolid(Real rho_0, Vecd a[3], Real E[3], Real G[3], Real poisson[3])
+	// set parameters for parent class: LinearElasticSolid
+	// we take the max. E and max. possion to approxiamte the maximum of the Bulk modulus --> for time step size calculation
+		: LinearElasticSolid(rho_0, std::max({E[0], E[1], E[2]}), std::max({poisson[0], poisson[1], poisson[2]})),
+		a_(a), E_(E), G_(G), poisson_(poisson)
 	{
-		// set parameters for parent class: LinearElasticSolid
-		// we take the max. E and max. possion to approxiamte the maximum of the Bulk modulus --> for time step size calculation
-
 		// parameters for derived class
 		material_name_ = "OrthotropicSolid";
 		CalculateA0();

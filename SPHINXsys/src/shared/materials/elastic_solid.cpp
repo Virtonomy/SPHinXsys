@@ -121,13 +121,22 @@ namespace SPH {
 	Matd NeoHookeanSolid::ConstitutiveRelation(Matd& F, size_t particle_index_i)
 	{
 		Matd right_cauchy = ~F * F;
-		Matd sigmaPK2 = G0_ * Matd(1.0) + (lambda0_ * log(det(F)) - G0_) * inverse(right_cauchy);
+		Matd sigmaPK2 = G0_ * Matd(1.0) + (lambda0_ * log(det(F)) - G0_) * inverse(right_cauchy); // same as: G0_ * Matd(1.0) + (K0_ * (J - 1) * J - G0_) * inverse(right_cauchy)
 		return sigmaPK2;
 	}
 	//=================================================================================================//
 	Real NeoHookeanSolid::VolumetricKirchhoff(Real J)
 	{
 		return  0.5 * K0_ * (J * J - 1);
+	}
+	//=================================================================================================//
+	Matd NeoHookeanSolidIncompressible::ConstitutiveRelation(Matd& F, size_t particle_index_i)
+	{
+		Matd right_cauchy = ~F * F;
+		Real I_1 = right_cauchy.trace(); // first strain invariant
+		Real I_3 = det(right_cauchy); // first strain invariant
+		Matd sigmaPK2 = G0_* std::pow(I_3, - 1.0 / 3.0) * (Matd(1.0) - 1.0 / 3.0 * I_1 * inverse(right_cauchy));
+		return sigmaPK2;
 	}
 	//=================================================================================================//
 	OrthotropicSolid::OrthotropicSolid(Real rho_0, std::array<Vecd, 3> a, std::array<Real, 3> E, std::array<Real, 3> G, std::array<Real, 3> poisson)

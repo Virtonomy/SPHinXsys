@@ -155,7 +155,7 @@ namespace SPH {
 
 	/**
 	* @class NeoHookeanSolid
-	* @brief Neo-Hookean solid
+	* @brief Neo-Hookean solid, Compressible formulation!
 	*/
 	class NeoHookeanSolid : public LinearElasticSolid
 	{
@@ -175,6 +175,23 @@ namespace SPH {
 		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;
+	};
+
+	/**
+	* @class NeoHookeanSolidIncompressible
+	* @brief Neo-Hookean solid, Incomressible formulation!
+	*/
+	class NeoHookeanSolidIncompressible : public NeoHookeanSolid
+	{
+	public:
+		NeoHookeanSolidIncompressible(Real rho_0, Real Youngs_modulus, Real poisson)
+			: NeoHookeanSolid(rho_0, Youngs_modulus, poisson)
+		{
+			material_name_ = "NeoHookeanSolidIncompressible";
+		};
+	
+		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
+		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
 	};
 
 	/**

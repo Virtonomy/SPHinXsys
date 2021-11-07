@@ -45,28 +45,32 @@ namespace SPH
 		}
 		//=================================================================================================//
 		void ContactDensitySummation::Interaction(size_t index_i, Real dt)
-		{
+		{	
+			// we modify the default formulation by an offset, so that exactly touching bodies produce 0 initial force
+			// subtract summation of the kernel function of 2 particles at 1 particle distance, and if the result is negative, we take 0
+			// different resolution: distance = 0.5 * dp1 + 0.5 * dp2
+			// dp1, dp2 half reference spacing
+			Real dp_1 = solid_body_contact_relation_->sph_body_->particle_adaptation_->ReferenceSpacing();
+
 			/** Contact interaction. */
 			Real sigma = 0.0;
 			for (size_t k = 0; k < contact_configuration_.size(); ++k)
 			{
 				StdLargeVec<Real> &contact_mass_k = *(contact_mass_[k]);
 				Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
+				
+				// different resolution: distance = 0.5 * dp1 + 0.5 * dp2
+				Real dp_2 = solid_body_contact_relation_->contact_bodies_[k]->particle_adaptation_->ReferenceSpacing();
+				Real distance = 0.5 * dp_1 + 0.5 * dp_2;
+				Real offset_W_ij_1 = solid_body_contact_relation_->sph_body_->particle_adaptation_->getKernel()->W(distance, Vecd(0.0));
+
 				for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
 				{	
-					Real distance = solid_body_contact_relation_->sph_body_->particle_adaptation_->ReferenceSpacing();
-					Real offset_W_ij = solid_body_contact_relation_->sph_body_->particle_adaptation_->getKernel()->W(distance, Vec3d(0.0));
-					Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij, 0.0);
+					Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_1, 0.0);
 					sigma += corrected_W_ij * contact_mass_k[contact_neighborhood.j_[n]];
 				}
 			}
 			contact_density_[index_i] = sigma;
-
-			//neighborhood.W_ij_.push_back(kernel_->W(distance, displacement));
-
-			// subtract summation of the kernel function of 2 particles at 1 particle distance, and if the result is negative, we take 0
-            // different resolution: distance = 0.5 * dp1 + 0.5 * dp2
-            // dp1 = half smoothing length
 		}
 		//=================================================================================================//
 		SelfContactForce::

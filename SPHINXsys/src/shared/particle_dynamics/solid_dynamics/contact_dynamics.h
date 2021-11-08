@@ -47,8 +47,11 @@ namespace SPH
 		public:
 			explicit SelfContactDensitySummation(SolidBodyRelationSelfContact* self_contact_relation);
 			virtual ~SelfContactDensitySummation() {};
+
+			SolidBodyRelationSelfContact* self_contact_relation_;
 		protected:
 			StdLargeVec<Real>& mass_, & contact_density_;
+			Real offset_W_ij_;
 
 			virtual void Interaction(size_t index_i, Real dt = 0.0) override;
 		};
@@ -63,10 +66,11 @@ namespace SPH
 		public:
 			explicit ContactDensitySummation(SolidBodyRelationContact* solid_body_contact_relation);
 			virtual ~ContactDensitySummation() {};
-			SolidBodyRelationContact* solid_body_contact_relation_;
+			
 		protected:
 			StdLargeVec<Real>& mass_, & contact_density_;
 			StdVec<StdLargeVec<Real>*> contact_mass_;
+			StdVec<Real> offset_W_ij_;
 
 			virtual void Interaction(size_t index_i, Real dt = 0.0) override;
 		};

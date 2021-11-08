@@ -17,15 +17,20 @@ namespace SPH
 			: PartInteractionDynamicsByParticle(self_contact_relation->sph_body_,
 												&self_contact_relation->body_surface_layer_),
 			  SolidDataInner(self_contact_relation),
-			  mass_(particles_->mass_), contact_density_(particles_->contact_density_) {}
+			  mass_(particles_->mass_), contact_density_(particles_->contact_density_)
+			  {
+				Real dp_1 = self_contact_relation->sph_body_->particle_adaptation_->ReferenceSpacing();
+				offset_W_ij_ = self_contact_relation->sph_body_->particle_adaptation_->getKernel()->W(dp_1, Vecd(0.0));
+			  }
 		//=================================================================================================//
 		void SelfContactDensitySummation::Interaction(size_t index_i, Real dt)
-		{
+		{	
 			Real sigma = 0.0;
 			const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
 			for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
-			{
-				sigma += inner_neighborhood.W_ij_[n] * mass_[inner_neighborhood.j_[n]];
+			{	
+				Real corrected_W_ij = std::max(inner_neighborhood.W_ij_[n] - offset_W_ij_, 0.0);
+				sigma += corrected_W_ij * mass_[inner_neighborhood.j_[n]];
 			}
 			contact_density_[index_i] = sigma;
 		}
@@ -35,38 +40,40 @@ namespace SPH
 			: PartInteractionDynamicsByParticle(solid_body_contact_relation->sph_body_,
 												&solid_body_contact_relation->body_surface_layer_),
 			  ContactDynamicsData(solid_body_contact_relation),
-			  solid_body_contact_relation_(solid_body_contact_relation),
-			  mass_(particles_->mass_), contact_density_(particles_->contact_density_)
+			  mass_(particles_->mass_), contact_density_(particles_->contact_density_),
+			  offset_W_ij_(StdVec<Real>(contact_configuration_.size(), 0.0))
 		{
 			for (size_t k = 0; k != contact_particles_.size(); ++k)
 			{
 				contact_mass_.push_back(&(contact_particles_[k]->mass_));
 			}
-		}
-		//=================================================================================================//
-		void ContactDensitySummation::Interaction(size_t index_i, Real dt)
-		{	
+			
 			// we modify the default formulation by an offset, so that exactly touching bodies produce 0 initial force
 			// subtract summation of the kernel function of 2 particles at 1 particle distance, and if the result is negative, we take 0
 			// different resolution: distance = 0.5 * dp1 + 0.5 * dp2
 			// dp1, dp2 half reference spacing
-			Real dp_1 = solid_body_contact_relation_->sph_body_->particle_adaptation_->ReferenceSpacing();
-
+			Real dp_1 = solid_body_contact_relation->sph_body_->particle_adaptation_->ReferenceSpacing();
+			// different resolution: distance = 0.5 * dp1 + 0.5 * dp2
+			for (size_t k = 0; k < contact_configuration_.size(); ++k)
+			{
+				Real dp_2 = solid_body_contact_relation->contact_bodies_[k]->particle_adaptation_->ReferenceSpacing();
+				Real distance = 0.5 * dp_1 + 0.5 * dp_2;
+				offset_W_ij_[k] = solid_body_contact_relation->sph_body_->particle_adaptation_->getKernel()->W(distance, Vecd(0.0));
+			}
+		}
+		//=================================================================================================//
+		void ContactDensitySummation::Interaction(size_t index_i, Real dt)
+		{	
 			/** Contact interaction. */
 			Real sigma = 0.0;
 			for (size_t k = 0; k < contact_configuration_.size(); ++k)
 			{
 				StdLargeVec<Real> &contact_mass_k = *(contact_mass_[k]);
 				Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
-				
-				// different resolution: distance = 0.5 * dp1 + 0.5 * dp2
-				Real dp_2 = solid_body_contact_relation_->contact_bodies_[k]->particle_adaptation_->ReferenceSpacing();
-				Real distance = 0.5 * dp_1 + 0.5 * dp_2;
-				Real offset_W_ij_1 = solid_body_contact_relation_->sph_body_->particle_adaptation_->getKernel()->W(distance, Vecd(0.0));
 
 				for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
 				{	
-					Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_1, 0.0);
+					Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], 0.0);
 					sigma += corrected_W_ij * contact_mass_k[contact_neighborhood.j_[n]];
 				}
 			}

@@ -249,8 +249,6 @@ namespace SPH
 		virtual ~SolidBodyRelationContact(){};
 
 		virtual void updateConfiguration() override;
-
-		SPHBody *sph_body_;
 	protected:
 		IndexVector &body_part_particles_;
 		BodyPartParticlesIndex get_body_part_particle_index_;

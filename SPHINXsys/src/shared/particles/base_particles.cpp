@@ -235,13 +235,16 @@ namespace SPH
 		size_t total_surface_particles = surface_particles.body_part_particles_.size();
 
 		//write current/final particle positions first
+		// precision: 3 - 0.1 mm accuracy
 		output_file << "   <Points>\n";
 		output_file << "    <DataArray Name=\"Position\" type=\"Float32\"  NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
 			size_t particle_i = surface_particles.body_part_particles_[i];
 			Vec3d particle_position = upgradeToVector3D(pos_n_[particle_i]);
-			output_file << particle_position[0] << " " << particle_position[1] << " " << particle_position[2] << " ";
+			output_file << std::fixed << std::setprecision(1) << particle_position[0] << " "
+						<< std::fixed << std::setprecision(1) << particle_position[1] << " "
+						<< std::fixed << std::setprecision(1) << particle_position[2] << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";

@@ -247,6 +247,7 @@ namespace SPH {
 		VtuStringData _vtuData;
 	};
 
+	using VtuStringDataRunTime = std::vector<std::tuple<std::string, std::string, std::string>>;
 	/**
 	 * @class BodyStatesRecordingToVtuStringRunTime
 	 * @brief  Writes simulation results as strings for bodies in rum time
@@ -257,8 +258,6 @@ namespace SPH {
 	{
 	public:
 		BodyStatesRecordingToVtuStringRunTime(In_Output& in_output, SPHBodyVector bodies);
-
-		using VtuStringDataRunTime = std::vector<std::tuple<std::string, std::string, std::string>>;
 
 		const VtuStringDataRunTime& GetVtuDataRunTime() const;
 	protected:
@@ -277,8 +276,6 @@ namespace SPH {
 	{
 	public:
 		SurfaceOnlyBodyStatesRecordingToVtuStringRunTime(In_Output& in_output, SPHBodyVector bodies);
-
-		using VtuStringDataRunTime = std::vector<std::tuple<std::string, std::string, std::string>>;
 
 		const VtuStringDataRunTime& GetVtuDataRunTime() const;
 	protected:

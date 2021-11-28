@@ -269,7 +269,7 @@ namespace SPH
 		}
 	}
 	//=============================================================================================//
-	const BodyStatesRecordingToVtuStringRunTime::VtuStringDataRunTime& BodyStatesRecordingToVtuStringRunTime::GetVtuDataRunTime() const
+	const VtuStringDataRunTime& BodyStatesRecordingToVtuStringRunTime::GetVtuDataRunTime() const
 	{
 		return _vtuDataRunTime;
 	}
@@ -302,7 +302,7 @@ namespace SPH
 		}
 	}
 	//=============================================================================================//
-	const SurfaceOnlyBodyStatesRecordingToVtuStringRunTime::VtuStringDataRunTime& SurfaceOnlyBodyStatesRecordingToVtuStringRunTime::GetVtuDataRunTime() const
+	const VtuStringDataRunTime& SurfaceOnlyBodyStatesRecordingToVtuStringRunTime::GetVtuDataRunTime() const
 	{
 		return _vtuDataRunTime;
 	}

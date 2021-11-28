@@ -210,6 +210,23 @@ namespace SPH {
 	};
 
 	/**
+	 * @class SurfaceOnlyBodyStatesRecordingToVtu
+	 * @brief  Write files for surface particles of bodies
+	 * the output file is VTK XML format can visualized by ParaView
+	 * the data type vtkUnstructedGrid
+	 */
+	class SurfaceOnlyBodyStatesRecordingToVtu : public BodyStatesRecording
+	{
+	public:
+		SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies);
+
+	protected:
+		virtual void writeWithFileName(const std::string& sequence) override;
+		virtual void writeVtu(std::ostream& stream, SPHBody* body, ShapeSurface& shape_surface) const;
+		StdVec<ShapeSurface> surface_body_layer_vector_;
+	};
+
+	/**
 	 * @class BodyStatesRecordingToVtuString
 	 * @brief  Write strings for bodies
 	 * the output is map of strings with VTK XML format can visualized by ParaView
@@ -219,7 +236,6 @@ namespace SPH {
 	{
 	public:
 		BodyStatesRecordingToVtuString(In_Output& in_output, SPHBodyVector bodies);
-		virtual ~BodyStatesRecordingToVtuString() = default;
 
 		using VtuStringData = std::map<std::string, std::string>;
 
@@ -241,7 +257,6 @@ namespace SPH {
 	{
 	public:
 		BodyStatesRecordingToVtuStringRunTime(In_Output& in_output, SPHBodyVector bodies);
-		virtual ~BodyStatesRecordingToVtuStringRunTime() = default;
 
 		using VtuStringDataRunTime = std::vector<std::tuple<std::string, std::string, std::string>>;
 
@@ -253,19 +268,23 @@ namespace SPH {
 	};
 
 	/**
-	 * @class SurfaceOnlyBodyStatesRecordingToVtu
-	 * @brief  Write files for surface particles of bodies
-	 * the output file is VTK XML format can visualized by ParaView
+	 * @class SurfaceOnlyBodyStatesRecordingToVtuStringRunTime
+	 * @brief  Writes simulation results as strings for bodies in rum time, only surface particles
+	 * the output is a std::pair of strings with VTK XML format that can be visualized by ParaView
 	 * the data type vtkUnstructedGrid
 	 */
-	class SurfaceOnlyBodyStatesRecordingToVtu : public BodyStatesRecording
+	class SurfaceOnlyBodyStatesRecordingToVtuStringRunTime : public SurfaceOnlyBodyStatesRecordingToVtu
 	{
 	public:
-		SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies);
+		SurfaceOnlyBodyStatesRecordingToVtuStringRunTime(In_Output& in_output, SPHBodyVector bodies);
 
+		using VtuStringDataRunTime = std::vector<std::tuple<std::string, std::string, std::string>>;
+
+		const VtuStringDataRunTime& GetVtuDataRunTime() const;
 	protected:
-		virtual void writeWithFileName(const std::string& sequence) override;
-		StdVec<ShapeSurface> surface_body_layer_vector_;
+		void writeWithFileName(const std::string& sequence) override;
+	private:
+		VtuStringDataRunTime _vtuDataRunTime;
 	};
 	
 	/**

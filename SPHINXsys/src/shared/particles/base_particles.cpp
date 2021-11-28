@@ -230,7 +230,7 @@ namespace SPH
 		}
 	}
 	//=================================================================================================//
-	void BaseParticles::writeSurfaceParticlesToVtuFile(std::ofstream& output_file, ShapeSurface& surface_particles)
+	void BaseParticles::writeSurfaceParticlesToVtuFile(std::ostream& output_file, ShapeSurface& surface_particles)
 	{
 		size_t total_surface_particles = surface_particles.body_part_particles_.size();
 

@@ -234,7 +234,7 @@ namespace SPH {
 		output_file << "    </DataArray>\n";
 	}
 	//=================================================================================================//
-	void ElasticSolidParticles::writeSurfaceParticlesToVtuFile(std::ofstream& output_file, ShapeSurface& surface_particles)
+	void ElasticSolidParticles::writeSurfaceParticlesToVtuFile(std::ostream& output_file, ShapeSurface& surface_particles)
 	{
 		SolidParticles::writeSurfaceParticlesToVtuFile(output_file, surface_particles);
 
@@ -262,6 +262,7 @@ namespace SPH {
 		output_file << "    </DataArray>\n";
 
 		//write Normal Vectors
+		/* // removed for production
 		output_file << "    <DataArray Name=\"Normal Vector\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -271,6 +272,7 @@ namespace SPH {
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
+		*/
 
 		//write von Mises strain
 		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";

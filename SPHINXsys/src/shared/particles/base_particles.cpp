@@ -272,6 +272,7 @@ namespace SPH
 			output_file << std::endl;
 			output_file << "    </DataArray>\n";
 		}
+		*/
 
 		//write vectors
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexVector])
@@ -283,12 +284,12 @@ namespace SPH
 			for (size_t i = 0; i != total_surface_particles; ++i) {
 				size_t particle_i = surface_particles.body_part_particles_[i];
 				Vec3d vector_value = upgradeToVector3D(variable[particle_i]);
-				output_file << std::fixed << std::setprecision(9) << vector_value[0] << " " << vector_value[1] << " " << vector_value[2] << " ";
+				output_file << std::fixed << std::setprecision(2) << vector_value[0] << " " << vector_value[1] << " " << vector_value[2] << " ";
 			}
 			output_file << std::endl;
 			output_file << "    </DataArray>\n";
 		}
-
+		/*
 		//write scalars
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexScalar])
 		{

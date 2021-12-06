@@ -255,7 +255,7 @@ namespace SPH
 		{
 			if (body->checkNewlyUpdated())
 			{
-				const auto& vtuName = body->getBodyName() + "_" + sequence + ".vtu";
+				const auto& vtuName = body->getBodyName() + ".stl"  + "_" + "0000" + sequence + ".vtu";
 				std::stringstream sstream;
 				//begin of the XML file
 				writeVtu(sstream, body);
@@ -287,7 +287,7 @@ namespace SPH
 		{
 			if (body->checkNewlyUpdated())
 			{
-				const auto& vtuName = body->getBodyName() + "_" + sequence + ".vtu";
+				const auto& vtuName = body->getBodyName() + ".stl" + "_" + "0000" + sequence + ".vtu";
 				std::stringstream sstream;
 				//begin of the XML file
 				writeVtu(sstream, body, surface_body_layer_vector_[i]);

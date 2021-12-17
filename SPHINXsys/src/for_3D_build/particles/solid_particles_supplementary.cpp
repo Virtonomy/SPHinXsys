@@ -44,10 +44,12 @@ namespace SPH {
 	//=================================================================================================//
 	Real ElasticSolidParticles::von_Mises_stress_Cauchy(size_t particle_i)
 	{
-		Real J = rho0_ / rho_n_[particle_i];
+		//Real J = rho0_ / rho_n_[particle_i];
 		Mat3d F = F_[particle_i];
+		Real J = det(F); // from Ansys
 		Mat3d stress = stress_PK1_[particle_i];
-		Mat3d sigma = (stress * ~F) / J; // Cauchy stress
+		//Mat3d sigma = (stress * ~F) / J; // Cauchy stress
+		Mat3d sigma = ( 1.0 / J ) * F * stress * ~F; // Cauchy stress from Ansys
 
 		return getVonMisesStressFromMatrix(sigma);
 	}

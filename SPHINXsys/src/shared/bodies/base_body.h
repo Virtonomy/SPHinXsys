@@ -118,9 +118,9 @@ namespace SPH
 		void allocateConfigurationMemoriesForBufferParticles();
 
 		virtual void writeParticlesToVtuFile(std::ostream &output_file);	
-		virtual void writeParticlesToVtpFile(std::ostream &output_file, BodySurface& surface_particles);;
+		virtual void writeParticlesToVtpFile(std::ostream &output_file);;
 		virtual void writeParticlesToPltFile(std::ofstream &output_file);
-		virtual void writeSurfaceParticlesToVtuFile(std::ofstream &output_file, BodySurface& surface_particles);
+		virtual void writeSurfaceParticlesToVtuFile(std::ostream &output_file, BodySurface& surface_particles);
 		virtual void writeParticlesToXmlForRestart(std::string &filefullpath);
 		virtual void readParticlesFromXmlForRestart(std::string &filefullpath);
 		virtual void writeToXmlForReloadParticle(std::string &filefullpath);
@@ -175,15 +175,29 @@ namespace SPH
 	{
 	public:
 		BodyPart(SPHBody &sph_body, const std::string &body_part_name)
-			: sph_body_(&sph_body), body_part_name_(body_part_name){};
+			: sph_body_(&sph_body), body_part_name_(body_part_name), body_part_bounds_(Vecd(0), Vecd(0)), body_part_bounds_set_(false)
+			{};
 		virtual ~BodyPart(){};
 
 		SPHBody *getSPHBody() { return sph_body_; };
 		std::string BodyPartName() { return body_part_name_; };
 
+		void setBodyPartBounds(BoundingBox bbox){
+			body_part_bounds_ = bbox;
+			body_part_bounds_set_ = true;
+		};
+
+		BoundingBox getBodyPartBounds(){
+			if (!body_part_bounds_set_) std::cout << "WARNING: the body part bounds are not set for BodyPart." << std::endl;
+			return body_part_bounds_;
+		}
+
 	protected:
 		SPHBody *sph_body_;
 		std::string body_part_name_;
+
+		BoundingBox body_part_bounds_;
+		bool body_part_bounds_set_;
 	};
 
 	/**
@@ -196,27 +210,12 @@ namespace SPH
 		IndexVector body_part_particles_; /**< Collection particle in this body part. */
 
 		BodyPartByParticle(SPHBody &sph_body, const std::string &body_part_name)
-			: BodyPart(sph_body, body_part_name), base_particles_(sph_body.base_particles_),
-			  body_part_bounds_(Vecd(0), Vecd(0)), body_part_bounds_set_(false){};
+			: BodyPart(sph_body, body_part_name), base_particles_(sph_body.base_particles_)
+			  {};
 		virtual ~BodyPartByParticle(){};
-
-		void setBodyPartBounds(BoundingBox bbox)
-		{
-			body_part_bounds_ = bbox;
-			body_part_bounds_set_ = true;
-		};
-
-		BoundingBox getBodyPartBounds()
-		{
-			if (!body_part_bounds_set_)
-				std::cout << "WARNING: the body part bounds are not set for BodyPartByParticle." << std::endl;
-			return body_part_bounds_;
-		}
 
 	protected:
 		BaseParticles *base_particles_;
-		BoundingBox body_part_bounds_;
-		bool body_part_bounds_set_;
 
 		typedef std::function<void(size_t)> TaggingParticleMethod;
 		void tagParticles(TaggingParticleMethod &tagging_particle_method);
@@ -229,43 +228,16 @@ namespace SPH
 	class BodyPartByCell : public BodyPart
 	{
 	public:
-<<<<<<< HEAD
-		IndexVector body_part_particles_; /**< Collection particle in this body part. */
-
-		BodyPartByParticle(SPHBody *body, std::string body_part_name)
-			: BodyPartByShape(body, body_part_name),
-			body_part_bounds_(Vecd(0), Vecd(0)), body_part_bounds_set_(false)
-		{};
-=======
 		CellLists body_part_cells_; /**< Collection of cells to indicate the body part. */
->>>>>>> f715470e424c1abf9de800921d9efd30aa6a0080
 
 		BodyPartByCell(RealBody &real_body, const std::string &body_part_name)
 			: BodyPart(real_body, body_part_name), cell_linked_list_(real_body.cell_linked_list_){};
 		virtual ~BodyPartByCell(){};
 
-		void setBodyPartBounds(BoundingBox bbox){
-			body_part_bounds_ = bbox;
-			body_part_bounds_set_ = true;
-		};
-
-		BoundingBox getBodyPartBounds(){
-			if (!body_part_bounds_set_) std::cout << "WARNING: the body part bounds are not set for BodyPartByParticle." << std::endl;
-			return body_part_bounds_;
-		}
-
 	protected:
-<<<<<<< HEAD
-		void tagAParticle(size_t particle_index);
-		virtual void tagBodyPart() override;
-
-		BoundingBox body_part_bounds_;
-		bool body_part_bounds_set_;
-=======
 		BaseCellLinkedList *cell_linked_list_;
 		typedef std::function<bool(Vecd, Real)> TaggingCellMethod;
 		void tagCells(TaggingCellMethod &tagging_cell_method);
->>>>>>> f715470e424c1abf9de800921d9efd30aa6a0080
 	};
 
 	/**

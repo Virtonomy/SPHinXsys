@@ -1,3 +1,4 @@
+
 /**
  * @file 	in_output.cpp
  * @author	Luhui Han, Chi ZHang and Xiangyu Hu
@@ -11,7 +12,7 @@
 namespace SPH
 {
 	//=============================================================================================//
-	In_Output::In_Output(SPHSystem& sph_system, bool delete_output)
+	In_Output::In_Output(SPHSystem &sph_system)
 		: sph_system_(sph_system),
 		  input_folder_("./input"), output_folder_("./output"),
 		  restart_folder_("./restart"), reload_folder_("./reload")
@@ -35,11 +36,9 @@ namespace SPH
 		{
 			fs::remove_all(restart_folder_);
 			fs::create_directory(restart_folder_);
-			if(delete_output == true)
-			{
-				fs::remove_all(output_folder_);
-				fs::create_directory(output_folder_);
-			}
+
+			fs::remove_all(output_folder_);
+			fs::create_directory(output_folder_);
 		}
 
 		restart_step_ = std::to_string(sph_system.restart_step_);
@@ -144,21 +143,17 @@ namespace SPH
 		{
 			if (body->checkNewlyUpdated())
 			{
-				std::string filefullpath = in_output_.output_folder_ + "/" + body->getBodyName() + "_" + sequence + ".vtu";
-				if (fs::exists(filefullpath))
-				{
-					fs::remove(filefullpath);
-				}
-				std::ofstream out_file{filefullpath.c_str(), std::ios::trunc};
+				const auto& vtuName = body->getBodyName() + "_" + sequence + ".vtu";
+				std::stringstream sstream;
 				//begin of the XML file
-				writeVtu(out_file, body);
-				out_file.close();
+				writeVtu(sstream, body);
+				_vtuData[vtuName] = sstream.str();
 			}
 			body->setNotNewlyUpdated();
 		}
 	}
 	//=============================================================================================//
-	void BodyStatesRecordingToVtu::writeVtu(std::ostream& stream, SPHBody* body) const
+	void BodyStatesRecordingToVtuString::writeVtu(std::ostream& stream, SPHBody* body) const
 	{
 		stream << "<?xml version=\"1.0\"?>\n";
 		stream << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
@@ -188,11 +183,16 @@ namespace SPH
 		stream << "</VTKFile>\n";
 	}
 	//=============================================================================================//
+	const BodyStatesRecordingToVtuString::VtuStringData& BodyStatesRecordingToVtuString::GetVtuData() const
+	{
+		return _vtuData;
+	}
+	//=============================================================================================//
 	SurfaceOnlyBodyStatesRecordingToVtu::SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies)
 			: BodyStatesRecording(in_output, bodies),
 			surface_body_layer_vector_({})
 	{
-		for (SPHBody* body : bodies_) surface_body_layer_vector_.push_back(BodySurface(body));
+		for (SPHBody* body : bodies_) surface_body_layer_vector_.push_back(BodySurface(*body));
 	}
 	//=============================================================================================//
 	void SurfaceOnlyBodyStatesRecordingToVtu::writeWithFileName(const std::string& sequence)
@@ -203,7 +203,7 @@ namespace SPH
 			SPHBody* body = bodies_[i];
 			if (body->checkNewlyUpdated())
 			{
-				std::string filefullpath = in_output_.output_folder_ + "/" + body->getBodyName() + "_" + sequence + ".vtu";
+				std::string filefullpath = in_output_.output_folder_ + "/SPHBody_" + body->getBodyName() + "_" + sequence + ".vtu";
 				if (fs::exists(filefullpath))
 				{
 					fs::remove(filefullpath);
@@ -214,10 +214,11 @@ namespace SPH
 				out_file << "<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
 				out_file << " <PolyData>\n";
 
-				size_t total_surface_particles = surface_body_layer_vector_[i].body_part_particles_.size();
-				out_file << "  <Piece Name =\"" << bodies_[i]->getBodyName() << "\" NumberOfPoints=\"" << total_surface_particles << "\" NumberOfCells=\"0\">\n";
+				BaseParticles *base_particles = body->base_particles_;
+				size_t total_real_particles = base_particles->total_real_particles_;
+				out_file << "  <Piece Name =\"" << body->getBodyName() << "\" NumberOfPoints=\"" << total_real_particles << "\" NumberOfVerts=\"" << total_real_particles << "\">\n";
 
-				body->writeSurfaceParticlesToVtuFile(out_file, surface_body_layer_vector_[i]);
+				body->writeParticlesToVtpFile(out_file);
 
 				out_file << "   </PointData>\n";
 
@@ -252,137 +253,13 @@ namespace SPH
 		}
 	}
 	//=============================================================================================//
-	void SurfaceOnlyBodyStatesRecordingToVtu::writeVtu(std::ostream& stream, SPHBody* body, ShapeSurface& shape_surface) const
-	{
-		stream << "<?xml version=\"1.0\"?>\n";
-		stream << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
-		stream << " <UnstructuredGrid>\n";
-
-		size_t total_surface_particles = shape_surface.body_part_particles_.size();
-		stream << "  <Piece Name =\"" << body->getBodyName() << "\" NumberOfPoints=\"" << total_surface_particles << "\" NumberOfCells=\"0\">\n";
-
-		body->writeSurfaceParticlesToVtuFile(stream, shape_surface);
-
-		stream << "   </PointData>\n";
-
-		//write empty cells
-		stream << "   <Cells>\n";
-		stream << "    <DataArray type=\"Int32\"  Name=\"connectivity\"  Format=\"ascii\">\n";
-		stream << "    </DataArray>\n";
-		stream << "    <DataArray type=\"Int32\"  Name=\"offsets\"  Format=\"ascii\">\n";
-		stream << "    </DataArray>\n";
-		stream << "    <DataArray type=\"types\"  Name=\"offsets\"  Format=\"ascii\">\n";
-		stream << "    </DataArray>\n";
-		stream << "   </Cells>\n";
-
-		stream << "  </Piece>\n";
-
-		stream << " </UnstructuredGrid>\n";
-		stream << "</VTKFile>\n";
-	}
-	//=============================================================================================//
-	BodyStatesRecordingToVtuString::BodyStatesRecordingToVtuString(In_Output& in_output, SPHBodyVector bodies) 
-			: BodyStatesRecordingToVtu(in_output, bodies)
-	{
-	}	
-	//=============================================================================================//
-	void BodyStatesRecordingToVtuString::writeWithFileName(const std::string& sequence)
-	{
-		for (SPHBody* body : bodies_)
-		{
-			if (body->checkNewlyUpdated())
-			{
-				const auto& vtuName = body->getBodyName() + "_" + sequence + ".vtu";
-				std::stringstream sstream;
-				//begin of the XML file
-				writeVtu(sstream, body);
-				_vtuData[vtuName] = sstream.str();
-			}
-			body->setNotNewlyUpdated();
-		}
-	}
-	//=============================================================================================//
-	const BodyStatesRecordingToVtuString::VtuStringData& BodyStatesRecordingToVtuString::GetVtuData() const
-	{
-		return _vtuData;
-	}
-	//=============================================================================================//
-	void BodyStatesRecordingToVtuString::clear()
-	{
-		_vtuData.clear();
-	}
-	//=============================================================================================//
-	BodyStatesRecordingToVtuStringRunTime::BodyStatesRecordingToVtuStringRunTime(In_Output& in_output, SPHBodyVector bodies) 
-			: BodyStatesRecordingToVtu(in_output, bodies)
-	{
-	}	
-	//=============================================================================================//
-	void BodyStatesRecordingToVtuStringRunTime::writeWithFileName(const std::string& sequence)
-	{
-		_vtuDataRunTime.clear();
-		for (SPHBody* body : bodies_)
-		{
-			if (body->checkNewlyUpdated())
-			{
-				const auto& vtuName = body->getBodyName() + ".stl"  + "_" + "0000" + sequence + ".vtu";
-				std::stringstream sstream;
-				//begin of the XML file
-				writeVtu(sstream, body);
-				std::tuple<std::string, std::string, std::string> vtuData;
-				std::get<0>(vtuData) = vtuName;
-				std::get<1>(vtuData) = sstream.str();
-				std::get<2>(vtuData) = body->getBodyName();
-				_vtuDataRunTime.push_back(vtuData);
-			}
-			body->setNotNewlyUpdated();
-		}
-	}
-	//=============================================================================================//
-	const VtuStringDataRunTime& BodyStatesRecordingToVtuStringRunTime::GetVtuDataRunTime() const
-	{
-		return _vtuDataRunTime;
-	}
-		//=============================================================================================//
-	SurfaceOnlyBodyStatesRecordingToVtuStringRunTime::SurfaceOnlyBodyStatesRecordingToVtuStringRunTime(In_Output& in_output, SPHBodyVector bodies) 
-			: SurfaceOnlyBodyStatesRecordingToVtu(in_output, bodies)
-	{
-	}	
-	//=============================================================================================//
-	void SurfaceOnlyBodyStatesRecordingToVtuStringRunTime::writeWithFileName(const std::string& sequence)
-	{
-		_vtuDataRunTime.clear();
-		size_t i = 0;
-		for (SPHBody* body : bodies_)
-		{
-			if (body->checkNewlyUpdated())
-			{
-				const auto& vtuName = body->getBodyName() + ".stl" + "_" + "0000" + sequence + ".vtu";
-				std::stringstream sstream;
-				//begin of the XML file
-				writeVtu(sstream, body, surface_body_layer_vector_[i]);
-				std::tuple<std::string, std::string, std::string> vtuData;
-				std::get<0>(vtuData) = vtuName;
-				std::get<1>(vtuData) = sstream.str();
-				std::get<2>(vtuData) = body->getBodyName();
-				_vtuDataRunTime.push_back(vtuData);
-			}
-			body->setNotNewlyUpdated();
-			i++;
-		}
-	}
-	//=============================================================================================//
-	const VtuStringDataRunTime& SurfaceOnlyBodyStatesRecordingToVtuStringRunTime::GetVtuDataRunTime() const
-	{
-		return _vtuDataRunTime;
-	}
-	//=============================================================================================//
-	void BodyStatesRecordingToPlt::writeWithFileName(const std::string& sequence)
+	void BodyStatesRecordingToPlt::writeWithFileName(const std::string &sequence)
 	{
 		for (SPHBody *body : bodies_)
 		{
 			if (body->checkNewlyUpdated())
 			{
-				std::string filefullpath = in_output_.output_folder_ + "/" + body->getBodyName()+ "_" + sequence +".plt";
+				std::string filefullpath = in_output_.output_folder_ + "/SPHBody_" + body->getBodyName() + "_" + sequence + ".plt";
 				if (fs::exists(filefullpath))
 				{
 					fs::remove(filefullpath);
@@ -445,7 +322,7 @@ namespace SPH
 
 		std::transform(bodies.begin(), bodies.end(), std::back_inserter(file_paths_),
 					   [&](SPHBody *body) -> std::string
-					   { return in_output.reload_folder_ + body->getBodyName() + "_rld.xml"; });
+					   { return in_output.reload_folder_ + "/SPHBody_" + body->getBodyName() + "_rld.xml"; });
 	};
 	//=============================================================================================//
 	ReloadParticleIO::ReloadParticleIO(In_Output &in_output, SPHBodyVector bodies,
@@ -453,7 +330,7 @@ namespace SPH
 	{
 		std::transform(given_body_names.begin(), given_body_names.end(), file_paths_.begin(),
 					   [&](const std::string &body_name) -> std::string
-					   { return in_output.reload_folder_ + body_name + "_rld.xml"; });
+					   { return in_output.reload_folder_ + "/SPHBody_" + body_name + "_rld.xml"; });
 	}
 	//=============================================================================================//
 	void ReloadParticleIO::writeToFile(size_t iteration_step)

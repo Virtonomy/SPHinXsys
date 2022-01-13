@@ -122,7 +122,7 @@ namespace SPH
 		a_(a), E_(E), G_(G), poisson_(poisson)
 	{
 		// parameters for derived class
-		material_name_ = "OrthotropicSolid";
+		material_type_ = "OrthotropicSolid";
 		CalculateA0();
 		CalculateAllMu();
 		CalculateAllLambda();

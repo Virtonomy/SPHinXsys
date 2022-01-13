@@ -117,8 +117,8 @@ namespace SPH
 		virtual std::string getRelevantStressMeasureName() override { return "PK2"; };
 
 		/** get methods */
-		Real getYoungsModulus() { return youngs_modulus_; };
-		Real getPoissonRatio() { return poisson_ratio_; };
+		Real getYoungsModulus() { return E0_; };
+		Real getPoissonRatio() { return nu_; };
 		Real getDensity() { return rho0_; };
 
 	protected:
@@ -163,7 +163,7 @@ namespace SPH
 		NeoHookeanSolidIncompressible(Real rho_0, Real Youngs_modulus, Real poisson)
 			: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
 		{
-			material_name_ = "NeoHookeanSolidIncompressible";
+			material_type_ = "NeoHookeanSolidIncompressible";
 		};
 		virtual ~NeoHookeanSolidIncompressible() {};
 	

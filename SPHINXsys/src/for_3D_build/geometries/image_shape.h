@@ -33,8 +33,6 @@
 
 #ifndef __EMSCRIPTEN__
 
-#ifndef __EMSCRIPTEN__
-
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 
 #include "base_geometry.h"

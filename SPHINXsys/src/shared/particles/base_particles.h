@@ -166,11 +166,11 @@ namespace SPH
 		/** Write particle data in Vtu format for Paraview. */
 		virtual void writeParticlesToVtuFile(std::ostream& output_file);
 		/** Write particle data in Vtp format for Paraview. */
-		virtual void writeParticlesToVtpFile(std::ostream &output_file, BodySurface& surface_particles);
+		virtual void writeParticlesToVtpFile(std::ostream &output_file);
 		/** Write particle data in PLT format for Tecplot. */
 		void writeParticlesToPltFile(std::ofstream &output_file);
 		/** Write only surface particle data in VTU format for Paraview. TODO: this should be generalized for body part by particles */
-		virtual void writeSurfaceParticlesToVtuFile(std::ofstream& output_file, BodySurface& surface_particles);
+		virtual void writeSurfaceParticlesToVtuFile(std::ostream& output_file, BodySurface& surface_particles);
 
 		void resizeXmlDocForParticles(XmlEngine &xml_engine);
 		void writeParticlesToXmlForRestart(std::string &filefullpath);

@@ -78,7 +78,7 @@ void relaxParticlesSingleResolution(In_Output &in_output,
 	//----------------------------------------------------------------------
 	//	Particle relaxation starts here.
 	//----------------------------------------------------------------------
-	random_imported_model_particles.parallel_exec(0.25);
+	random_imported_model_particles.parallel_exec(0.25);s
 	relaxation_step_inner.surface_bounding_.parallel_exec();
 	if (write_particle_relaxation_data)
 	{
@@ -920,10 +920,10 @@ void StructuralSimulation::runSimulation(Real end_time)
 		}
 		tick_count t2 = tick_count::now();
 		// record data for test
-		von_mises_stress_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getMaxVonMisesStress());
+		von_mises_stress_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressMax());
 		von_mises_stress_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStress());
 
-		von_mises_strain_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getMaxVonMisesStrain());
+		von_mises_strain_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrainMax());
 		von_mises_strain_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrain());
 		// write data to file
 		if (surface_particles_only_to_vtu_)

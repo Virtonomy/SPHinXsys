@@ -99,21 +99,6 @@ namespace SPH
 		}
 		return BoundingBox(lower_bound, upper_bound);
 	}
-<<<<<<< HEAD:SPHINXsys/src/for_3D_build/geometries/geometry.cpp
-
-	//=================================================================================================//
-	bool ComplexShape::checkContain(const Vec3d &input_pnt, bool BOUNDARY_INCLUDED)
-	{
-		return complex_shape_mesh_->checkContain(input_pnt, BOUNDARY_INCLUDED);
-	}
-	//=================================================================================================//
-	Vec3d ComplexShape::findClosestPoint(const Vec3d &input_pnt)
-	{
-		//std::cout << "ComplexShape::findSignedDistance(const Vec3d &input_pnt) called";
-		return complex_shape_mesh_->findClosestPoint(input_pnt);
-	}
-=======
->>>>>>> f715470e424c1abf9de800921d9efd30aa6a0080:SPHINXsys/src/for_3D_build/geometries/triangle_mesh_shape.cpp
 	//=================================================================================================//
 	TriangleMeshShapeSTL::
 		TriangleMeshShapeSTL(const std::string &filepathname, Vec3d translation, Real scale_factor,

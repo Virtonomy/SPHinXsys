@@ -125,27 +125,6 @@ namespace SPH
 		};
 
 		/**
-		 * @class ConstrainSolidBodySurfaceRegion
-		 * @brief Constrain the surface particles of a solid body part with prescribed motion.
-		 */
-		class ConstrainSolidBodySurfaceRegion :
-			public PartSimpleDynamicsByParticle, public SolidDataSimple
-		{
-		public:
-			ConstrainSolidBodySurfaceRegion(SPHBody* body, BodyPartByParticle* body_part);
-			virtual ~ConstrainSolidBodySurfaceRegion() {};
-
-			StdLargeVec<bool>& GetApplyConstrainToParticle(){ return apply_constrain_to_particle_; }
-		protected:
-			StdLargeVec<Vecd>& pos_n_, & pos_0_;
-			StdLargeVec<Vecd>& vel_n_, & dvel_dt_;
-			StdLargeVec<bool> apply_constrain_to_particle_;
-
-			virtual Vecd getDisplacement(Vecd& pos_0, Vecd& pos_n) { return pos_n; };
-			virtual void Update(size_t index_i, Real dt = 0.0) override;
-		};
-
-		/**
 		 * @class PositionSolidBody
 		 * @brief Moves the body into a defined position in a given time interval - position driven boundary condition
 		 * Note the average values for FSI are prescirbed also.

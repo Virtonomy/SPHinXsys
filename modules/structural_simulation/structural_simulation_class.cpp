@@ -35,10 +35,10 @@ SolidBodyFromMesh::SolidBodyFromMesh(
 SolidBodyForSimulation::SolidBodyForSimulation(
 	SPHSystem &system, const string &body_name, TriangleMeshShape &triangle_mesh_shape, SharedPtr<SPHAdaptation> particle_adaptation,
 	Real physical_viscosity, SharedPtr<LinearElasticSolid> material_model, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume)
-	: imported_model_(system, body_name, triangle_mesh_shape, particle_adaptation, pos_0, volume),
+	: solid_body_from_mesh_(system, body_name, triangle_mesh_shape, particle_adaptation, pos_0, volume),
 	  //material_model_(material_model),
-	  elastic_solid_particles_(imported_model_, material_model),
-	  inner_body_relation_(imported_model_),
+	  elastic_solid_particles_(solid_body_from_mesh_, material_model),
+	  inner_body_relation_(solid_body_from_mesh_),
 
 	  correct_configuration_(solid_dynamics::CorrectConfiguration(inner_body_relation_)),
 	  stress_relaxation_first_half_(solid_dynamics::StressRelaxationFirstHalf(inner_body_relation_)),
@@ -64,27 +64,27 @@ void expandBoundingBox(BoundingBox *original, BoundingBox *additional)
 
 void relaxParticlesSingleResolution(In_Output &in_output,
 									bool write_particle_relaxation_data,
-									SolidBody &imported_model,
-									BodyRelationInner &imported_model_inner)
+									SolidBody &solid_body_from_mesh,
+									BodyRelationInner &solid_body_from_mesh_inner)
 {
-	BodyStatesRecordingToVtp write_imported_model_to_vtp(in_output, imported_model);
+	BodyStatesRecordingToVtp write_solid_body_from_mesh_to_vtp(in_output, solid_body_from_mesh);
 
 	//----------------------------------------------------------------------
 	//	Methods used for particle relaxation.
 	//----------------------------------------------------------------------
-	RandomizePartilePosition random_imported_model_particles(imported_model);
+	RandomizePartilePosition random_solid_body_from_mesh_particles(solid_body_from_mesh);
 	/** A  Physics relaxation step. */
-	relax_dynamics::SolidRelaxationStepInner relaxation_step_inner(imported_model_inner, true);
+	relax_dynamics::SolidRelaxationStepInner relaxation_step_inner(solid_body_from_mesh_inner, true);
 	//----------------------------------------------------------------------
 	//	Particle relaxation starts here.
 	//----------------------------------------------------------------------
-	random_imported_model_particles.parallel_exec(0.25);
+	random_solid_body_from_mesh_particles.parallel_exec(0.25);
 	relaxation_step_inner.surface_bounding_.parallel_exec();
 	if (write_particle_relaxation_data)
 	{
-		write_imported_model_to_vtp.writeToFile(0.0);
+		write_solid_body_from_mesh_to_vtp.writeToFile(0.0);
 	}
-	imported_model.updateCellLinkedList();
+	solid_body_from_mesh.updateCellLinkedList();
 	//----------------------------------------------------------------------
 	//	Particle relaxation time stepping start here.
 	//----------------------------------------------------------------------
@@ -98,7 +98,7 @@ void relaxParticlesSingleResolution(In_Output &in_output,
 			std::cout << std::fixed << std::setprecision(9) << "Relaxation steps for the imported model N = " << ite_p << "\n";
 			if (write_particle_relaxation_data)
 			{
-				write_imported_model_to_vtp.writeToFile(ite_p);
+				write_solid_body_from_mesh_to_vtp.writeToFile(ite_p);
 			}
 		}
 	}

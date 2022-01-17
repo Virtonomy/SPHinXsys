@@ -55,7 +55,7 @@ public:
 class SolidBodyForSimulation
 {
 private:
-	SolidBodyFromMesh imported_model_;
+	SolidBodyFromMesh solid_body_from_mesh_;
 	//LinearElasticSolid material_model_;
 	ElasticSolidParticles elastic_solid_particles_;
 	BodyRelationInner inner_body_relation_;
@@ -71,7 +71,7 @@ public:
 		Real physical_viscosity, SharedPtr<LinearElasticSolid> material_model, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume);
 	~SolidBodyForSimulation(){};
 
-	SolidBodyFromMesh *getSolidBodyFromMesh() { return &imported_model_; };
+	SolidBodyFromMesh *getSolidBodyFromMesh() { return &solid_body_from_mesh_; };
 	//LinearElasticSolid* GetMaterialModel() { return &material_model_; };
 	ElasticSolidParticles *getElasticSolidParticles() { return &elastic_solid_particles_; };
 	BodyRelationInner *getInnerBodyRelation() { return &inner_body_relation_; };
@@ -86,9 +86,9 @@ void expandBoundingBox(BoundingBox *original, BoundingBox *additional);
 
 void relaxParticlesSingleResolution(In_Output &in_output,
 									bool write_particles_to_file,
-									SolidBodyFromMesh &imported_model,
-									ElasticSolidParticles &imported_model_particles,
-									BodyRelationInner &imported_model_inner);
+									SolidBodyFromMesh &solid_body_from_mesh,
+									ElasticSolidParticles &solid_body_from_mesh_particles,
+									BodyRelationInner &solid_body_from_mesh_inner);
 
 static inline Real getPhysicalViscosityGeneral(Real rho, Real youngs_modulus, Real length_scale, Real shape_constant = 1.0)
 {

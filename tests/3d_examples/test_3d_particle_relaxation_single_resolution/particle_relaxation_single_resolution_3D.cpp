@@ -55,32 +55,32 @@ int main(int ac, char *av[])
 	//----------------------------------------------------------------------
 	//	Creating body, materials and particles.
 	//----------------------------------------------------------------------
-	SolidBodyFromMesh imported_model(system, "SolidBodyFromMesh");
-	SolidParticles imported_model_particles(imported_model);
+	SolidBodyFromMesh solid_body_from_mesh(system, "SolidBodyFromMesh");
+	SolidParticles solid_body_from_mesh_particles(solid_body_from_mesh);
 	//----------------------------------------------------------------------
 	//	Define simple file input and outputs functions.
 	//----------------------------------------------------------------------
-	BodyStatesRecordingToVtp write_imported_model_to_vtp(in_output, {imported_model});
-	MeshRecordingToPlt write_cell_linked_list(in_output, imported_model, imported_model.cell_linked_list_);
+	BodyStatesRecordingToVtp write_solid_body_from_mesh_to_vtp(in_output, {solid_body_from_mesh});
+	MeshRecordingToPlt write_cell_linked_list(in_output, solid_body_from_mesh, solid_body_from_mesh.cell_linked_list_);
 	//----------------------------------------------------------------------
 	//	Define body relation map.
 	//	The contact map gives the topological connections between the bodies.
 	//	Basically the the range of bodies to build neighbor particle lists.
 	//----------------------------------------------------------------------
-	BodyRelationInner imported_model_inner(imported_model);
+	BodyRelationInner solid_body_from_mesh_inner(solid_body_from_mesh);
 	//----------------------------------------------------------------------
 	//	Methods used for particle relaxation.
 	//----------------------------------------------------------------------
-	RandomizePartilePosition random_imported_model_particles(imported_model);
+	RandomizePartilePosition random_solid_body_from_mesh_particles(solid_body_from_mesh);
 	/** A  Physics relaxation step. */
-	relax_dynamics::RelaxationStepInner relaxation_step_inner(imported_model_inner, true);
+	relax_dynamics::RelaxationStepInner relaxation_step_inner(solid_body_from_mesh_inner, true);
 	//----------------------------------------------------------------------
 	//	Particle relaxation starts here.
 	//----------------------------------------------------------------------
-	random_imported_model_particles.parallel_exec(0.25);
+	random_solid_body_from_mesh_particles.parallel_exec(0.25);
 	relaxation_step_inner.surface_bounding_.parallel_exec();
-	write_imported_model_to_vtp.writeToFile(0.0);
-	imported_model.updateCellLinkedList();
+	write_solid_body_from_mesh_to_vtp.writeToFile(0.0);
+	solid_body_from_mesh.updateCellLinkedList();
 	write_cell_linked_list.writeToFile(0.0);
 	//----------------------------------------------------------------------
 	//	Particle relaxation time stepping start here.
@@ -93,7 +93,7 @@ int main(int ac, char *av[])
 		if (ite_p % 100 == 0)
 		{
 			std::cout << std::fixed << std::setprecision(9) << "Relaxation steps for the imported model N = " << ite_p << "\n";
-			write_imported_model_to_vtp.writeToFile(ite_p);
+			write_solid_body_from_mesh_to_vtp.writeToFile(ite_p);
 		}
 	}
 	std::cout << "The physics relaxation process of imported model finish !" << std::endl;

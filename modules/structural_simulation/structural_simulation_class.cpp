@@ -105,7 +105,7 @@ void relaxParticlesSingleResolution(In_Output &in_output,
 	std::cout << "The physics relaxation process of the imported model finished !" << std::endl;
 }
 
-std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> getParticlesFromTriangleMeshShape(
+std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> generateAndRelaxParticlesFromMesh(
 	TriangleMeshShape &triangle_mesh_shape, Real resolution, bool particle_relaxation, bool write_particle_relaxation_data)
 {
 	BoundingBox bb = triangle_mesh_shape.findBounds();
@@ -336,7 +336,7 @@ void StructuralSimulation::initializeElasticSolidBodies()
 	for (size_t i = 0; i < body_mesh_list_.size(); i++)
 	{
 		// create the initial particles from the triangle mesh shape with particle relaxation option
-		std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> particles = getParticlesFromTriangleMeshShape(*body_mesh_list_[i], resolution_list_[i], particle_relaxation_list_[i], write_particle_relaxation_data_);
+		std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> particles = generateAndRelaxParticlesFromMesh(*body_mesh_list_[i], resolution_list_[i], particle_relaxation_list_[i], write_particle_relaxation_data_);
 
 		// get the particles' initial position and their volume
 		StdLargeVec<Vecd> &pos_0 = std::get<0>(particles);

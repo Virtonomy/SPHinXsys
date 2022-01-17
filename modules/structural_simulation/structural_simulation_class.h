@@ -44,18 +44,18 @@ public:
 	~BodyPartFromMesh(){};
 };
 
-class ImportedModel : public SolidBody
+class SolidBodyFromMesh : public SolidBody
 {
 public:
-	ImportedModel(SPHSystem &system, const string &body_name, TriangleMeshShape &triangle_mesh_shape,
+	SolidBodyFromMesh(SPHSystem &system, const string &body_name, TriangleMeshShape &triangle_mesh_shape,
 				  SharedPtr<SPHAdaptation> particle_adaptation, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume);
-	~ImportedModel(){};
+	~SolidBodyFromMesh(){};
 };
 
 class SolidBodyForSimulation
 {
 private:
-	ImportedModel imported_model_;
+	SolidBodyFromMesh imported_model_;
 	//LinearElasticSolid material_model_;
 	ElasticSolidParticles elastic_solid_particles_;
 	BodyRelationInner inner_body_relation_;
@@ -71,7 +71,7 @@ public:
 		Real physical_viscosity, SharedPtr<LinearElasticSolid> material_model, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume);
 	~SolidBodyForSimulation(){};
 
-	ImportedModel *getImportedModel() { return &imported_model_; };
+	SolidBodyFromMesh *getSolidBodyFromMesh() { return &imported_model_; };
 	//LinearElasticSolid* GetMaterialModel() { return &material_model_; };
 	ElasticSolidParticles *getElasticSolidParticles() { return &elastic_solid_particles_; };
 	BodyRelationInner *getInnerBodyRelation() { return &inner_body_relation_; };
@@ -86,7 +86,7 @@ void expandBoundingBox(BoundingBox *original, BoundingBox *additional);
 
 void relaxParticlesSingleResolution(In_Output &in_output,
 									bool write_particles_to_file,
-									ImportedModel &imported_model,
+									SolidBodyFromMesh &imported_model,
 									ElasticSolidParticles &imported_model_particles,
 									BodyRelationInner &imported_model_inner);
 

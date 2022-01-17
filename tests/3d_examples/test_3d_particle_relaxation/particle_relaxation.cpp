@@ -24,10 +24,10 @@ BoundingBox system_domain_bounds(domain_lower_bound, domain_upper_bound);
 //----------------------------------------------------------------------
 //	define a body from the imported model.
 //----------------------------------------------------------------------
-class ImportedModel : public SolidBody
+class SolidBodyFromMesh : public SolidBody
 {
 public:
-	ImportedModel(SPHSystem &system, const std::string &body_name)
+	SolidBodyFromMesh(SPHSystem &system, const std::string &body_name)
 		: SolidBody(system, body_name, makeShared<ParticleSpacingByBodyShape>(1.15, 1.0, 2))
 	{
 		/** Geometry definition. */
@@ -56,7 +56,7 @@ int main(int ac, char *av[])
 	//----------------------------------------------------------------------
 	//	Creating body, materials and particles.
 	//----------------------------------------------------------------------
-	ImportedModel imported_model(system, "ImportedModel");
+	SolidBodyFromMesh imported_model(system, "SolidBodyFromMesh");
 	SolidParticles imported_model_particles(imported_model, makeShared<ParticleGeneratorMultiResolution>());
 	imported_model_particles.addAVariableToWrite<indexScalar, Real>("SmoothingLengthRatio");
 	//----------------------------------------------------------------------

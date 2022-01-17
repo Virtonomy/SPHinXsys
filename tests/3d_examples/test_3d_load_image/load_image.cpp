@@ -30,7 +30,7 @@ int main(int ac, char *av[])
 	//----------------------------------------------------------------------
 	//	Creating body, materials and particles.
 	//----------------------------------------------------------------------
-	ImportedModel imported_model(system, "ImportedModel");
+	SolidBodyFromMesh imported_model(system, "SolidBodyFromMesh");
 	SolidParticles imported_model_particles(imported_model, makeShared<ParticleGeneratorMultiResolution>());
 	imported_model_particles.addAVariableToWrite<indexScalar, Real>("SmoothingLengthRatio");
 	//----------------------------------------------------------------------

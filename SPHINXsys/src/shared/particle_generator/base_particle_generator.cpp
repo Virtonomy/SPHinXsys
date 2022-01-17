@@ -12,7 +12,7 @@
 namespace SPH
 {
 	//=================================================================================================//
-	ParticleGeneratorDirect(StdLargeVec<Vecd>& pos_0, StdLargeVec<Real>& volume) : ParticleGenerator()
+	ParticleGeneratorDirect::ParticleGeneratorDirect(StdLargeVec<Vecd>& pos_0, StdLargeVec<Real>& volume) : ParticleGenerator()
 	{
 		// we add the generated particles for the direct generator
 		for(size_t particle_i = 0; particle_i < pos_0.size(); particle_i++)

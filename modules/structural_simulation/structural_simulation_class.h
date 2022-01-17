@@ -37,11 +37,11 @@ using PositionScaleSolidBodyTuple = tuple<int, Real, Real, Real>;
 using TranslateSolidBodyTuple = tuple<int, Real, Real, Vec3d>;
 using TranslateSolidBodyPartTuple = tuple<int, Real, Real, Vec3d, BoundingBox>;
 
-class BodyPartByParticleTriMesh : public BodyRegionByParticle
+class BodyPartFromMesh : public BodyRegionByParticle
 {
 public:
-	BodyPartByParticleTriMesh(SPHBody &body, const string &body_part_name, TriangleMeshShape &triangle_mesh_shape);
-	~BodyPartByParticleTriMesh(){};
+	BodyPartFromMesh(SPHBody &body, const string &body_part_name, TriangleMeshShape &triangle_mesh_shape);
+	~BodyPartFromMesh(){};
 };
 
 class ImportedModel : public SolidBody
@@ -150,7 +150,7 @@ private:
 	UniquePtrVectorKeeper<SolidBodyRelationContact> contact_relation_ptr_keeper_;
 	UniquePtrVectorKeeper<Gravity> gravity_ptr_keeper_;
 	UniquePtrVectorKeeper<TriangleMeshShape> tri_mesh_shape_ptr_keeper_;
-	UniquePtrVectorKeeper<BodyPartByParticleTriMesh> body_part_tri_mesh_ptr_keeper_;
+	UniquePtrVectorKeeper<BodyPartFromMesh> body_part_tri_mesh_ptr_keeper_;
 
 protected:
 	// mandatory input

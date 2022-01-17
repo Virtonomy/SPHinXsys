@@ -288,17 +288,17 @@ namespace SPH
 	};
 
 	/**
-	 * @class BodyStatesRecordingToVtuString
+	 * @class BodyStatesRecordingToVtpString
 	 * @brief  Write strings for bodies
 	 * the output is map of strings with VTK XML format can visualized by ParaView
 	 * the data type vtkUnstructedGrid
 	 */
-	class BodyStatesRecordingToVtuString : public BodyStatesRecording
+	class BodyStatesRecordingToVtpString : public BodyStatesRecording
 	{
 	public:
-		BodyStatesRecordingToVtuString(In_Output& in_output, SPHBodyVector bodies)
+		BodyStatesRecordingToVtpString(In_Output& in_output, SPHBodyVector bodies)
 			: BodyStatesRecording(in_output, bodies) {};
-		virtual ~BodyStatesRecordingToVtuString() = default;
+		virtual ~BodyStatesRecordingToVtpString() = default;
 
 		using VtuStringData = std::map<std::string, std::string>;
 
@@ -311,15 +311,15 @@ namespace SPH
 	};
 
 	/**
-	 * @class SurfaceOnlyBodyStatesRecordingToVtu
+	 * @class SurfaceOnlyBodyStatesRecordingToVtp
 	 * @brief  Write files for surface particles of bodies
 	 * the output file is VTK XML format can visualized by ParaView
 	 * the data type vtkUnstructedGrid
 	 */
-	class SurfaceOnlyBodyStatesRecordingToVtu : public BodyStatesRecording
+	class SurfaceOnlyBodyStatesRecordingToVtp : public BodyStatesRecording
 	{
 	public:
-		SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies);
+		SurfaceOnlyBodyStatesRecordingToVtp(In_Output& in_output, SPHBodyVector bodies);
 
 	protected:
 		virtual void writeWithFileName(const std::string& sequence) override;

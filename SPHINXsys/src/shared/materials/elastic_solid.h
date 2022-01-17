@@ -123,8 +123,6 @@ namespace SPH
 
 	protected:
 		Real lambda0_; /*< first Lame parameter */
-
-	private:
 		Real getBulkModulus(Real youngs_modulus, Real poisson_ratio);
 		Real getShearModulus(Real youngs_modulus, Real poisson_ratio);
 		Real getLambda(Real youngs_modulus, Real poisson_ratio);

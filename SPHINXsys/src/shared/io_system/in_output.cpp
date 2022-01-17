@@ -137,7 +137,7 @@ namespace SPH
 		}
 	}
 	//=============================================================================================//
-	void BodyStatesRecordingToVtuString::writeWithFileName(const std::string& sequence)
+	void BodyStatesRecordingToVtpString::writeWithFileName(const std::string& sequence)
 	{
 		for (SPHBody* body : bodies_)
 		{
@@ -153,7 +153,7 @@ namespace SPH
 		}
 	}
 	//=============================================================================================//
-	void BodyStatesRecordingToVtuString::writeVtu(std::ostream& stream, SPHBody* body) const
+	void BodyStatesRecordingToVtpString::writeVtu(std::ostream& stream, SPHBody* body) const
 	{
 		stream << "<?xml version=\"1.0\"?>\n";
 		stream << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
@@ -183,19 +183,19 @@ namespace SPH
 		stream << "</VTKFile>\n";
 	}
 	//=============================================================================================//
-	const BodyStatesRecordingToVtuString::VtuStringData& BodyStatesRecordingToVtuString::GetVtuData() const
+	const BodyStatesRecordingToVtpString::VtuStringData& BodyStatesRecordingToVtpString::GetVtuData() const
 	{
 		return _vtuData;
 	}
 	//=============================================================================================//
-	SurfaceOnlyBodyStatesRecordingToVtu::SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies)
+	SurfaceOnlyBodyStatesRecordingToVtp::SurfaceOnlyBodyStatesRecordingToVtp(In_Output& in_output, SPHBodyVector bodies)
 			: BodyStatesRecording(in_output, bodies),
 			surface_body_layer_vector_({})
 	{
 		for (SPHBody* body : bodies_) surface_body_layer_vector_.push_back(BodySurface(*body));
 	}
 	//=============================================================================================//
-	void SurfaceOnlyBodyStatesRecordingToVtu::writeWithFileName(const std::string& sequence)
+	void SurfaceOnlyBodyStatesRecordingToVtp::writeWithFileName(const std::string& sequence)
 	{
 		for (size_t i = 0; i < bodies_.size(); i++)
 		//for (size_t i = 0; surface_body_layer_vector_.size(); i++)

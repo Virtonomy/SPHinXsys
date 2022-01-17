@@ -322,7 +322,7 @@ namespace SPH
 
 		std::transform(bodies.begin(), bodies.end(), std::back_inserter(file_paths_),
 					   [&](SPHBody *body) -> std::string
-					   { return in_output.reload_folder_ + "/SPHBody_" + body->getBodyName() + "_rld.xml"; });
+					   { return in_output.reload_folder_ + "/" + body->getBodyName() + "_rld.xml"; });
 	};
 	//=============================================================================================//
 	ReloadParticleIO::ReloadParticleIO(In_Output &in_output, SPHBodyVector bodies,
@@ -330,7 +330,7 @@ namespace SPH
 	{
 		std::transform(given_body_names.begin(), given_body_names.end(), file_paths_.begin(),
 					   [&](const std::string &body_name) -> std::string
-					   { return in_output.reload_folder_ + "/SPHBody_" + body_name + "_rld.xml"; });
+					   { return in_output.reload_folder_ + "/" + body_name + "_rld.xml"; });
 	}
 	//=============================================================================================//
 	void ReloadParticleIO::writeToFile(size_t iteration_step)

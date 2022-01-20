@@ -17,12 +17,22 @@ namespace SPH {
 		}
 	}
 	//=================================================================================================//
+	Matd ElasticSolidParticles::get_GreenLagrange_strain(size_t particle_i)
+	{
+		Mat2d F = F_[particle_i];
+		return 0.5 * (~F * F - Matd(1.0)); // calculation of the Green-Lagrange strain tensor
+	}
+	//=================================================================================================//
+	Vecd ElasticSolidParticles::get_Principal_strains(size_t particle_i)
+	{
+		Mat2d epsilon = get_GreenLagrange_strain(particle_i); // calculation of the Green-Lagrange strain tensor
+		return getPrincipalValuesFromMatrix(epsilon);
+	}
+	//=================================================================================================//
 	Real ElasticSolidParticles::von_Mises_strain_static(size_t particle_i) //not tested in 2D
 	{
 		
-		Mat2d F = F_[particle_i];
-		Mat2d epsilon = 0.5 * (~F * F - Mat2d(1.0)); //calculation of the Green-Lagrange strain tensor
-		
+		Mat2d epsilon = get_GreenLagrange_strain(particle_i); // calculation of the Green-Lagrange strain tensor
 
 		Real epsilonxx = epsilon(0, 0);
 		Real epsilonyy = epsilon(1, 1);
@@ -37,7 +47,6 @@ namespace SPH {
 	//=================================================================================================//
 	Real ElasticSolidParticles::von_Mises_strain_dynamic(size_t particle_i, Real poisson) //not tested in 2D
 	{
-		// calculation based on the Ansys formulation
 		Mat2d F = F_[particle_i];
 		Mat2d epsilon = 0.5 * (~F * F - Matd(1.0)); //calculation of the Green-Lagrange strain tensor
 		
@@ -48,21 +57,47 @@ namespace SPH {
 		return 1.0/(1.0 + poisson) * std::sqrt(0.5 * (std::pow(eps_1 - eps_2, 2)));
 	}
 	//=================================================================================================//
-	Real ElasticSolidParticles::von_Mises_stress_Cauchy(size_t particle_i)
+	Matd ElasticSolidParticles::get_Cauchy_stress(size_t particle_i);
 	{
 		Real J = rho0_ / rho_n_[particle_i];
 		Mat2d F = F_[particle_i];
 		Mat2d stress = stress_PK1_[particle_i];
-		Mat2d sigma = (stress * ~F) / J; // Cauchy stress
 
-		return getVonMisesStressFromMatrix(sigma);
+		return (stress * ~F) / J; // Cauchy stress
 	}
 	//=================================================================================================//
-	Real ElasticSolidParticles::von_Mises_stress_PK2(size_t particle_i)
+	Matd ElasticSolidParticles::get_PK2_stress(size_t particle_i);
 	{
 		Mat2d F = F_[particle_i];
 		Mat2d stress = stress_PK1_[particle_i];
-		Mat2d sigma = SimTK::inverse(F) * stress; // Second Piola-Kirchhof stress
+
+		return SimTK::inverse(F) * stress; // Second Piola-Kirchhof stress
+	}
+	//=================================================================================================//
+	Vec2d ElasticSolidParticles::get_Principal_stresses(size_t particle_i)
+	{
+		Mat2d sigma;
+		if (stress_measure_ == "Cauchy") {
+			sigma = get_Cauchy_stress(particle_i); // Cauchy stress
+		} else if (stress_measure_ == "PK2") {
+			sigma = get_PK2_stress(particle_i); // Second Piola-Kirchhof stress
+		} else {
+			throw std::runtime_error("get_Principal_stresses: wrong input");
+		}
+
+		return getPrincipalValuesFromMatrix(sigma);
+	}
+	//=================================================================================================//
+	Real ElasticSolidParticles::get_von_Mises_stress(size_t particle_i)
+	{
+		Mat2d sigma;
+		if (stress_measure_ == "Cauchy") {
+			sigma = get_Cauchy_stress(particle_i); // Cauchy stress
+		} else if (stress_measure_ == "PK2") {
+			sigma = get_PK2_stress(particle_i); // Second Piola-Kirchhof stress
+		} else {
+			throw std::runtime_error("get_von_Mises_stress: wrong input");
+		}
 
 		return getVonMisesStressFromMatrix(sigma);
 	}

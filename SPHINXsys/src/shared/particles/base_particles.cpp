@@ -272,7 +272,6 @@ namespace SPH
 			output_file << std::endl;
 			output_file << "    </DataArray>\n";
 		}
-		*/
 
 		//write vectors
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexVector])
@@ -289,7 +288,7 @@ namespace SPH
 			output_file << std::endl;
 			output_file << "    </DataArray>\n";
 		}
-		/*
+		
 		//write scalars
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexScalar])
 		{

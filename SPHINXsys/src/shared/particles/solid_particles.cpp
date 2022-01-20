@@ -226,6 +226,18 @@ namespace SPH {
 
 		size_t total_surface_particles = surface_particles.body_part_particles_.size();
 
+		//write Min Principal stress
+		// precision: 6 - higher precision because it depends on the E modulus
+		output_file << "    <DataArray Name=\"Min Principal stress\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_surface_particles; ++i) {
+			size_t particle_i = surface_particles.body_part_particles_[i];
+			Vecd stress = get_Principal_stresses(particle_i);
+			output_file << std::fixed << std::setprecision(6) << stress[stress.size()-1] << " "; // take the min. component, which is the last one
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
+
 		//write von Mises stress
 		// precision: 6 - higher precision because it depends on the E modulus
 		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
@@ -233,6 +245,29 @@ namespace SPH {
 		for (size_t i = 0; i != total_surface_particles; ++i) {
 			size_t particle_i = surface_particles.body_part_particles_[i];
 			output_file << std::fixed << std::setprecision(6) << get_von_Mises_stress(particle_i) << " ";
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
+
+		//write Min Principal strain
+		// precision: 3 - 0.1% accuracy
+		output_file << "    <DataArray Name=\"Min Principal strain\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_surface_particles; ++i) {
+			size_t particle_i = surface_particles.body_part_particles_[i];
+			Vecd strain = get_Principal_strains(particle_i);
+			output_file << std::fixed << std::setprecision(3) << strain[strain.size()-1] << " "; // take the min. component, which is the last one
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
+
+		//write von Mises strain
+		// precision: 3 - 0.1% accuracy
+		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_surface_particles; ++i) {
+			size_t particle_i = surface_particles.body_part_particles_[i];
+			output_file << std::fixed << std::setprecision(3) << von_Mises_strain_static(particle_i) << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -263,17 +298,6 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 		*/
-
-		//write von Mises strain
-		// precision: 3 - 0.1% accuracy
-		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
-		output_file << "    ";
-		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_particles.body_part_particles_[i];
-			output_file << std::fixed << std::setprecision(3) << von_Mises_strain_static(particle_i) << " ";
-		}
-		output_file << std::endl;
-		output_file << "    </DataArray>\n";
 	}
 	//=================================================================================================//
 	void ElasticSolidParticles::writePltFileHeader(std::ofstream& output_file)

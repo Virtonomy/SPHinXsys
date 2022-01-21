@@ -228,12 +228,12 @@ namespace SPH {
 
 		//write Min Principal stress
 		// precision: 6 - higher precision because it depends on the E modulus
-		output_file << "    <DataArray Name=\"Min Principal stress\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    <DataArray Name=\"Principal stress\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
 			size_t particle_i = surface_particles.body_part_particles_[i];
 			Vecd stress = get_Principal_stresses(particle_i);
-			output_file << std::fixed << std::setprecision(6) << stress[stress.size()-1] << " "; // take the min. component, which is the last one
+			output_file << std::fixed << std::setprecision(6) << stress[0] << " "; // take the max. component, which is the first one, this represents the max. tension
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -251,12 +251,12 @@ namespace SPH {
 
 		//write Min Principal strain
 		// precision: 3 - 0.1% accuracy
-		output_file << "    <DataArray Name=\"Min Principal strain\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    <DataArray Name=\"Principal strain\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
 			size_t particle_i = surface_particles.body_part_particles_[i];
 			Vecd strain = get_Principal_strains(particle_i);
-			output_file << std::fixed << std::setprecision(3) << strain[strain.size()-1] << " "; // take the min. component, which is the last one
+			output_file << std::fixed << std::setprecision(3) << strain[0] << " "; // take the max. component, which is the first one, this represents the max. tension
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";

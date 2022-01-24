@@ -41,8 +41,8 @@ namespace SPH {
 		Real epsilonxz = 0; 			//z-components zero for 2D measures
 		Real epsilonyz = 0; 			//z-components zero for 2D measures
 
-		return sqrt( (1.0 / 3.0) * (std::pow(epsilonxx - epsilonyy, 2.0) + std::pow(epsilonyy - epsilonzz, 2.0) + std::pow(epsilonzz - epsilonxx, 2.0))
-		 + 2.0 * (std::pow(epsilonxy, 2.0) + std::pow(epsilonyz, 2.0) + std::pow(epsilonxz, 2.0)));
+		return sqrt( (1.0 / 3.0) * (powerN(epsilonxx - epsilonyy, 2) + powerN(epsilonyy - epsilonzz, 2) + powerN(epsilonzz - epsilonxx, 2))
+		 + 2.0 * (powerN(epsilonxy, 2) + powerN(epsilonyz, 2) + powerN(epsilonxz, 2)));
 	}
 	//=================================================================================================//
 	Real ElasticSolidParticles::von_Mises_strain_dynamic(size_t particle_i, Real poisson) //not tested in 2D
@@ -54,7 +54,7 @@ namespace SPH {
 		Real eps_1 = principal_strains[0];
 		Real eps_2 = principal_strains[1];
 
-		return 1.0/(1.0 + poisson) * std::sqrt(0.5 * (std::pow(eps_1 - eps_2, 2)));
+		return 1.0/(1.0 + poisson) * std::sqrt(0.5 * (powerN(eps_1 - eps_2, 2)));
 	}
 	//=================================================================================================//
 	Matd ElasticSolidParticles::get_Cauchy_stress(size_t particle_i)

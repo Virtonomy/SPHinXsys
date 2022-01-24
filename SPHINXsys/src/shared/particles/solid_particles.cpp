@@ -226,8 +226,8 @@ namespace SPH {
 
 		size_t total_surface_particles = surface_particles.body_part_particles_.size();
 
-		//write Min Principal stress
-		// precision: 6 - higher precision because it depends on the E modulus
+		/** write Min Principal stress */
+		/** precision: 6 - higher precision because it depends on the E modulus */
 		output_file << "    <DataArray Name=\"Principal stress\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -238,8 +238,8 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write von Mises stress
-		// precision: 6 - higher precision because it depends on the E modulus
+		/** write von Mises stress */
+		/** precision: 6 - higher precision because it depends on the E modulus */
 		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -249,8 +249,8 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write Min Principal strain
-		// precision: 3 - 0.1% accuracy
+		/** write Min Principal strain */
+		/** precision: 3 - 0.1% accuracy */
 		output_file << "    <DataArray Name=\"Principal strain\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -261,8 +261,8 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write von Mises strain
-		// precision: 3 - 0.1% accuracy
+		/** write von Mises strain */
+		/** precision: 3 - 0.1% accuracy */
 		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -272,8 +272,8 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write Displacement
-		// precision: 3 - 0.1 mm accuracy
+		/** write Displacement */
+		/** precision: 3 - 0.1 mm accuracy */
 		output_file << "    <DataArray Name=\"Displacement\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -286,8 +286,9 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write Normal Vectors
-		/* // removed for production
+		/** write Normal Vectors  */
+		/*
+		// removed for production
 		output_file << "    <DataArray Name=\"Normal Vector\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {

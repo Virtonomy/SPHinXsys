@@ -72,7 +72,6 @@ public:
 	~SolidBodyForSimulation(){};
 
 	SolidBodyFromMesh *getSolidBodyFromMesh() { return &solid_body_from_mesh_; };
-	//LinearElasticSolid* GetMaterialModel() { return &material_model_; };
 	ElasticSolidParticles *getElasticSolidParticles() { return &elastic_solid_particles_; };
 	BodyRelationInner *getInnerBodyRelation() { return &inner_body_relation_; };
 

@@ -12,10 +12,10 @@
 namespace SPH
 {
 	//=============================================================================================//
-	In_Output::In_Output(SPHSystem &sph_system)
+	In_Output::In_Output(SPHSystem& sph_system, bool delete_output)
 		: sph_system_(sph_system),
-		  input_folder_("./input"), output_folder_("./output"),
-		  restart_folder_("./restart"), reload_folder_("./reload")
+		input_folder_("./input"), output_folder_("./output"),
+		restart_folder_("./restart"), reload_folder_("./reload")
 	{
 		if (!fs::exists(input_folder_))
 		{
@@ -26,7 +26,7 @@ namespace SPH
 		{
 			fs::create_directory(output_folder_);
 		}
-
+		
 		if (!fs::exists(restart_folder_))
 		{
 			fs::create_directory(restart_folder_);
@@ -36,13 +36,15 @@ namespace SPH
 		{
 			fs::remove_all(restart_folder_);
 			fs::create_directory(restart_folder_);
-
-			fs::remove_all(output_folder_);
-			fs::create_directory(output_folder_);
+			if(delete_output == true)
+			{
+				fs::remove_all(output_folder_);
+				fs::create_directory(output_folder_);
+			}
 		}
 
 		restart_step_ = std::to_string(sph_system.restart_step_);
-
+		
 		sph_system.in_output_ = this;
 	}
 	//=============================================================================================//

@@ -66,7 +66,7 @@ namespace SPH
 	class In_Output
 	{
 	public:
-		explicit In_Output(SPHSystem &sph_system);
+		explicit In_Output(SPHSystem &sph_system, bool delete_output = true);
 		virtual ~In_Output(){};
 
 		SPHSystem &sph_system_;

@@ -136,7 +136,7 @@ namespace SPH
 	{
 		size_t total_real_particles = total_real_particles_;
 
-		//write current/final particle positions first
+		/** write current/final particle positions first */
 		output_file << "   <Points>\n";
 		output_file << "    <DataArray Name=\"Position\" type=\"Float32\"  NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
@@ -148,10 +148,10 @@ namespace SPH
 		output_file << "    </DataArray>\n";
 		output_file << "   </Points>\n";
 
-		//write header of particles data
+		/** write header of particles data */
 		output_file << "   <PointData  Vectors=\"vector\">\n";
 
-		//write sorted particles ID
+		/** write sorted particles ID */
 		output_file << "    <DataArray Name=\"SortedParticle_ID\" type=\"Int32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_real_particles; ++i) {
@@ -160,7 +160,7 @@ namespace SPH
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write unsorted particles ID
+		/** write unsorted particles ID */
 		output_file << "    <DataArray Name=\"UnsortedParticle_ID\" type=\"Int32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_real_particles; ++i) {
@@ -169,7 +169,7 @@ namespace SPH
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write matrices
+		/** write matrices */
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexMatrix])
 		{
 			std::string variable_name = name_index.first;
@@ -187,7 +187,7 @@ namespace SPH
 			output_file << "    </DataArray>\n";
 		}
 
-		//write vectors
+		/** /write vectors */
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexVector])
 		{
 			std::string variable_name = name_index.first;
@@ -202,7 +202,7 @@ namespace SPH
 			output_file << "    </DataArray>\n";
 		}
 
-		//write scalars
+		/** write scalars */
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexScalar])
 		{
 			std::string variable_name = name_index.first;
@@ -216,7 +216,7 @@ namespace SPH
 			output_file << "    </DataArray>\n";
 		}
 
-		//write integers
+		/** write integers */
 		for (std::pair<std::string, size_t>& name_index : variables_to_write_[indexInteger])
 		{
 			std::string variable_name = name_index.first;
@@ -235,7 +235,8 @@ namespace SPH
 	{
 		size_t total_real_particles = total_real_particles_;
 
-		//write current/final particle positions first
+		/** write current/final particle positions first */
+		/** precision: 3 - 0.1 mm accuracy */
 		output_file << "   <Points>\n";
 		output_file << "    <DataArray Name=\"Position\" type=\"Float32\"  NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
@@ -248,29 +249,11 @@ namespace SPH
 		output_file << "    </DataArray>\n";
 		output_file << "   </Points>\n";
 
-		//write header of particles data
+		/** write header of particles data */
 		output_file << "   <PointData  Vectors=\"vector\">\n";
 
-		//write sorted particles ID
-		output_file << "    <DataArray Name=\"SortedParticle_ID\" type=\"Int32\" Format=\"ascii\">\n";
-		output_file << "    ";
-		for (size_t i = 0; i != total_real_particles; ++i)
-		{
-			output_file << i << " ";
-		}
-		output_file << std::endl;
-		output_file << "    </DataArray>\n";
-
-		//write unsorted particles ID
-		output_file << "    <DataArray Name=\"UnsortedParticle_ID\" type=\"Int32\" Format=\"ascii\">\n";
-		output_file << "    ";
-		for (size_t i = 0; i != total_real_particles; ++i)
-		{
-			output_file << unsorted_id_[i] << " ";
-		}
-		output_file << std::endl;
-		output_file << "    </DataArray>\n";
-
+		/*
+		// REMOVED FOR PRODUCTION
 		//write matrices
 		for (std::pair<std::string, size_t> &name_index : variables_to_write_[indexMatrix])
 		{
@@ -306,7 +289,7 @@ namespace SPH
 			output_file << std::endl;
 			output_file << "    </DataArray>\n";
 		}
-
+		
 		//write scalars
 		for (std::pair<std::string, size_t> &name_index : variables_to_write_[indexScalar])
 		{

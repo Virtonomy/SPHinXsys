@@ -319,6 +319,7 @@ namespace SPH
 			output_file << std::endl;
 			output_file << "    </DataArray>\n";
 		}
+		*/
 	}
 	//=================================================================================================//
 	void BaseParticles::writePltFileHeader(std::ofstream &output_file)

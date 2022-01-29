@@ -181,7 +181,7 @@ namespace SPH
 		output_file << "    ";
 		for (size_t i = 0; i != total_real_particles; ++i)
 		{
-			output_file << std::fixed << std::setprecision(9) << von_Mises_stress_Cauchy(i) << " ";
+			output_file << std::fixed << std::setprecision(9) << get_von_Mises_stress(i) << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";

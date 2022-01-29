@@ -53,6 +53,11 @@ namespace SPH
 		LinearElasticSolid(Real rho0, Real youngs_modulus, Real poisson_ratio) : ElasticSolid(rho0)
 	{
 		material_type_ = "LinearElasticSolid";
+		assignElasticMaterialParameters(youngs_modulus, poisson_ratio);
+	}
+	//=================================================================================================//
+	void LinearElasticSolid::assignElasticMaterialParameters(Real youngs_modulus, Real poisson_ratio)
+	{
 		E0_ = youngs_modulus;
 		nu_ = poisson_ratio;
 		G0_ = getShearModulus(youngs_modulus, poisson_ratio);

@@ -110,6 +110,8 @@ namespace SPH
 		explicit LinearElasticSolid(Real rho0, Real youngs_modulus, Real poisson_ratio);
 		virtual ~LinearElasticSolid(){};
 
+		virtual void assignElasticMaterialParameters(Real youngs_modulus, Real poisson_ratio);
+
 		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress from determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;

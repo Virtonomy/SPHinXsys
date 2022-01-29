@@ -311,22 +311,6 @@ namespace SPH
 	};
 
 	/**
-	 * @class SurfaceOnlyBodyStatesRecordingToVtp
-	 * @brief  Write files for surface particles of bodies
-	 * the output file is VTK XML format can visualized by ParaView
-	 * the data type vtkUnstructedGrid
-	 */
-	class SurfaceOnlyBodyStatesRecordingToVtp : public BodyStatesRecording
-	{
-	public:
-		SurfaceOnlyBodyStatesRecordingToVtp(In_Output& in_output, SPHBodyVector bodies);
-
-	protected:
-		virtual void writeWithFileName(const std::string& sequence) override;
-		StdVec<BodySurface> surface_body_layer_vector_;
-	};
-
-	/**
 	 * @class BodyStatesRecordingToPlt
 	 * @brief  Write files for bodies
 	 * the output file is dat format can visualized by TecPlot

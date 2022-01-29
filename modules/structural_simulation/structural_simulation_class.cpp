@@ -899,7 +899,7 @@ void StructuralSimulation::runSimulationStep(Real &dt, Real &integration_time)
 void StructuralSimulation::runSimulation(Real end_time)
 {
 	BodyStatesRecordingToVtp write_states(in_output_, system_.real_bodies_);
-	SurfaceOnlyBodyStatesRecordingToVtp write_states_surface(in_output_, system_.real_bodies_);
+	SurfaceOnlyBodyStatesRecordingToVtu write_states_surface(in_output_, system_.real_bodies_);
 
 	/** Statistics for computing time. */
 	if (surface_particles_only_to_vtu_)

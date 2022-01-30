@@ -173,7 +173,6 @@ StructuralSimulationInput::StructuralSimulationInput(
 	position_scale_solid_body_tuple_ = {};
 	translation_solid_body_tuple_ = {};
 	translation_solid_body_part_tuple_ = {};
-	surface_particles_only_to_vtu_ = false;
 };
 
 ///////////////////////////////////////
@@ -213,7 +212,6 @@ StructuralSimulation::StructuralSimulation(StructuralSimulationInput &input)
 	  position_scale_solid_body_tuple_(input.position_scale_solid_body_tuple_),
 	  translation_solid_body_tuple_(input.translation_solid_body_tuple_),
 	  translation_solid_body_part_tuple_(input.translation_solid_body_part_tuple_),
-	  surface_particles_only_to_vtu_(input.surface_particles_only_to_vtu_),
 
 	  // iterators
 	  iteration_(0),
@@ -899,13 +897,9 @@ void StructuralSimulation::runSimulationStep(Real &dt, Real &integration_time)
 void StructuralSimulation::runSimulation(Real end_time)
 {
 	BodyStatesRecordingToVtp write_states(in_output_, system_.real_bodies_);
-	SurfaceOnlyBodyStatesRecordingToVtu write_states_surface(in_output_, system_.real_bodies_);
 
 	/** Statistics for computing time. */
-	if (surface_particles_only_to_vtu_)
-		write_states_surface.writeToFile(0);
-	else
-		write_states.writeToFile(0);
+	write_states.writeToFile(0);
 	Real output_period = end_time / 100.0;
 	Real dt = 0.0;
 	tick_count t1 = tick_count::now();
@@ -926,10 +920,7 @@ void StructuralSimulation::runSimulation(Real end_time)
 		von_mises_strain_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrainMax());
 		von_mises_strain_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrainVector());
 		// write data to file
-		if (surface_particles_only_to_vtu_)
-			write_states_surface.writeToFile();
-		else
-			write_states.writeToFile();
+		write_states.writeToFile();
 		tick_count t3 = tick_count::now();
 		interval += t3 - t2;
 	}

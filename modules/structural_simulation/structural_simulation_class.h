@@ -129,8 +129,6 @@ public:
 	vector<PositionScaleSolidBodyTuple> position_scale_solid_body_tuple_;
 	vector<TranslateSolidBodyTuple> translation_solid_body_tuple_;
 	vector<TranslateSolidBodyPartTuple> translation_solid_body_part_tuple_;
-	//option to only write surface particles into vtu
-	bool surface_particles_only_to_vtu_;
 
 	StructuralSimulationInput(
 		const string &relative_input_path,
@@ -216,8 +214,6 @@ protected:
 	// for TranslateSolidBodyPart
 	vector<shared_ptr<solid_dynamics::TranslateSolidBodyPart>> translation_solid_body_part_;
 	vector<TranslateSolidBodyPartTuple> translation_solid_body_part_tuple_;
-	//option to only write surface particles into vtu
-	bool surface_particles_only_to_vtu_;
 
 	// iterators
 	int iteration_;

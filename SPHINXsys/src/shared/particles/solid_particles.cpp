@@ -5,21 +5,20 @@
  */
 #include "solid_particles.h"
 
-#include "geometry.h"
 #include "base_body.h"
 #include "elastic_solid.h"
 #include "inelastic_solid.h"
 #include "xml_engine.h"
 
-namespace SPH {
+namespace SPH
+{
 	//=============================================================================================//
-	SolidParticles::SolidParticles(SPHBody* body)
-		: SolidParticles(body, new Solid()){}
-	//=============================================================================================//
-	SolidParticles::SolidParticles(SPHBody* body, Solid* solid)
-		: BaseParticles(body, solid)
+	SolidParticles::SolidParticles(SPHBody &sph_body,
+								   SharedPtr<Solid> shared_solid_ptr,
+								   SharedPtr<ParticleGenerator> particle_generator_ptr)
+		: BaseParticles(sph_body, shared_solid_ptr, particle_generator_ptr)
 	{
-		solid->assignSolidParticles(this);
+		shared_solid_ptr->assignSolidParticles(this);
 		//----------------------------------------------------------------------
 		//		register particle data
 		//----------------------------------------------------------------------
@@ -45,9 +44,10 @@ namespace SPH {
 		registerASortableVariable<indexVector, Vecd>("InitialPosition");
 		registerASortableVariable<indexScalar, Real>("Volume");
 		//set the initial value for initial particle position
-		for (size_t i = 0; i != pos_n_.size(); ++i) pos_0_[i] =  pos_n_[i];
+		for (size_t i = 0; i != pos_n_.size(); ++i)
+			pos_0_[i] = pos_n_[i];
 		//sorting particle once
-		//dynamic_cast<RealBody*>(body)->sortParticleWithCellLinkedList();
+		//DynamicCast<RealBody>(this, body)->sortParticleWithCellLinkedList();
 	}
 	//=============================================================================================//
 	void SolidParticles::offsetInitialParticlePosition(Vecd offset)
@@ -59,30 +59,46 @@ namespace SPH {
 		}
 	}
 	//=================================================================================================//
-	void SolidParticles::initializeNormalDirectionFromGeometry()
+	void SolidParticles::initializeNormalDirectionFromBodyShape()
 	{
+		ComplexShape &body_shape = sph_body_->body_shape_;
 		for (size_t i = 0; i != total_real_particles_; ++i)
 		{
-			Vecd normal_direction = body_->body_shape_->findNormalDirection(pos_n_[i]);
+			Vecd normal_direction = body_shape.findNormalDirection(pos_n_[i]);
 			n_[i] = normal_direction;
 			n_0_[i] = normal_direction;
 		}
 	}
-	//=================================================================================================//	
-	Vecd SolidParticles::normalizeKernelGradient(size_t particle_index_i, Vecd& kernel_gradient) 
+	//=================================================================================================//
+	void SolidParticles::initializeNormalDirectionFromShapeAndOp(const std::string &shape_name)
 	{
-		return  B_[particle_index_i] * kernel_gradient;
+		ComplexShape &body_shape = sph_body_->body_shape_;
+		ShapeAndOp *shape_and_op = body_shape.getShapeAndOpByName(shape_name);
+		Real switch_sign = shape_and_op->second == ShapeBooleanOps::add ? 1.0 : -1.0;
+		for (size_t i = 0; i != total_real_particles_; ++i)
+		{
+			Vecd normal_direction = switch_sign * shape_and_op->first->findNormalDirection(pos_n_[i]);
+			n_[i] = normal_direction;
+			n_0_[i] = normal_direction;
+		}
 	}
 	//=================================================================================================//
-	Vecd SolidParticles::getKernelGradient(size_t particle_index_i, size_t particle_index_j, Real dW_ij, Vecd& e_ij) 
+	Vecd SolidParticles::normalizeKernelGradient(size_t particle_index_i, Vecd &kernel_gradient)
+	{
+		return B_[particle_index_i] * kernel_gradient;
+	}
+	//=================================================================================================//
+	Vecd SolidParticles::getKernelGradient(size_t particle_index_i, size_t particle_index_j, Real dW_ij, Vecd &e_ij)
 	{
 		return 0.5 * dW_ij * (B_[particle_index_i] + B_[particle_index_j]) * e_ij;
 	}
 	//=============================================================================================//
-	ElasticSolidParticles::ElasticSolidParticles(SPHBody* body, ElasticSolid* elastic_solid)
-		: SolidParticles(body, elastic_solid)
+	ElasticSolidParticles::ElasticSolidParticles(SPHBody &sph_body,
+												 SharedPtr<ElasticSolid> shared_elastic_solid_ptr,
+												 SharedPtr<ParticleGenerator> particle_generator_ptr)
+		: SolidParticles(sph_body, shared_elastic_solid_ptr, particle_generator_ptr)
 	{
-		elastic_solid->assignElasticSolidParticles(this);
+		shared_elastic_solid_ptr->assignElasticSolidParticles(this);
 		//----------------------------------------------------------------------
 		//		register particle data
 		//----------------------------------------------------------------------
@@ -94,7 +110,7 @@ namespace SPH {
 		//----------------------------------------------------------------------
 		addAVariableNameToList<indexMatrix, Matd>(variables_to_restart_, "DeformationGradient");
 		// get which stress measure is relevant for the material
-		stress_measure_ = elastic_solid->getRelevantStressMeasureName();
+		stress_measure_ = shared_elastic_solid_ptr->getRelevantStressMeasureName();
 	}
 	//=================================================================================================//
 	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrainVector(std::string strain_measure, Real poisson)
@@ -138,14 +154,7 @@ namespace SPH {
 		StdLargeVec<Real> stress_vector = {};
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			Real stress = 0.0;
-			if (stress_measure_ == "Cauchy") {
-				stress = von_Mises_stress_Cauchy(index_i);
-			} else if (stress_measure_ == "PK2") {
-				stress = von_Mises_stress_PK2(index_i);
-			} else {
-				throw std::runtime_error("getVonMisesStressVector: wrong input");
-			}
+			Real stress = get_von_Mises_stress(index_i);
 			stress_vector.push_back(stress);
 		}
 		return stress_vector;
@@ -156,17 +165,26 @@ namespace SPH {
 		Real stress_max = 0.0;
 		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
 		{
-			Real stress = 0.0;
-			if (stress_measure_ == "Cauchy") {
-				stress = von_Mises_stress_Cauchy(index_i);
-			} else if (stress_measure_ == "PK2") {
-				stress = von_Mises_stress_PK2(index_i);
-			} else {
-				throw std::runtime_error("getVonMisesStressMax: wrong input");
-			}
+			Real stress = get_von_Mises_stress(index_i);
 			if (stress_max < stress) stress_max = stress;
 		}
 		return stress_max;
+	}
+	//=================================================================================================//
+	void ElasticSolidParticles::writeParticlesToVtpFile(std::ostream &output_file)
+	{
+		SolidParticles::writeParticlesToVtpFile(output_file);
+
+		size_t total_real_particles = total_real_particles_;
+
+		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_real_particles; ++i)
+		{
+			output_file << std::fixed << std::setprecision(9) << get_von_Mises_stress(i) << " ";
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
 	}
 	//=================================================================================================//
 	StdLargeVec<Vecd> ElasticSolidParticles::getDisplacement()
@@ -189,7 +207,7 @@ namespace SPH {
 		return normal_vector;
 	}
 	//=================================================================================================//
-	void ElasticSolidParticles::writeParticlesToVtuFile(std::ostream& output_file)
+	void ElasticSolidParticles::writeParticlesToVtuFile(std::ostream &output_file)
 	{
 		SolidParticles::writeParticlesToVtuFile(output_file);
 
@@ -199,7 +217,7 @@ namespace SPH {
 		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_real_particles; ++i) {
-			output_file << std::fixed << std::setprecision(9) << von_Mises_stress_Cauchy(i) << " ";
+			output_file << std::fixed << std::setprecision(9) << get_von_Mises_stress(i) << " ";
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
@@ -234,25 +252,60 @@ namespace SPH {
 		output_file << "    </DataArray>\n";
 	}
 	//=================================================================================================//
-	void ElasticSolidParticles::writeSurfaceParticlesToVtuFile(std::ostream& output_file, ShapeSurface& surface_particles)
+	void ElasticSolidParticles::writeSurfaceParticlesToVtuFile(std::ostream& output_file, BodySurface& surface_particles)
 	{
 		SolidParticles::writeSurfaceParticlesToVtuFile(output_file, surface_particles);
 
 		size_t total_surface_particles = surface_particles.body_part_particles_.size();
 
-		//write von Mises stress
-		// precision: 6 - higher precision because it depends on the E modulus
-		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
+		/** write Min Principal stress */
+		/** precision: 6 - higher precision because it depends on the E modulus */
+		output_file << "    <DataArray Name=\"Principal stress\" type=\"Float32\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
 			size_t particle_i = surface_particles.body_part_particles_[i];
-			output_file << std::fixed << std::setprecision(6) << von_Mises_stress_Cauchy(particle_i) << " ";
+			Vecd stress = get_Principal_stresses(particle_i);
+			output_file << std::fixed << std::setprecision(6) << stress[0] << " "; // take the max. component, which is the first one, this represents the max. tension
 		}
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write Displacement
-		// precision: 3 - 0.1 mm accuracy
+		/** write von Mises stress */
+		/** precision: 6 - higher precision because it depends on the E modulus */
+		output_file << "    <DataArray Name=\"von Mises stress\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_surface_particles; ++i) {
+			size_t particle_i = surface_particles.body_part_particles_[i];
+			output_file << std::fixed << std::setprecision(6) << get_von_Mises_stress(particle_i) << " ";
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
+
+		/** write Min Principal strain */
+		/** precision: 3 - 0.1% accuracy */
+		output_file << "    <DataArray Name=\"Principal strain\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_surface_particles; ++i) {
+			size_t particle_i = surface_particles.body_part_particles_[i];
+			Vecd strain = get_Principal_strains(particle_i);
+			output_file << std::fixed << std::setprecision(3) << strain[0] << " "; // take the max. component, which is the first one, this represents the max. tension
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
+
+		/** write von Mises strain */
+		/** precision: 3 - 0.1% accuracy */
+		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
+		output_file << "    ";
+		for (size_t i = 0; i != total_surface_particles; ++i) {
+			size_t particle_i = surface_particles.body_part_particles_[i];
+			output_file << std::fixed << std::setprecision(3) << von_Mises_strain_static(particle_i) << " ";
+		}
+		output_file << std::endl;
+		output_file << "    </DataArray>\n";
+
+		/** write Displacement */
+		/** precision: 3 - 0.1 mm accuracy */
 		output_file << "    <DataArray Name=\"Displacement\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -265,8 +318,9 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 
-		//write Normal Vectors
-		/* // removed for production
+		/** write Normal Vectors  */
+		/*
+		// removed for production
 		output_file << "    <DataArray Name=\"Normal Vector\" type=\"Float32\" NumberOfComponents=\"3\" Format=\"ascii\">\n";
 		output_file << "    ";
 		for (size_t i = 0; i != total_surface_particles; ++i) {
@@ -277,20 +331,9 @@ namespace SPH {
 		output_file << std::endl;
 		output_file << "    </DataArray>\n";
 		*/
-
-		//write von Mises strain
-		// precision: 3 - 0.1% accuracy
-		output_file << "    <DataArray Name=\"von Mises strain\" type=\"Float32\" Format=\"ascii\">\n";
-		output_file << "    ";
-		for (size_t i = 0; i != total_surface_particles; ++i) {
-			size_t particle_i = surface_particles.body_part_particles_[i];
-			output_file << std::fixed << std::setprecision(3) << von_Mises_strain_static(particle_i) << " ";
-		}
-		output_file << std::endl;
-		output_file << "    </DataArray>\n";
 	}
 	//=================================================================================================//
-	void ElasticSolidParticles::writePltFileHeader(std::ofstream& output_file)
+	void ElasticSolidParticles::writePltFileHeader(std::ofstream &output_file)
 	{
 		SolidParticles::writePltFileHeader(output_file);
 
@@ -300,11 +343,11 @@ namespace SPH {
 		output_file << ",\" von Mises strain \"";
 	}
 	//=================================================================================================//
-	void ElasticSolidParticles::writePltFileParticleData(std::ofstream& output_file, size_t index_i)
+	void ElasticSolidParticles::writePltFileParticleData(std::ofstream &output_file, size_t index_i)
 	{
 		SolidParticles::writePltFileParticleData(output_file, index_i);
 		
-		output_file << von_Mises_stress_Cauchy(index_i) << " ";
+		output_file << get_von_Mises_stress(index_i) << " ";
 		Vecd displacement_vector = displacement(index_i);
 		output_file << displacement_vector[0] << " " << displacement_vector[1] << " " << displacement_vector[2] << " "
 			<< index_i << " ";
@@ -324,10 +367,12 @@ namespace SPH {
 		addAVariableNameToList<indexScalar, Real>(variables_to_restart_, "ActiveContractionStress");
 	}
 	//=============================================================================================//
-	ShellParticles::ShellParticles(SPHBody* body, ElasticSolid* elastic_solid, Real thickness)
-		: ElasticSolidParticles(body, elastic_solid)
+	ShellParticles::ShellParticles(SPHBody &sph_body,
+								   SharedPtr<ElasticSolid> shared_elastic_solid_ptr,
+								   SharedPtr<ParticleGenerator> particle_generator_ptr, Real thickness)
+		: ElasticSolidParticles(sph_body, shared_elastic_solid_ptr, particle_generator_ptr)
 	{
-		elastic_solid->assignElasticSolidParticles(this);
+		shared_elastic_solid_ptr->assignElasticSolidParticles(this);
 		//----------------------------------------------------------------------
 		//		register particle data
 		//----------------------------------------------------------------------

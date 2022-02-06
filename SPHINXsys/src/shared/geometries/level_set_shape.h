@@ -31,12 +31,12 @@ namespace SPH
 		virtual ~LevelSetShape(){};
 
 		virtual BoundingBox findBounds() override { return bounding_box_; };
-		virtual Vecd findClosestPoint(const Vecd &input_pnt) override;
-		virtual bool checkContain(const Vecd &input_pnt, bool BOUNDARY_INCLUDED = true) override;
-		virtual bool checkNotFar(const Vecd &input_pnt, Real threshold) override;
-		virtual bool checkNearSurface(const Vecd &input_pnt, Real threshold) override;
-		virtual Real findSignedDistance(const Vecd &input_pnt) override;
-		virtual Vecd findNormalDirection(const Vecd &input_pnt) override;
+		virtual Vecd findClosestPoint(const Vecd &input_pnt) const override;
+		virtual bool checkContain(const Vecd &input_pnt, bool BOUNDARY_INCLUDED = true) const override;
+		virtual bool checkNotFar(const Vecd &input_pnt, Real threshold) const override;
+		virtual bool checkNearSurface(const Vecd &input_pnt, Real threshold) const override;
+		virtual Real findSignedDistance(const Vecd &input_pnt) const override;
+		virtual Vecd findNormalDirection(const Vecd &input_pnt) const override;
 
 		virtual Real computeKernelIntegral(const Vecd &input_pnt, Real h_ratio = 1.0);
 		virtual Vecd computeKernelGradientIntegral(const Vecd &input_pnt, Real h_ratio = 1.0);

@@ -19,7 +19,7 @@ namespace SPH
 		return triangle_mesh;
 	}
 	//=================================================================================================//
-	bool TriangleMeshShape::checkContain(const Vec3d &pnt, bool BOUNDARY_INCLUDED)
+	bool TriangleMeshShape::checkContain(const Vec3d &pnt, bool BOUNDARY_INCLUDED) const
 	{
 
 		SimTK::Vec2 uv_coordinate;
@@ -65,7 +65,7 @@ namespace SPH
 		return weighted_inside;
 	}
 	//=================================================================================================//
-	Vec3d TriangleMeshShape::findClosestPoint(const Vec3d &input_pnt)
+	Vec3d TriangleMeshShape::findClosestPoint(const Vec3d &input_pnt) const
 	{
 		bool inside = false;
 		int face_id;

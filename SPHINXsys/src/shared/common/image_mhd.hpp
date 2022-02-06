@@ -212,7 +212,7 @@ namespace SPH {
 
 	//=================================================================================================//
 	template<typename T, int nDims>
-	std::vector<int> ImageMHD<T, nDims>::findNeighbors(const Vec3d& input_pnt, Vec3i& this_cell)
+	std::vector<int> ImageMHD<T, nDims>::findNeighbors(const Vec3d& input_pnt, Vec3i& this_cell) const
 	{
 		std::vector<int> neighbors;
 
@@ -326,7 +326,7 @@ namespace SPH {
 	}
 
 	template<typename T, int nDims>
-	T ImageMHD<T, nDims>::getValueAtCell(int i)
+	T ImageMHD<T, nDims>::getValueAtCell(int i) const
 	{
 		if (i < 0 || i > size_)
 		{
@@ -415,7 +415,7 @@ namespace SPH {
 	}
 
 	template<typename T, int nDims>
-	Real ImageMHD<T, nDims>::findValueAtPoint(const Vec3d& input_pnt)
+	Real ImageMHD<T, nDims>::findValueAtPoint(const Vec3d& input_pnt) const
 	{
 		Vec3i this_cell;
 		std::vector<int> neighbors = findNeighbors(input_pnt, this_cell);

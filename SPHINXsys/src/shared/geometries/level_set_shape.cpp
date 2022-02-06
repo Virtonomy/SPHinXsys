@@ -30,12 +30,12 @@ namespace SPH
 		}
 	}
 	//=================================================================================================//
-	bool LevelSetShape::checkContain(const Vecd &input_pnt, bool BOUNDARY_INCLUDED)
+	bool LevelSetShape::checkContain(const Vecd &input_pnt, bool BOUNDARY_INCLUDED) const
 	{
 		return level_set_->probeSignedDistance(input_pnt) < 0.0 ? true : false;
 	}
 	//=================================================================================================//
-	bool LevelSetShape::checkNearSurface(const Vecd &input_pnt, Real threshold)
+	bool LevelSetShape::checkNearSurface(const Vecd &input_pnt, Real threshold) const
 	{
 		if (!checkNotFar(input_pnt, threshold))
 			return false;
@@ -45,18 +45,18 @@ namespace SPH
 				   : false;
 	}
 	//=================================================================================================//
-	Real LevelSetShape::findSignedDistance(const Vecd &input_pnt)
+	Real LevelSetShape::findSignedDistance(const Vecd &input_pnt) const
 	{
 		return level_set_->probeSignedDistance(input_pnt);
 	}
 	//=================================================================================================//
-	Vecd LevelSetShape::findNormalDirection(const Vecd &input_pnt)
+	Vecd LevelSetShape::findNormalDirection(const Vecd &input_pnt) const
 	{
 		//std::cout << "LevelSetComplexShape::findNormalDirection called" << std::endl; //to check if LevelSetComplexShape::findNormalDirection is called
 		return level_set_->probeNormalDirection(input_pnt);
 	}
 	//=================================================================================================//
-	bool LevelSetShape::checkNotFar(const Vecd &input_pnt, Real threshold)
+	bool LevelSetShape::checkNotFar(const Vecd &input_pnt, Real threshold) const
 	{
 		return level_set_->probeIsWithinMeshBound(input_pnt);
 	}
@@ -71,7 +71,7 @@ namespace SPH
 		return level_set_->probeKernelGradientIntegral(input_pnt, h_ratio);
 	}
 	//=================================================================================================//
-	Vecd LevelSetShape::findClosestPoint(const Vecd &input_pnt)
+	Vecd LevelSetShape::findClosestPoint(const Vecd &input_pnt) const
 	{
 		Real phi = level_set_->probeSignedDistance(input_pnt);
 		Vecd normal = level_set_->probeNormalDirection(input_pnt);

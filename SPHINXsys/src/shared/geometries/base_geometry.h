@@ -68,15 +68,15 @@ namespace SPH
 		std::string getName() { return name_; };
 		void setName(const std::string &name) { name_ = name; };
 		virtual BoundingBox findBounds() = 0;
-		virtual bool checkContain(const Vecd &pnt, bool BOUNDARY_INCLUDED = true) = 0;
-		virtual Vecd findClosestPoint(const Vecd &input_pnt) = 0;
+		virtual bool checkContain(const Vecd &pnt, bool BOUNDARY_INCLUDED = true) const = 0;
+		virtual Vecd findClosestPoint(const Vecd &input_pnt) const = 0;
 
-		virtual bool checkNotFar(const Vecd &input_pnt, Real threshold);
-		virtual bool checkNearSurface(const Vecd &input_pnt, Real threshold);
+		virtual bool checkNotFar(const Vecd &input_pnt, Real threshold) const;
+		virtual bool checkNearSurface(const Vecd &input_pnt, Real threshold) const;
 		/** Signed distance is negative for point within the complex shape. */
-		virtual Real findSignedDistance(const Vecd &input_pnt);
+		virtual Real findSignedDistance(const Vecd &input_pnt) const;
 		/** Normal direction point toward outside of the complex shape. */
-		virtual Vecd findNormalDirection(const Vecd &input_pnt);
+		virtual Vecd findNormalDirection(const Vecd &input_pnt) const;
 
 	protected:
 		std::string name_;
@@ -118,8 +118,8 @@ namespace SPH
 		};
 
 		virtual BoundingBox findBounds() override;
-		virtual bool checkContain(const Vecd &pnt, bool BOUNDARY_INCLUDED = true) override;
-		virtual Vecd findClosestPoint(const Vecd &input_pnt) override;
+		virtual bool checkContain(const Vecd &pnt, bool BOUNDARY_INCLUDED = true) const override;
+		virtual Vecd findClosestPoint(const Vecd &input_pnt) const override;
 		Shape *getShapeByName(const std::string &shape_name);
 		ShapeAndOp *getShapeAndOpByName(const std::string &shape_name);
 

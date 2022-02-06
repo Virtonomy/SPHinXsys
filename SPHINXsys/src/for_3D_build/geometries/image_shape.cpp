@@ -5,7 +5,7 @@
 namespace SPH
 {
 	//=================================================================================================//
-	bool ImageShape::checkContain(const Vec3d &input_pnt, bool BOUNDARY_INCLUDED)
+	bool ImageShape::checkContain(const Vec3d &input_pnt, bool BOUNDARY_INCLUDED) const
 	{
 		Real value = findSignedDistance(input_pnt);
 		if (BOUNDARY_INCLUDED == true)
@@ -24,7 +24,7 @@ namespace SPH
 		}
 	}
 	//=================================================================================================//
-	Vec3d ImageShape::findClosestPoint(const Vec3d &input_pnt)
+	Vec3d ImageShape::findClosestPoint(const Vec3d &input_pnt) const
 	{
 		return image_->findClosestPoint(input_pnt);
 	}
@@ -34,22 +34,22 @@ namespace SPH
 		return image_->findBounds();
 	}
 	//=================================================================================================//
-	Real ImageShape::findSignedDistance(const Vec3d &input_pnt)
+	Real ImageShape::findSignedDistance(const Vec3d &input_pnt) const
 	{
 		return image_->findValueAtPoint(input_pnt);
 	}
 	//=================================================================================================//
-	Vec3d ImageShape::findNormalDirection(const Vec3d &input_pnt)
+	Vec3d ImageShape::findNormalDirection(const Vec3d &input_pnt) const
 	{
 		return image_->findNormalAtPoint(input_pnt);
 	}
 	//=================================================================================================//
-	bool ImageShape::checkNotFar(const Vec3d &input_pnt, Real threshold)
+	bool ImageShape::checkNotFar(const Vec3d &input_pnt, Real threshold) const
 	{
 		return checkContain(input_pnt) || checkNearSurface(input_pnt, threshold) ? true : false;
 	}
 	//=================================================================================================//
-	bool ImageShape::checkNearSurface(const Vec3d &input_pnt, Real threshold)
+	bool ImageShape::checkNearSurface(const Vec3d &input_pnt, Real threshold) const
 	{
 		return getMaxAbsoluteElement(input_pnt - findClosestPoint(input_pnt)) < threshold ? true : false;
 	}

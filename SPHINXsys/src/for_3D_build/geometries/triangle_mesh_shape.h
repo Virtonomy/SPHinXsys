@@ -60,8 +60,8 @@ namespace SPH
 		explicit TriangleMeshShape(const std::string &shape_name)
 			: Shape(shape_name), triangle_mesh_(nullptr){};
 
-		virtual bool checkContain(const Vec3d &pnt, bool BOUNDARY_INCLUDED = true) override;
-		virtual Vec3d findClosestPoint(const Vec3d &input_pnt) override;
+		virtual bool checkContain(const Vec3d &pnt, bool BOUNDARY_INCLUDED = true) const override;
+		virtual Vec3d findClosestPoint(const Vec3d &input_pnt) const override;
 		virtual BoundingBox findBounds() override;
 
 		SimTK::ContactGeometry::TriangleMesh *getTriangleMesh() { return triangle_mesh_; };

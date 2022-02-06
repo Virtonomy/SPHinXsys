@@ -7,23 +7,23 @@
 namespace SPH
 {
 	//=================================================================================================//
-	bool Shape::checkNotFar(const Vecd &input_pnt, Real threshold)
+	bool Shape::checkNotFar(const Vecd &input_pnt, Real threshold) const
 	{
 		return checkContain(input_pnt) || checkNearSurface(input_pnt, threshold) ? true : false;
 	}
 	//=================================================================================================//
-	bool Shape::checkNearSurface(const Vecd &input_pnt, Real threshold)
+	bool Shape::checkNearSurface(const Vecd &input_pnt, Real threshold) const
 	{
 		return getMaxAbsoluteElement(input_pnt - findClosestPoint(input_pnt)) < threshold ? true : false;
 	}
 	//=================================================================================================//
-	Real Shape::findSignedDistance(const Vecd &input_pnt)
+	Real Shape::findSignedDistance(const Vecd &input_pnt) const
 	{
 		Real distance_to_surface = (input_pnt - findClosestPoint(input_pnt)).norm();
 		return checkContain(input_pnt) ? -distance_to_surface : distance_to_surface;
 	}
 	//=================================================================================================//
-	Vecd Shape::findNormalDirection(const Vecd &input_pnt)
+	Vecd Shape::findNormalDirection(const Vecd &input_pnt) const
 	{
 		bool is_contain = checkContain(input_pnt);
 		Vecd displacement_to_surface = findClosestPoint(input_pnt) - input_pnt;
@@ -57,7 +57,7 @@ namespace SPH
 		return BoundingBox(lower_bound, upper_bound);
 	}
 	//=================================================================================================//
-	bool BinaryShapes::checkContain(const Vecd &pnt, bool BOUNDARY_INCLUDED)
+	bool BinaryShapes::checkContain(const Vecd &pnt, bool BOUNDARY_INCLUDED) const
 	{
 		bool exist = false;
 		bool inside = false;
@@ -91,7 +91,7 @@ namespace SPH
 		return exist;
 	}
 	//=================================================================================================//
-	Vecd BinaryShapes::findClosestPoint(const Vecd &input_pnt)
+	Vecd BinaryShapes::findClosestPoint(const Vecd &input_pnt) const
 	{
 		//a big positive number
 		Real large_number(Infinity);

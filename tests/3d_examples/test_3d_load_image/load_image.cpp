@@ -32,7 +32,7 @@ int main(int ac, char *av[])
 	//----------------------------------------------------------------------
 	SolidBodyFromMesh solid_body_from_mesh(system, "SolidBodyFromMesh");
 	SolidParticles solid_body_from_mesh_particles(solid_body_from_mesh, makeShared<ParticleGeneratorMultiResolution>());
-	solid_body_from_mesh_particles.addAVariableToWrite<indexScalar, Real>("SmoothingLengthRatio");
+	solid_body_from_mesh_particles.addAVariableToWrite<Real>("SmoothingLengthRatio");
 	//----------------------------------------------------------------------
 	//	Define simple file input and outputs functions.
 	//----------------------------------------------------------------------

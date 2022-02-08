@@ -66,7 +66,7 @@ namespace SPH
 	class In_Output
 	{
 	public:
-		explicit In_Output(SPHSystem &sph_system, bool delete_output = true);
+		explicit In_Output(SPHSystem &sph_system);
 		virtual ~In_Output(){};
 
 		SPHSystem &sph_system_;
@@ -288,17 +288,17 @@ namespace SPH
 	};
 
 	/**
-	 * @class BodyStatesRecordingToVtpString
+	 * @class BodyStatesRecordingToVtuString
 	 * @brief  Write strings for bodies
 	 * the output is map of strings with VTK XML format can visualized by ParaView
 	 * the data type vtkUnstructedGrid
 	 */
-	class BodyStatesRecordingToVtpString : public BodyStatesRecording
+	class BodyStatesRecordingToVtuString : public BodyStatesRecording
 	{
 	public:
-		BodyStatesRecordingToVtpString(In_Output& in_output, SPHBodyVector bodies)
+		BodyStatesRecordingToVtuString(In_Output& in_output, SPHBodyVector bodies)
 			: BodyStatesRecording(in_output, bodies) {};
-		virtual ~BodyStatesRecordingToVtpString() = default;
+		virtual ~BodyStatesRecordingToVtuString() = default;
 
 		using VtuStringData = std::map<std::string, std::string>;
 
@@ -308,6 +308,22 @@ namespace SPH
 		virtual void writeVtu(std::ostream& stream, SPHBody* body) const;
 	private:
 		VtuStringData _vtuData;
+	};
+
+	/**
+	 * @class SurfaceOnlyBodyStatesRecordingToVtu
+	 * @brief  Write files for surface particles of bodies
+	 * the output file is VTK XML format can visualized by ParaView
+	 * the data type vtkUnstructedGrid
+	 */
+	class SurfaceOnlyBodyStatesRecordingToVtu : public BodyStatesRecording
+	{
+	public:
+		SurfaceOnlyBodyStatesRecordingToVtu(In_Output& in_output, SPHBodyVector bodies);
+
+	protected:
+		virtual void writeWithFileName(const std::string& sequence) override;
+		StdVec<BodySurface> surface_body_layer_vector_;
 	};
 
 	/**
@@ -367,9 +383,9 @@ namespace SPH
 	 * @class ObservedQuantityRecording
 	 * @brief write files for observed quantity
 	 */
-	template <int DataTypeIndex, typename VariableType>
+	template <typename VariableType>
 	class ObservedQuantityRecording : public BodyStatesRecording,
-									  public observer_dynamics::ObservingAQuantity<DataTypeIndex, VariableType>
+									  public observer_dynamics::ObservingAQuantity<VariableType>
 	{
 	protected:
 		SPHBody *observer_;
@@ -389,7 +405,7 @@ namespace SPH
 		ObservedQuantityRecording(const std::string &quantity_name, In_Output &in_output,
 								  BaseBodyRelationContact &contact_relation)
 			: BodyStatesRecording(in_output, *contact_relation.sph_body_),
-			  observer_dynamics::ObservingAQuantity<DataTypeIndex, VariableType>(contact_relation, quantity_name),
+			  observer_dynamics::ObservingAQuantity<VariableType>(contact_relation, quantity_name),
 			  observer_(contact_relation.sph_body_), plt_engine_(), xmlmemory_io_(),
 			  base_particles_(observer_->base_particles_), body_name_(contact_relation.sph_body_->getBodyName()),
 			  quantity_name_(quantity_name), observe_xml_engine_("xml_observe", quantity_name_)

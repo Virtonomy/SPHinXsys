@@ -79,16 +79,18 @@ namespace SPH
 		Real BulkModulus() { return K0_; };
 		Real PoissonRatio() { return nu_; };
 
-		/** compute the stress through defoemation, which can be green-lagrangian tensor, left or right cauchy tensor. */
+		/** Compute the stress through deformation, which can be Green-Lagrangian tensor, left or right Cauchy tensor. */
 		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) = 0;
-		/** Compute numerical damping stress using right cauchy tensor. */
+		/** Compute the Cauchy stress through Eulerian Almansi strain tensor. */
+		virtual Matd EulerianConstitutiveRelation(Matd &almansi_strain, Matd &F, size_t particle_index_i) = 0;
+		/** Compute numerical damping stress using right Cauchy tensor. */
 		virtual Matd NumericalDampingRightCauchy(Matd &deformation, Matd &deformation_rate, Real smoothing_length, size_t particle_index_i);
-		/** Compute numerical damping stress using left cauchy tensor. */
+		/** Compute numerical damping stress using left Cauchy tensor. */
 		virtual Matd NumericalDampingLeftCauchy(Matd &deformation, Matd &deformation_rate, Real smoothing_length, size_t particle_index_i);
-		/** numerical demaping is computed between particles i and j */
+		/** Numerical demaping is computed between particles i and j */
 		virtual Real PairNumericalDamping(Real dE_dt_ij, Real smoothing_length);
 
-		/** Deviatoric Kirchhoff stress related with the deviatoric part of left cauchy-green deformation tensor.
+		/** Deviatoric Kirchhoff stress related with the deviatoric part of left Cauchy-Green deformation tensor.
 		 *  Note that, dependent of the normalizeation of the later, the returned stress can be normalized or non-normalized. */
 		virtual Matd DeviatoricKirchhoff(const Matd &deviatoric_be);
 		/** Volumetric Kirchhoff stress from determinate */
@@ -110,21 +112,15 @@ namespace SPH
 		explicit LinearElasticSolid(Real rho0, Real youngs_modulus, Real poisson_ratio);
 		virtual ~LinearElasticSolid(){};
 
-		virtual void assignElasticMaterialParameters(Real youngs_modulus, Real poisson_ratio);
-
 		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
+		virtual Matd EulerianConstitutiveRelation(Matd &almansi_strain, Matd &F, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress from determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;
-		/** Define the calculation of the stress matrix for postprocessing */
-		virtual std::string getRelevantStressMeasureName() override { return "PK2"; };
-
-		/** get methods */
-		Real getYoungsModulus() { return E0_; };
-		Real getPoissonRatio() { return nu_; };
-		Real getDensity() { return rho0_; };
 
 	protected:
 		Real lambda0_; /*< first Lame parameter */
+
+	private:
 		Real getBulkModulus(Real youngs_modulus, Real poisson_ratio);
 		Real getShearModulus(Real youngs_modulus, Real poisson_ratio);
 		Real getLambda(Real youngs_modulus, Real poisson_ratio);
@@ -146,30 +142,8 @@ namespace SPH
 
 		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
 		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
+		virtual Matd EulerianConstitutiveRelation(Matd &almansi_strain, Matd &F, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress from determinate */
-		virtual Real VolumetricKirchhoff(Real J) override;
-		/** Define the calculation of the stress matrix for postprocessing */
-		virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
-	};
-
-	/**
-	* @class NeoHookeanSolidIncompressible
-	* @brief Neo-Hookean solid, Incomressible formulation!
-	* Currently only works with KirchhoffStressRelaxationFirstHalf, not with StressRelaxationFirstHalf
-	*/
-	class NeoHookeanSolidIncompressible : public LinearElasticSolid
-	{
-	public:
-		NeoHookeanSolidIncompressible(Real rho_0, Real Youngs_modulus, Real poisson)
-			: LinearElasticSolid(rho_0, Youngs_modulus, poisson)
-		{
-			material_type_ = "NeoHookeanSolidIncompressible";
-		};
-		virtual ~NeoHookeanSolidIncompressible() {};
-	
-		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
-		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
-		/** Volumetric Kirchhoff stress determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;
 	};
 
@@ -221,10 +195,8 @@ namespace SPH
 		{
 			material_type_ = "FeneNeoHookeanSolid";
 		};
-		virtual ~FeneNeoHookeanSolid() {};
-		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
-		/** Define the calculation of the stress matrix for postprocessing */
-		virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
+		virtual ~FeneNeoHookeanSolid(){};
+		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
 	};
 
 	/**
@@ -253,6 +225,8 @@ namespace SPH
 		virtual Real VolumetricKirchhoff(Real J) override;
 		/** Define the calculation of the stress matrix for postprocessing */
 		virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
+
+		virtual Muscle *ThisObjectPtr() override { return this; };
 
 		virtual Muscle *ThisObjectPtr() override { return this; };
 
@@ -298,10 +272,8 @@ namespace SPH
 		virtual void assignElasticSolidParticles(ElasticSolidParticles *elastic_particles) override;
 		virtual Matd MuscleFiberDirection(size_t particle_index_i) override { return local_f0f0_[particle_index_i]; };
 		/** Compute the stress through Constitutive relation. */
-		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
+		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
 		virtual void readFromXmlForLocalParameters(const std::string &filefullpath) override;
-		/** Define the calculation of the stress matrix for postprocessing */
-		virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
 	};
 }
 #endif //ELASTIC_SOLID_H

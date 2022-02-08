@@ -79,10 +79,6 @@ namespace SPH
 		//constructor for load STL file from out side
 		explicit TriangleMeshShapeSTL(const std::string &file_path_name, Vec3d translation, Real scale_factor,
 									  const std::string &shape_name = "TriangleMeshShapeSTL");
-		#ifdef __EMSCRIPTEN__
-		//constructor for load stl file from buffer
-		TriangleMeshShapeSTL(const uint8_t* buffer, Vec3d translation, Real scale_factor, const std::string &shape_name = "TriangleMeshShapeSTL");
-		#endif
 		virtual ~TriangleMeshShapeSTL(){};
 	};
 

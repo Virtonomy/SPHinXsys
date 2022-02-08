@@ -116,16 +116,6 @@ namespace SPH
 		polymesh.scaleMesh(scale_factor);
 		triangle_mesh_ = generateTriangleMesh(polymesh.transformMesh(translation));
 	}
-	//=================================================================================================//
-	#ifdef __EMSCRIPTEN__	
-	TriangleMeshShapeSTL::TriangleMeshShapeSTL(const uint8_t* buffer, Vec3d translation, Real scale_factor, const std::string &shape_name)
-		: TriangleMeshShape(shape_name)
-	{
-		SimTK::PolygonalMesh polymesh;
-		polymesh.loadStlBuffer(buffer);
-		polymesh.scaleMesh(scale_factor);
-		triangle_mesh_ = generateTriangleMesh(polymesh.transformMesh(translation));
-	}
 	#endif
 	//=================================================================================================//
 	TriangleMeshShapeBrick::

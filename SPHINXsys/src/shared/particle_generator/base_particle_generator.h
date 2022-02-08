@@ -67,7 +67,6 @@ namespace SPH
 	{
 	public:
 		ParticleGeneratorDirect() : ParticleGenerator(){};
-		ParticleGeneratorDirect(StdLargeVec<Vecd>& pos_0, StdLargeVec<Real>& volume);
 		virtual ~ParticleGeneratorDirect(){};
 		virtual void createBaseParticles(BaseParticles *base_particles) override;
 	

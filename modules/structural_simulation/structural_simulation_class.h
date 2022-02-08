@@ -37,25 +37,25 @@ using PositionScaleSolidBodyTuple = tuple<int, Real, Real, Real>;
 using TranslateSolidBodyTuple = tuple<int, Real, Real, Vec3d>;
 using TranslateSolidBodyPartTuple = tuple<int, Real, Real, Vec3d, BoundingBox>;
 
-class BodyPartFromMesh : public BodyRegionByParticle
+class BodyPartByParticleTriMesh : public BodyRegionByParticle
 {
 public:
-	BodyPartFromMesh(SPHBody &body, const string &body_part_name, TriangleMeshShape &triangle_mesh_shape);
-	~BodyPartFromMesh(){};
+	BodyPartByParticleTriMesh(SPHBody &body, const string &body_part_name, TriangleMeshShape &triangle_mesh_shape);
+	~BodyPartByParticleTriMesh(){};
 };
 
-class SolidBodyFromMesh : public SolidBody
+class ImportedModel : public SolidBody
 {
 public:
-	SolidBodyFromMesh(SPHSystem &system, const string &body_name, TriangleMeshShape &triangle_mesh_shape,
+	ImportedModel(SPHSystem &system, const string &body_name, TriangleMeshShape &triangle_mesh_shape,
 				  SharedPtr<SPHAdaptation> particle_adaptation, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume);
-	~SolidBodyFromMesh(){};
+	~ImportedModel(){};
 };
 
 class SolidBodyForSimulation
 {
 private:
-	SolidBodyFromMesh solid_body_from_mesh_;
+	ImportedModel imported_model_;
 	//LinearElasticSolid material_model_;
 	ElasticSolidParticles elastic_solid_particles_;
 	BodyRelationInner inner_body_relation_;
@@ -63,7 +63,7 @@ private:
 	solid_dynamics::CorrectConfiguration correct_configuration_;
 	solid_dynamics::StressRelaxationFirstHalf stress_relaxation_first_half_;
 	solid_dynamics::StressRelaxationSecondHalf stress_relaxation_second_half_;
-	DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec3d>> damping_random_;
+	DampingWithRandomChoice<DampingPairwiseInner<Vec3d>> damping_random_;
 
 public:
 	SolidBodyForSimulation(
@@ -71,23 +71,24 @@ public:
 		Real physical_viscosity, SharedPtr<LinearElasticSolid> material_model, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume);
 	~SolidBodyForSimulation(){};
 
-	SolidBodyFromMesh *getSolidBodyFromMesh() { return &solid_body_from_mesh_; };
+	ImportedModel *getImportedModel() { return &imported_model_; };
+	//LinearElasticSolid* GetMaterialModel() { return &material_model_; };
 	ElasticSolidParticles *getElasticSolidParticles() { return &elastic_solid_particles_; };
 	BodyRelationInner *getInnerBodyRelation() { return &inner_body_relation_; };
 
 	solid_dynamics::CorrectConfiguration *getCorrectConfiguration() { return &correct_configuration_; };
 	solid_dynamics::StressRelaxationFirstHalf *getStressRelaxationFirstHalf() { return &stress_relaxation_first_half_; };
 	solid_dynamics::StressRelaxationSecondHalf *getStressRelaxationSecondHalf() { return &stress_relaxation_second_half_; };
-	DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec3d>> *getDampingWithRandomChoice() { return &damping_random_; };
+	DampingWithRandomChoice<DampingPairwiseInner<Vec3d>> *getDampingWithRandomChoice() { return &damping_random_; };
 };
 
 void expandBoundingBox(BoundingBox *original, BoundingBox *additional);
 
 void relaxParticlesSingleResolution(In_Output &in_output,
 									bool write_particles_to_file,
-									SolidBodyFromMesh &solid_body_from_mesh,
-									ElasticSolidParticles &solid_body_from_mesh_particles,
-									BodyRelationInner &solid_body_from_mesh_inner);
+									ImportedModel &imported_model,
+									ElasticSolidParticles &imported_model_particles,
+									BodyRelationInner &imported_model_inner);
 
 static inline Real getPhysicalViscosityGeneral(Real rho, Real youngs_modulus, Real length_scale, Real shape_constant = 1.0)
 {
@@ -129,6 +130,8 @@ public:
 	vector<PositionScaleSolidBodyTuple> position_scale_solid_body_tuple_;
 	vector<TranslateSolidBodyTuple> translation_solid_body_tuple_;
 	vector<TranslateSolidBodyPartTuple> translation_solid_body_part_tuple_;
+	//option to only write surface particles into vtu
+	bool surface_particles_only_to_vtu_;
 
 	StructuralSimulationInput(
 		const string &relative_input_path,
@@ -147,7 +150,7 @@ private:
 	UniquePtrVectorKeeper<SolidBodyRelationContact> contact_relation_ptr_keeper_;
 	UniquePtrVectorKeeper<Gravity> gravity_ptr_keeper_;
 	UniquePtrVectorKeeper<TriangleMeshShape> tri_mesh_shape_ptr_keeper_;
-	UniquePtrVectorKeeper<BodyPartFromMesh> body_part_tri_mesh_ptr_keeper_;
+	UniquePtrVectorKeeper<BodyPartByParticleTriMesh> body_part_tri_mesh_ptr_keeper_;
 
 protected:
 	// mandatory input
@@ -214,6 +217,8 @@ protected:
 	// for TranslateSolidBodyPart
 	vector<shared_ptr<solid_dynamics::TranslateSolidBodyPart>> translation_solid_body_part_;
 	vector<TranslateSolidBodyPartTuple> translation_solid_body_part_tuple_;
+	//option to only write surface particles into vtu
+	bool surface_particles_only_to_vtu_;
 
 	// iterators
 	int iteration_;

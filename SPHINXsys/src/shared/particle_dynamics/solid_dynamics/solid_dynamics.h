@@ -37,9 +37,9 @@
 
 namespace SPH
 {
-	template <int DataTypeIndex, typename VariableType>
+	template <typename VariableType>
 	class BodySummation;
-	template <int DataTypeIndex, typename VariableType>
+	template <typename VariableType>
 	class BodyMoment;
 
 	namespace solid_dynamics
@@ -295,7 +295,7 @@ namespace SPH
 			Matd correction_matrix_;
 			Vecd velocity_correction_;
 			StdLargeVec<Vecd> &vel_n_;
-			BodyMoment<indexVector, Vecd> compute_total_momentum_;
+			BodyMoment<Vecd> compute_total_momentum_;
 		};
 
 		/**@class ImposeExternalForce
@@ -425,7 +425,6 @@ namespace SPH
 		public:
 			ForceInBodyRegion(SPHBody &sph_body, BodyPartByParticle &body_part, Vecd force, Real end_time);
 
-			StdLargeVec<bool>& GetApplyForceToParticle(){ return apply_force_to_particle_; }
 		protected:
 			StdLargeVec<Vecd> &pos_0_, &dvel_dt_prior_;
 			Vecd acceleration_;
@@ -607,7 +606,7 @@ namespace SPH
 			StdLargeVec<Real> J_to_minus_2_over_dimension_;
 			StdLargeVec<Matd> stress_on_particle_, inverse_F_T_;
 			const Real one_over_dimensions_ = 1.0 / (Real)Dimensions;
-			const Real correction_factor_ = 1.05;
+			Real correction_factor_;
 
 			virtual void Initialization(size_t index_i, Real dt = 0.0) override;
 			virtual void Interaction(size_t index_i, Real dt = 0.0) override;

@@ -12,7 +12,7 @@
 /* global functions in StructuralSimulation  */
 ////////////////////////////////////////////////////
 
-BodyPartFromMesh::BodyPartFromMesh(SPHBody &body, const string &body_part_name, TriangleMeshShape &triangle_mesh_shape)
+BodyPartByParticleTriMesh::BodyPartByParticleTriMesh(SPHBody &body, const string &body_part_name, TriangleMeshShape &triangle_mesh_shape)
 	: BodyRegionByParticle(body, body_part_name, triangle_mesh_shape)
 {
 	// set the body domain bounds because it is not set by default
@@ -20,7 +20,7 @@ BodyPartFromMesh::BodyPartFromMesh(SPHBody &body, const string &body_part_name, 
 	setBodyPartBounds(bounds);
 }
 
-SolidBodyFromMesh::SolidBodyFromMesh(
+ImportedModel::ImportedModel(
 	SPHSystem &system, const string &body_name, TriangleMeshShape &triangle_mesh_shape,
 	SharedPtr<SPHAdaptation> particle_adaptation, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume)
 	: SolidBody(system, body_name, particle_adaptation)
@@ -35,15 +35,15 @@ SolidBodyFromMesh::SolidBodyFromMesh(
 SolidBodyForSimulation::SolidBodyForSimulation(
 	SPHSystem &system, const string &body_name, TriangleMeshShape &triangle_mesh_shape, SharedPtr<SPHAdaptation> particle_adaptation,
 	Real physical_viscosity, SharedPtr<LinearElasticSolid> material_model, StdLargeVec<Vecd> &pos_0, StdLargeVec<Real> &volume)
-	: solid_body_from_mesh_(system, body_name, triangle_mesh_shape, particle_adaptation, pos_0, volume),
+	: imported_model_(system, body_name, triangle_mesh_shape, particle_adaptation, pos_0, volume),
 	  //material_model_(material_model),
-	  elastic_solid_particles_(solid_body_from_mesh_, material_model),
-	  inner_body_relation_(solid_body_from_mesh_),
+	  elastic_solid_particles_(imported_model_, material_model),
+	  inner_body_relation_(imported_model_),
 
 	  correct_configuration_(solid_dynamics::CorrectConfiguration(inner_body_relation_)),
 	  stress_relaxation_first_half_(solid_dynamics::StressRelaxationFirstHalf(inner_body_relation_)),
 	  stress_relaxation_second_half_(solid_dynamics::StressRelaxationSecondHalf(inner_body_relation_)),
-	  damping_random_(DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec3d>>(inner_body_relation_, 0.2, "Velocity", physical_viscosity))
+	  damping_random_(DampingWithRandomChoice<DampingPairwiseInner<Vec3d>>(inner_body_relation_, 0.2, "Velocity", physical_viscosity))
 {
 }
 
@@ -64,27 +64,27 @@ void expandBoundingBox(BoundingBox *original, BoundingBox *additional)
 
 void relaxParticlesSingleResolution(In_Output &in_output,
 									bool write_particle_relaxation_data,
-									SolidBody &solid_body_from_mesh,
-									BodyRelationInner &solid_body_from_mesh_inner)
+									SolidBody &imported_model,
+									BodyRelationInner &imported_model_inner)
 {
-	BodyStatesRecordingToVtp write_solid_body_from_mesh_to_vtp(in_output, solid_body_from_mesh);
+	BodyStatesRecordingToVtp write_imported_model_to_vtp(in_output, imported_model);
 
 	//----------------------------------------------------------------------
 	//	Methods used for particle relaxation.
 	//----------------------------------------------------------------------
-	RandomizePartilePosition random_solid_body_from_mesh_particles(solid_body_from_mesh);
+	RandomizePartilePosition random_imported_model_particles(imported_model);
 	/** A  Physics relaxation step. */
-	relax_dynamics::SolidRelaxationStepInner relaxation_step_inner(solid_body_from_mesh_inner, true);
+	relax_dynamics::SolidRelaxationStepInner relaxation_step_inner(imported_model_inner, true);
 	//----------------------------------------------------------------------
 	//	Particle relaxation starts here.
 	//----------------------------------------------------------------------
-	random_solid_body_from_mesh_particles.parallel_exec(0.25);
+	random_imported_model_particles.parallel_exec(0.25);
 	relaxation_step_inner.surface_bounding_.parallel_exec();
 	if (write_particle_relaxation_data)
 	{
-		write_solid_body_from_mesh_to_vtp.writeToFile(0.0);
+		write_imported_model_to_vtp.writeToFile(0.0);
 	}
-	solid_body_from_mesh.updateCellLinkedList();
+	imported_model.updateCellLinkedList();
 	//----------------------------------------------------------------------
 	//	Particle relaxation time stepping start here.
 	//----------------------------------------------------------------------
@@ -98,14 +98,14 @@ void relaxParticlesSingleResolution(In_Output &in_output,
 			std::cout << std::fixed << std::setprecision(9) << "Relaxation steps for the imported model N = " << ite_p << "\n";
 			if (write_particle_relaxation_data)
 			{
-				write_solid_body_from_mesh_to_vtp.writeToFile(ite_p);
+				write_imported_model_to_vtp.writeToFile(ite_p);
 			}
 		}
 	}
 	std::cout << "The physics relaxation process of the imported model finished !" << std::endl;
 }
 
-std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> generateAndRelaxParticlesFromMesh(
+std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> getParticlesFromTriangleMeshShape(
 	TriangleMeshShape &triangle_mesh_shape, Real resolution, bool particle_relaxation, bool write_particle_relaxation_data)
 {
 	BoundingBox bb = triangle_mesh_shape.findBounds();
@@ -173,6 +173,7 @@ StructuralSimulationInput::StructuralSimulationInput(
 	position_scale_solid_body_tuple_ = {};
 	translation_solid_body_tuple_ = {};
 	translation_solid_body_part_tuple_ = {};
+	surface_particles_only_to_vtu_ = false;
 };
 
 ///////////////////////////////////////
@@ -212,6 +213,7 @@ StructuralSimulation::StructuralSimulation(StructuralSimulationInput &input)
 	  position_scale_solid_body_tuple_(input.position_scale_solid_body_tuple_),
 	  translation_solid_body_tuple_(input.translation_solid_body_tuple_),
 	  translation_solid_body_part_tuple_(input.translation_solid_body_part_tuple_),
+	  surface_particles_only_to_vtu_(input.surface_particles_only_to_vtu_),
 
 	  // iterators
 	  iteration_(0),
@@ -334,7 +336,7 @@ void StructuralSimulation::initializeElasticSolidBodies()
 	for (size_t i = 0; i < body_mesh_list_.size(); i++)
 	{
 		// create the initial particles from the triangle mesh shape with particle relaxation option
-		std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> particles = generateAndRelaxParticlesFromMesh(*body_mesh_list_[i], resolution_list_[i], particle_relaxation_list_[i], write_particle_relaxation_data_);
+		std::tuple<StdLargeVec<Vecd>, StdLargeVec<Real>> particles = getParticlesFromTriangleMeshShape(*body_mesh_list_[i], resolution_list_[i], particle_relaxation_list_[i], write_particle_relaxation_data_);
 
 		// get the particles' initial position and their volume
 		StdLargeVec<Vecd> &pos_0 = std::get<0>(particles);
@@ -347,14 +349,14 @@ void StructuralSimulation::initializeElasticSolidBodies()
 		// update initial normal direction of particles
 		solid_body_list_[i]->getElasticSolidParticles()->initializeNormalDirectionFromBodyShape();
 		std::cout << "  normal initialization done" << std::endl;
-		particle_normal_update_.emplace_back(make_shared<solid_dynamics::UpdateElasticNormalDirection>(*solid_body_list_[i]->getSolidBodyFromMesh()));
+		particle_normal_update_.emplace_back(make_shared<solid_dynamics::UpdateElasticNormalDirection>(*solid_body_list_[i]->getImportedModel()));
 	}
 }
 
 void StructuralSimulation::initializeContactBetweenTwoBodies(int first, int second)
 {
-	SolidBodyFromMesh *first_body = solid_body_list_[first]->getSolidBodyFromMesh();
-	SolidBodyFromMesh *second_body = solid_body_list_[second]->getSolidBodyFromMesh();
+	ImportedModel *first_body = solid_body_list_[first]->getImportedModel();
+	ImportedModel *second_body = solid_body_list_[second]->getImportedModel();
 	SolidBodyRelationContact *first_contact = contact_relation_ptr_keeper_.createPtr<SolidBodyRelationContact>(*first_body, RealBodyVector({second_body}));
 	SolidBodyRelationContact *second_contact = contact_relation_ptr_keeper_.createPtr<SolidBodyRelationContact>(*second_body, RealBodyVector({first_body}));
 
@@ -376,11 +378,11 @@ void StructuralSimulation::initializeAllContacts()
 	// first place all the regular contacts into the lists
 	for (size_t i = 0; i < contacting_body_pairs_list_.size(); i++)
 	{
-		SolidBodyFromMesh *contact_body = solid_body_list_[i]->getSolidBodyFromMesh();
+		ImportedModel *contact_body = solid_body_list_[i]->getImportedModel();
 		RealBodyVector target_list = {};
 		for (size_t target_i : contacting_body_pairs_list_[i])
 		{
-			target_list.emplace_back(solid_body_list_[target_i]->getSolidBodyFromMesh());
+			target_list.emplace_back(solid_body_list_[target_i]->getImportedModel());
 		}
 
 		SolidBodyRelationContact *contact = contact_relation_ptr_keeper_.createPtr<SolidBodyRelationContact>(*contact_body, target_list);
@@ -415,12 +417,12 @@ void StructuralSimulation::initializeGravity()
 		if (count(gravity_indices.begin(), gravity_indices.end(), i))
 		{
 			Gravity *gravity = gravity_ptr_keeper_.createPtr<Gravity>(non_zero_gravity_[gravity_index_i].second);
-			initialize_gravity_.emplace_back(make_shared<TimeStepInitialization>(*solid_body_list_[i]->getSolidBodyFromMesh(), *gravity));
+			initialize_gravity_.emplace_back(make_shared<TimeStepInitialization>(*solid_body_list_[i]->getImportedModel(), *gravity));
 			gravity_index_i++;
 		}
 		else
 		{
-			initialize_gravity_.emplace_back(make_shared<TimeStepInitialization>(*solid_body_list_[i]->getSolidBodyFromMesh()));
+			initialize_gravity_.emplace_back(make_shared<TimeStepInitialization>(*solid_body_list_[i]->getImportedModel()));
 		}
 	}
 }
@@ -430,7 +432,7 @@ void StructuralSimulation::initializeAccelerationForBodyPartInBoundingBox()
 	acceleration_bounding_box_ = {};
 	for (size_t i = 0; i < acceleration_bounding_box_tuple_.size(); i++)
 	{
-		SolidBody *solid_body = solid_body_list_[get<0>(acceleration_bounding_box_tuple_[i])]->getSolidBodyFromMesh();
+		SolidBody *solid_body = solid_body_list_[get<0>(acceleration_bounding_box_tuple_[i])]->getImportedModel();
 		acceleration_bounding_box_.emplace_back(make_shared<solid_dynamics::AccelerationForBodyPartInBoundingBox>(
 			*solid_body, get<1>(acceleration_bounding_box_tuple_[i]), get<2>(acceleration_bounding_box_tuple_[i])));
 	}
@@ -457,8 +459,8 @@ void StructuralSimulation::initializeForceInBodyRegion()
 		int resolution(20);
 		// create the triangle mesh of the box
 		TriangleMeshShape *tri_mesh = tri_mesh_shape_ptr_keeper_.createPtr<TriangleMeshShapeBrick>(halfsize_bbox, resolution, center);
-		BodyPartFromMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *tri_mesh);
-		force_in_body_region_.emplace_back(make_shared<solid_dynamics::ForceInBodyRegion>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp, force, end_time));
+		BodyPartByParticleTriMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *tri_mesh);
+		force_in_body_region_.emplace_back(make_shared<solid_dynamics::ForceInBodyRegion>(*solid_body_list_[body_index]->getImportedModel(), *bp, force, end_time));
 	}
 }
 
@@ -472,8 +474,8 @@ void StructuralSimulation::initializeSurfacePressure()
 		Vec3d point = get<2>(surface_pressure_tuple_[i]);
 		StdVec<array<Real, 2>> pressure_over_time = get<3>(surface_pressure_tuple_[i]);
 
-		BodyPartByParticle *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *tri_mesh);
-		surface_pressure_.emplace_back(make_shared<solid_dynamics::SurfacePressureFromSource>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp, point, pressure_over_time));
+		BodyPartByParticle *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *tri_mesh);
+		surface_pressure_.emplace_back(make_shared<solid_dynamics::SurfacePressureFromSource>(*solid_body_list_[body_index]->getImportedModel(), *bp, point, pressure_over_time));
 	}
 }
 
@@ -482,7 +484,7 @@ void StructuralSimulation::initializeSpringDamperConstraintParticleWise()
 	spring_damper_constraint_ = {};
 	for (size_t i = 0; i < spring_damper_tuple_.size(); i++)
 	{
-		SolidBody *solid_body = solid_body_list_[get<0>(spring_damper_tuple_[i])]->getSolidBodyFromMesh();
+		SolidBody *solid_body = solid_body_list_[get<0>(spring_damper_tuple_[i])]->getImportedModel();
 		spring_damper_constraint_.emplace_back(make_shared<solid_dynamics::SpringDamperConstraintParticleWise>(*solid_body, get<1>(spring_damper_tuple_[i]), get<2>(spring_damper_tuple_[i])));
 	}
 }
@@ -499,8 +501,8 @@ void StructuralSimulation::initializeSpringNormalOnSurfaceParticles()
 		Real spring_stiffness = get<4>(surface_spring_tuple_[i]);
 		Real damping_coefficient = get<5>(surface_spring_tuple_[i]);
 
-		BodyPartByParticle *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *tri_mesh);
-		surface_spring_.emplace_back(make_shared<solid_dynamics::SpringNormalOnSurfaceParticles>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp, inner_outer, point, spring_stiffness, damping_coefficient));
+		BodyPartByParticle *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *tri_mesh);
+		surface_spring_.emplace_back(make_shared<solid_dynamics::SpringNormalOnSurfaceParticles>(*solid_body_list_[body_index]->getImportedModel(), *bp, inner_outer, point, spring_stiffness, damping_coefficient));
 	}
 }
 
@@ -510,8 +512,8 @@ void StructuralSimulation::initializeConstrainSolidBody()
 	for (size_t i = 0; i < body_indices_fixed_constraint_.size(); i++)
 	{
 		int body_index = body_indices_fixed_constraint_[i];
-		BodyPartFromMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
-		fixed_constraint_body_.emplace_back(make_shared<solid_dynamics::ConstrainSolidBodyRegion>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp));
+		BodyPartByParticleTriMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
+		fixed_constraint_body_.emplace_back(make_shared<solid_dynamics::ConstrainSolidBodyRegion>(*solid_body_list_[body_index]->getImportedModel(), *bp));
 	}
 }
 
@@ -535,8 +537,8 @@ void StructuralSimulation::initializeConstrainSolidBodyRegion()
 		// create the triangle mesh of the box
 		TriangleMeshShape *tri_mesh = tri_mesh_shape_ptr_keeper_.createPtr<TriangleMeshShapeBrick>(halfsize_bbox, resolution, center);
 
-		BodyPartFromMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *tri_mesh);
-		fixed_constraint_region_.emplace_back(make_shared<solid_dynamics::ConstrainSolidBodyRegion>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp));
+		BodyPartByParticleTriMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *tri_mesh);
+		fixed_constraint_region_.emplace_back(make_shared<solid_dynamics::ConstrainSolidBodyRegion>(*solid_body_list_[body_index]->getImportedModel(), *bp));
 	}
 }
 
@@ -549,9 +551,9 @@ void StructuralSimulation::initializePositionSolidBody()
 		Real start_time = get<1>(position_solid_body_tuple_[i]);
 		Real end_time = get<2>(position_solid_body_tuple_[i]);
 		Vecd pos_end_center = get<3>(position_solid_body_tuple_[i]);
-		BodyPartFromMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
+		BodyPartByParticleTriMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
 
-		position_solid_body_.emplace_back(make_shared<solid_dynamics::PositionSolidBody>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp, start_time, end_time, pos_end_center));
+		position_solid_body_.emplace_back(make_shared<solid_dynamics::PositionSolidBody>(*solid_body_list_[body_index]->getImportedModel(), *bp, start_time, end_time, pos_end_center));
 	}
 }
 
@@ -564,9 +566,9 @@ void StructuralSimulation::initializePositionScaleSolidBody()
 		Real start_time = get<1>(position_scale_solid_body_tuple_[i]);
 		Real end_time = get<2>(position_scale_solid_body_tuple_[i]);
 		Real scale = get<3>(position_scale_solid_body_tuple_[i]);
-		BodyPartFromMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
+		BodyPartByParticleTriMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
 
-		position_scale_solid_body_.emplace_back(make_shared<solid_dynamics::PositionScaleSolidBody>(*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp, start_time, end_time, scale));
+		position_scale_solid_body_.emplace_back(make_shared<solid_dynamics::PositionScaleSolidBody>(*solid_body_list_[body_index]->getImportedModel(), *bp, start_time, end_time, scale));
 	}
 }
 
@@ -579,11 +581,11 @@ void StructuralSimulation::initializeTranslateSolidBody()
 		Real start_time = get<1>(translation_solid_body_tuple_[i]);
 		Real end_time = get<2>(translation_solid_body_tuple_[i]);
 		Vecd translation = get<3>(translation_solid_body_tuple_[i]);
-		BodyPartFromMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(
-			*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
+		BodyPartByParticleTriMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(
+			*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
 
 		translation_solid_body_.emplace_back(make_shared<solid_dynamics::TranslateSolidBody>(
-			*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp, start_time, end_time, translation));
+			*solid_body_list_[body_index]->getImportedModel(), *bp, start_time, end_time, translation));
 	}
 }
 
@@ -597,11 +599,11 @@ void StructuralSimulation::initializeTranslateSolidBodyPart()
 		Real end_time = get<2>(translation_solid_body_part_tuple_[i]);
 		Vecd translation = get<3>(translation_solid_body_part_tuple_[i]);
 		BoundingBox bbox = get<4>(translation_solid_body_part_tuple_[i]);
-		BodyPartFromMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartFromMesh>(
-			*solid_body_list_[body_index]->getSolidBodyFromMesh(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
+		BodyPartByParticleTriMesh *bp = body_part_tri_mesh_ptr_keeper_.createPtr<BodyPartByParticleTriMesh>(
+			*solid_body_list_[body_index]->getImportedModel(), imported_stl_list_[body_index], *body_mesh_list_[body_index]);
 
 		translation_solid_body_part_.emplace_back(make_shared<solid_dynamics::TranslateSolidBodyPart>(
-			*solid_body_list_[body_index]->getSolidBodyFromMesh(), *bp, start_time, end_time, translation, bbox));
+			*solid_body_list_[body_index]->getImportedModel(), *bp, start_time, end_time, translation, bbox));
 	}
 }
 
@@ -795,7 +797,7 @@ void StructuralSimulation::executeUpdateCellLinkedList()
 {
 	for (size_t i = 0; i < solid_body_list_.size(); i++)
 	{
-		solid_body_list_[i]->getSolidBodyFromMesh()->updateCellLinkedList();
+		solid_body_list_[i]->getImportedModel()->updateCellLinkedList();
 	}
 }
 
@@ -897,9 +899,13 @@ void StructuralSimulation::runSimulationStep(Real &dt, Real &integration_time)
 void StructuralSimulation::runSimulation(Real end_time)
 {
 	BodyStatesRecordingToVtp write_states(in_output_, system_.real_bodies_);
+	SurfaceOnlyBodyStatesRecordingToVtu write_states_surface(in_output_, system_.real_bodies_);
 
 	/** Statistics for computing time. */
-	write_states.writeToFile(0);
+	if (surface_particles_only_to_vtu_)
+		write_states_surface.writeToFile(0);
+	else
+		write_states.writeToFile(0);
 	Real output_period = end_time / 100.0;
 	Real dt = 0.0;
 	tick_count t1 = tick_count::now();
@@ -914,13 +920,16 @@ void StructuralSimulation::runSimulation(Real end_time)
 		}
 		tick_count t2 = tick_count::now();
 		// record data for test
-		von_mises_stress_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressMax());
-		von_mises_stress_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressVector());
+		von_mises_stress_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getMaxVonMisesStress());
+		von_mises_stress_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStress());
 
-		von_mises_strain_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrainMax());
-		von_mises_strain_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrainVector());
+		von_mises_strain_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getMaxVonMisesStrain());
+		von_mises_strain_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrain());
 		// write data to file
-		write_states.writeToFile();
+		if (surface_particles_only_to_vtu_)
+			write_states_surface.writeToFile();
+		else
+			write_states.writeToFile();
 		tick_count t3 = tick_count::now();
 		interval += t3 - t2;
 	}

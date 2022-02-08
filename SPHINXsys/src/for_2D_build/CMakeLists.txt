@@ -49,7 +49,7 @@ FOREACH(srcdir_path ${sourcedirs})
 	list(APPEND SCR_FILES ${DIR_scrs})
 ENDFOREACH()
 
-if(NOT SPH_ONLY_STATIC_BUILD)
+if(NOT STATIC_BUILD)
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		ADD_LIBRARY(sphinxsys_2d ${SCR_FILES})
 	else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")

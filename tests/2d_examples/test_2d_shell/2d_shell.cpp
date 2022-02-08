@@ -129,7 +129,7 @@ int main()
 	ShellParticles cylinder_body_particles(cylinder_body,
 										   makeShared<LinearElasticSolid>(rho0_s, Youngs_modulus, poisson),
 										   makeShared<CylinderParticleGenerator>(), thickness);
-	cylinder_body_particles.addAVariableToWrite<indexVector, Vecd>("PseudoNormal");
+	cylinder_body_particles.addAVariableToWrite<Vecd>("PseudoNormal");
 
 	/** Define Observer. */
 	ObserverBody cylinder_observer(system, "CylinderObserver");
@@ -165,14 +165,14 @@ int main()
 	BoundaryGeometry boundary_geometry(cylinder_body, "BoundaryGeometry");
 	thin_structure_dynamics::ClampConstrainShellBodyRegion
 		fixed_free_rotate_shell_boundary(cylinder_body_inner, boundary_geometry);
-	DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec2d>>
+	DampingWithRandomChoice<DampingPairwiseInner<Vec2d>>
 		cylinder_position_damping(cylinder_body_inner, 0.5, "Velocity", physical_viscosity);
-	DampingWithRandomChoice<DampingPairwiseInner<indexVector, Vec2d>>
+	DampingWithRandomChoice<DampingPairwiseInner<Vec2d>>
 		cylinder_rotation_damping(cylinder_body_inner, 0.5, "AngularVelocity", physical_viscosity);
 	/** Output */
 	In_Output in_output(system);
 	BodyStatesRecordingToVtp write_states(in_output, system.real_bodies_);
-	RegressionTestDynamicTimeWarping<ObservedQuantityRecording<indexVector, Vecd>>
+	RegressionTestDynamicTimeWarping<ObservedQuantityRecording<Vecd>>
 		write_cylinder_max_displacement("Position", in_output, cylinder_observer_contact);
 
 	/** Apply initial condition. */

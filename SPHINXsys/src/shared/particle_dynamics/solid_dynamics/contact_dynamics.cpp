@@ -17,11 +17,7 @@ namespace SPH
 			: PartInteractionDynamicsByParticle(*self_contact_relation.sph_body_,
 												self_contact_relation.body_surface_layer_),
 			  SolidDataInner(self_contact_relation),
-			  mass_(particles_->mass_), contact_density_(particles_->contact_density_)
-			  {
-				Real dp_1 = self_contact_relation.sph_body_->sph_adaptation_->ReferenceSpacing();
-				offset_W_ij_ = self_contact_relation.sph_body_->sph_adaptation_->getKernel()->W(dp_1, Vecd(0.0));
-			  }
+			  mass_(particles_->mass_), contact_density_(particles_->contact_density_){}
 		//=================================================================================================//
 		void SelfContactDensitySummation::Interaction(size_t index_i, Real dt)
 		{	
@@ -29,8 +25,7 @@ namespace SPH
 			const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
 			for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
 			{	
-				Real corrected_W_ij = std::max(inner_neighborhood.W_ij_[n] - offset_W_ij_, 0.0);
-				sigma += corrected_W_ij * mass_[inner_neighborhood.j_[n]];
+				sigma += inner_neighborhood.W_ij_[n] * mass_[inner_neighborhood.j_[n]];
 			}
 			contact_density_[index_i] = sigma;
 		}
@@ -40,8 +35,7 @@ namespace SPH
 			: PartInteractionDynamicsByParticle(*solid_body_contact_relation.sph_body_,
 												*solid_body_contact_relation.body_surface_layer_),
 			  ContactDynamicsData(solid_body_contact_relation),
-			  mass_(particles_->mass_), contact_density_(particles_->contact_density_),
-			  offset_W_ij_(StdVec<Real>(contact_configuration_.size(), 0.0))
+			  mass_(particles_->mass_), contact_density_(particles_->contact_density_)
 		{
 			for (size_t k = 0; k != contact_particles_.size(); ++k)
 			{
@@ -58,7 +52,7 @@ namespace SPH
 			{
 				Real dp_2 = solid_body_contact_relation.contact_bodies_[k]->sph_adaptation_->ReferenceSpacing();
 				Real distance = 0.5 * dp_1 + 0.5 * dp_2;
-				offset_W_ij_[k] = solid_body_contact_relation.sph_body_->sph_adaptation_->getKernel()->W(distance, Vecd(0.0));
+				// offset_W_ij_[k] = solid_body_contact_relation.sph_body_->sph_adaptation_->getKernel()->W(distance, Vecd(0.0));
 			}
 		}
 		//=================================================================================================//
@@ -72,9 +66,8 @@ namespace SPH
 				Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
 
 				for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
-				{	
-					Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], 0.0);
-					sigma += corrected_W_ij * contact_mass_k[contact_neighborhood.j_[n]];
+				{
+					sigma += contact_neighborhood.W_ij_[n] * contact_mass_k[contact_neighborhood.j_[n]];
 				}
 			}
 			contact_density_[index_i] = sigma;

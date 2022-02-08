@@ -228,8 +228,6 @@ namespace SPH
 
 		virtual Muscle *ThisObjectPtr() override { return this; };
 
-		virtual Muscle *ThisObjectPtr() override { return this; };
-
 	protected:
 		Vecd f0_, s0_;			  /**< Reference fiber and sheet directions as basic parameter. */
 		Matd f0f0_, s0s0_, f0s0_; /**< Tensor products of fiber and sheet directions as basic parameter.. */

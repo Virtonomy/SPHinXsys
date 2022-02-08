@@ -181,16 +181,6 @@ namespace SPH
 		SPHBody *getSPHBody() { return sph_body_; };
 		std::string BodyPartName() { return body_part_name_; };
 
-		void setBodyPartBounds(BoundingBox bbox){
-			body_part_bounds_ = bbox;
-			body_part_bounds_set_ = true;
-		};
-
-		BoundingBox getBodyPartBounds(){
-			if (!body_part_bounds_set_) std::cout << "WARNING: the body part bounds are not set for BodyPart." << std::endl;
-			return body_part_bounds_;
-		}
-
 	protected:
 		SPHBody *sph_body_;
 		std::string body_part_name_;

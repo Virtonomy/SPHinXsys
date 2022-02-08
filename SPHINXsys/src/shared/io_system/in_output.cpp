@@ -36,11 +36,8 @@ namespace SPH
 		{
 			fs::remove_all(restart_folder_);
 			fs::create_directory(restart_folder_);
-			if(delete_output == true)
-			{
-				fs::remove_all(output_folder_);
-				fs::create_directory(output_folder_);
-			}
+			fs::remove_all(output_folder_);
+			fs::create_directory(output_folder_);
 		}
 
 		restart_step_ = std::to_string(sph_system.restart_step_);
@@ -141,7 +138,7 @@ namespace SPH
 	//=============================================================================================//
 	void BodyStatesRecordingToVtuString::writeWithFileName(const std::string& sequence)
 	{
-		for (SPHBody *body : bodies_)
+		for (SPHBody* body : bodies_)
 		{
 			if (body->checkNewlyUpdated())
 			{

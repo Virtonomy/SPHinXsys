@@ -116,7 +116,6 @@ namespace SPH
 		polymesh.scaleMesh(scale_factor);
 		triangle_mesh_ = generateTriangleMesh(polymesh.transformMesh(translation));
 	}
-	#endif
 	//=================================================================================================//
 	TriangleMeshShapeBrick::
 		TriangleMeshShapeBrick(Vec3d halfsize, int resolution, Vec3d translation,

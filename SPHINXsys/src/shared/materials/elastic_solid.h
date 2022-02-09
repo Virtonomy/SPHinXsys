@@ -95,8 +95,7 @@ namespace SPH
 		virtual Matd DeviatoricKirchhoff(const Matd &deviatoric_be);
 		/** Volumetric Kirchhoff stress from determinate */
 		virtual Real VolumetricKirchhoff(Real J) = 0;
-		/** Define the calculation of the stress matrix for postprocessing */
-		virtual std::string getRelevantStressMeasureName() = 0;
+
 
 		virtual ElasticSolid *ThisObjectPtr() override { return this; };
 	};
@@ -128,7 +127,7 @@ namespace SPH
 
 	/**
 	* @class NeoHookeanSolid
-	* @brief Neo-Hookean solid, Compressible formulation!
+	* @brief Neo-Hookean solid
 	*/
 	class NeoHookeanSolid : public LinearElasticSolid
 	{
@@ -223,8 +222,6 @@ namespace SPH
 		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
 		/** Volumetric Kirchhoff stress form determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;
-		/** Define the calculation of the stress matrix for postprocessing */
-		virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
 
 		virtual Muscle *ThisObjectPtr() override { return this; };
 

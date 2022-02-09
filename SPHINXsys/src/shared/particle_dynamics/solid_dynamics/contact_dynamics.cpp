@@ -17,14 +17,14 @@ namespace SPH
 			: PartInteractionDynamicsByParticle(*self_contact_relation.sph_body_,
 												self_contact_relation.body_surface_layer_),
 			  SolidDataInner(self_contact_relation),
-			  mass_(particles_->mass_), contact_density_(particles_->contact_density_){}
+			  mass_(particles_->mass_), contact_density_(particles_->contact_density_) {}
 		//=================================================================================================//
 		void SelfContactDensitySummation::Interaction(size_t index_i, Real dt)
-		{	
+		{
 			Real sigma = 0.0;
 			const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
 			for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
-			{	
+			{
 				sigma += inner_neighborhood.W_ij_[n] * mass_[inner_neighborhood.j_[n]];
 			}
 			contact_density_[index_i] = sigma;
@@ -57,7 +57,7 @@ namespace SPH
 		}
 		//=================================================================================================//
 		void ContactDensitySummation::Interaction(size_t index_i, Real dt)
-		{	
+		{
 			/** Contact interaction. */
 			Real sigma = 0.0;
 			for (size_t k = 0; k < contact_configuration_.size(); ++k)

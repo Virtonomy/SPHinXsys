@@ -3,14 +3,7 @@
 
 using namespace SPH;
 
-TEST(small_vectors, CalculateDoubleDotProduct)
-{
-    Mat3d matrix_1 = Mat3d(Vec3d(6.5, 7.8, 0.0), Vec3d(1.0, 2.0, 3.0), Vec3d(10.0, 10.0, 17.3));
-    Mat3d matrix_2 = Mat3d(Vec3d(4.6, 4.9, 9.0), Vec3d(1.0, 5.0, 7.0), Vec3d(0.0, 0.0, 0.2));
-    EXPECT_DOUBLE_EQ(CalculateDoubleDotProduct(matrix_1, matrix_2), 103.58);
-}
-
-TEST(small_vectors, getCosineOfAngleBetweenTwoVectors)
+TEST(AngleBetweenTwo3DVectors, getAngleBetweenTwo3DVectors)
 {
     Vec3d vector_1 = Vec3d(2, -4, 0);
     Vec3d vector_2 = Vec3d(3, 2, 5);
@@ -36,7 +29,7 @@ TEST(small_vectors, getCosineOfAngleBetweenTwoVectors)
 
 }
 //=================================================================================================//
-TEST(small_vectors, getVectorProjectionOfVector)
+TEST(VectorProjectionOf3DVector, getVectorProjectionOf3DVector)
 {
     Vec3d vector_1 = Vec3d(1, 2, 3);
     Vec3d vector_2 = Vec3d(2, -1, 4);

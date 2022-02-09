@@ -508,6 +508,8 @@ namespace SPH
 		{
 			size_t sorted_index_i = sorted_id_[unsorted_index_i];
 			vel_n_[sorted_index_i] = getTargetVelocity(pos_n_[sorted_index_i], vel_n_[sorted_index_i]);
+			rho_n_[sorted_index_i] = rho0_;
+			p_[sorted_index_i] = material_->getPressure(rho_n_[sorted_index_i]);
 		}
 		//=================================================================================================//
 		EmitterInflowInjecting ::EmitterInflowInjecting(FluidBody &fluid_body, BodyRegionByParticle &body_part,

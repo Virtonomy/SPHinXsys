@@ -56,7 +56,7 @@ int main(int ac, char *av[])
 	//----------------------------------------------------------------------
 	//	Particle relaxation starts here.
 	//----------------------------------------------------------------------
-	random_solid_body_from_mesh_particles.parallel_exec(0.25);
+	random_imported_model_particles.parallel_exec(0.25);
 	relaxation_step_inner.surface_bounding_.parallel_exec();
 	update_smoothing_length_ratio.parallel_exec();
 	write_imported_model_to_vtp.writeToFile();

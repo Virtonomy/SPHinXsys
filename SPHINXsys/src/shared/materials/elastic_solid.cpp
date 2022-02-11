@@ -130,6 +130,12 @@ namespace SPH
 		return sigmaPK2;
 	}
 	//=================================================================================================//
+	Matd NeoHookeanSolidIncompressible::EulerianConstitutiveRelation(Matd &almansi_strain, Matd &F, size_t particle_index_i)
+	{
+		// TODO: implement
+		return {};
+	}
+	//=================================================================================================//
 	Real NeoHookeanSolidIncompressible::VolumetricKirchhoff(Real J)
 	{
 		return  0.5 * K0_ * (J * J - 1);

@@ -172,8 +172,9 @@ namespace SPH
 		virtual ~NeoHookeanSolidIncompressible() {};
 	
 		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
-		virtual Matd ConstitutiveRelation(Matd& deformation, size_t particle_index_i) override;
-		/** Volumetric Kirchhoff stress determinate */
+		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
+		virtual Matd EulerianConstitutiveRelation(Matd &almansi_strain, Matd &F, size_t particle_index_i) override;
+		/** Volumetric Kirchhoff stress from determinate */
 		virtual Real VolumetricKirchhoff(Real J) override;
 	};
 

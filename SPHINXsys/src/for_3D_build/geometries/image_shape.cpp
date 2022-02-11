@@ -74,3 +74,4 @@ namespace SPH
 }
 
 #endif // __EMSCRIPTEN__
+#endif // __EMSCRIPTEN__

@@ -114,18 +114,6 @@ namespace SPH {
 		return normal_vec;
 	}
 	//=================================================================================================//
-	Vecd ElasticSolidParticles::displacement(size_t particle_i) //not tested in 2D
-	{
-		Vecd disp = pos_n_[particle_i] - pos_0_[particle_i];
-		return disp;
-	}
-	//=================================================================================================//
-	Vecd ElasticSolidParticles::normal(size_t particle_i) //not tested in 2D
-	{
-		Vecd normal_vec = n_[particle_i];
-		return normal_vec;
-	}
-	//=================================================================================================//
 	Real ElasticSolidParticles::von_Mises_strain(size_t particle_i) //not tested in 2D
 	{
 		

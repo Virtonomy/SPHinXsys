@@ -115,6 +115,7 @@ namespace SPH
 		//----------------------------------------------------------------------
 		ParticleData all_particle_data_;
 		ParticleDataMap all_variable_maps_;
+		ParticleVariableList variables_to_write_;
 
 		/** register a variable defined in a class (can be non-particle class) */
 		template <typename VariableType>
@@ -195,7 +196,6 @@ namespace SPH
 		std::string body_name_;
 		XmlEngine restart_xml_engine_;
 		XmlEngine reload_xml_engine_;
-		ParticleVariableList variables_to_write_;
 		ParticleVariableList variables_to_restart_;
 		void addAParticleEntry();
 

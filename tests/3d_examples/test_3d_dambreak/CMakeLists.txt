@@ -34,7 +34,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/regression_test_tool/Fluidobserver_Pressur
 aux_source_directory(. DIR_SRCS)
 ADD_EXECUTABLE(${PROJECT_NAME} ${DIR_SRCS})
 
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME}
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME} --rt=false
                    WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
 if(NOT SPH_ONLY_STATIC_BUILD) # usual dynamic build

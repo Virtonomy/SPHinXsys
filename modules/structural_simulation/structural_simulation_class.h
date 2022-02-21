@@ -61,7 +61,7 @@ private:
 	BodyRelationInner inner_body_relation_;
 
 	solid_dynamics::CorrectConfiguration correct_configuration_;
-	solid_dynamics::StressRelaxationFirstHalf stress_relaxation_first_half_;
+	solid_dynamics::KirchhoffStressRelaxationFirstHalf stress_relaxation_first_half_;
 	solid_dynamics::StressRelaxationSecondHalf stress_relaxation_second_half_;
 	DampingWithRandomChoice<DampingPairwiseInner<Vec3d>> damping_random_;
 
@@ -76,7 +76,7 @@ public:
 	BodyRelationInner *getInnerBodyRelation() { return &inner_body_relation_; };
 
 	solid_dynamics::CorrectConfiguration *getCorrectConfiguration() { return &correct_configuration_; };
-	solid_dynamics::StressRelaxationFirstHalf *getStressRelaxationFirstHalf() { return &stress_relaxation_first_half_; };
+	solid_dynamics::KirchhoffStressRelaxationFirstHalf *getKirchhoffStressRelaxationFirstHalf() { return &stress_relaxation_first_half_; };
 	solid_dynamics::StressRelaxationSecondHalf *getStressRelaxationSecondHalf() { return &stress_relaxation_second_half_; };
 	DampingWithRandomChoice<DampingPairwiseInner<Vec3d>> *getDampingWithRandomChoice() { return &damping_random_; };
 };
@@ -144,7 +144,6 @@ public:
 class StructuralSimulation
 {
 private:
-	UniquePtrVectorKeeper<SolidBodyRelationContact> contact_relation_ptr_keeper_;
 	UniquePtrVectorKeeper<Gravity> gravity_ptr_keeper_;
 	UniquePtrVectorKeeper<TriangleMeshShape> tri_mesh_shape_ptr_keeper_;
 	UniquePtrVectorKeeper<BodyPartFromMesh> body_part_tri_mesh_ptr_keeper_;
@@ -260,7 +259,7 @@ protected:
 	void executeSpringNormalOnSurfaceParticles();
 	void executeContactDensitySummation();
 	void executeContactForce();
-	void executeStressRelaxationFirstHalf(Real dt);
+	void executeKirchhoffStressRelaxationFirstHalf(Real dt);
 	void executeConstrainSolidBody();
 	void executeConstrainSolidBodyRegion();
 	void executePositionSolidBody(Real dt);

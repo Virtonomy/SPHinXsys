@@ -580,7 +580,8 @@ namespace SPH
 				Vecd point = pos_n_[index_i];
 				if (checkIfPointInBoundingBox(point, bounding_box_))
 				{
-					dvel_dt_prior_[index_i] += acceleration_;
+					Real end_time = 0.2;
+					dvel_dt_prior_[index_i] += acceleration_ * powerN(GlobalStaticVariables::physical_time_ / end_time, 2);
 				}
 			}
 			catch (std::out_of_range &e)

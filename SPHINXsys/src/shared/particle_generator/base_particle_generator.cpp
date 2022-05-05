@@ -21,6 +21,15 @@ namespace SPH
 		}
 	}
 	//=================================================================================================//
+	ParticleGeneratorDirect::ParticleGeneratorDirect(StdVec<std::array<double, 3>>& pos_0, StdVec<double>& volume)
+	{
+		// we add the generated particles for the direct generator
+		for(size_t particle_i = 0; particle_i < pos_0.size(); particle_i++)
+		{
+			positions_volumes_.push_back(std::make_pair(Vec3d(pos_0[particle_i][0], pos_0[particle_i][1], pos_0[particle_i][2]), volume[particle_i]));
+		}
+	}
+	//=================================================================================================//
 	void ParticleGenerator::initialize(SPHBody *sph_body)
 	{
 		sph_body_ = sph_body;

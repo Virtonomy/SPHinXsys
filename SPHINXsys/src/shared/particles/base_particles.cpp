@@ -35,7 +35,6 @@ namespace SPH
 		registerAVariable<Vecd>(vel_n_, "Velocity");
 		registerAVariable<Vecd>(dvel_dt_, "Acceleration");
 		registerAVariable<Vecd>(dvel_dt_prior_, "PriorAcceleration");
-		registerAVariable<Vecd>(displ_n_, "Displacement");
 		registerAVariable<Real>(Vol_, "Volume");
 		registerAVariable<Real>(rho_n_, "Density");
 		registerAVariable<Real>(mass_, "Mass");
@@ -72,7 +71,6 @@ namespace SPH
 		vel_n_.push_back(Vecd(0));
 		dvel_dt_.push_back(Vecd(0));
 		dvel_dt_prior_.push_back(Vecd(0));
-		displ_n_.push_back(Vecd(0));
 
 		Vol_.push_back(Vol_0);
 		rho_n_.push_back(rho0_);

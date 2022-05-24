@@ -105,6 +105,14 @@ namespace SPH
 		StdLargeVec<Matd> F_;		   /**<  deformation tensor */
 		StdLargeVec<Matd> dF_dt_;	   /**<  deformation tensor change rate */
 		StdLargeVec<Matd> stress_PK1_; /**<  first Piola-Kirchhoff stress tensor */
+		StdLargeVec<Vecd> displ_n_;
+		StdLargeVec<Vecd> princ_stres_n_;
+		StdLargeVec<Vecd> princ_strain_n_;
+		StdLargeVec<Real> von_misses_strain_n_;
+		StdLargeVec<Real> von_misses_stress_n_;
+
+		StdLargeVec<Vecd> getPrincipalStresses();
+		StdLargeVec<Vecd> getPrincipalStrains();
 
 		// STRAIN
 		Matd get_GreenLagrange_strain(size_t particle_i);

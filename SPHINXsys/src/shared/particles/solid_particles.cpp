@@ -103,6 +103,11 @@ namespace SPH
 		registerAVariable<Matd>(F_, "DeformationGradient", Matd(1.0));
 		registerAVariable<Matd>(dF_dt_, "DeformationRate");
 		registerAVariable<Matd>(stress_PK1_, "FirstPiolaKirchhoffStress");
+		registerAVariable<Vecd>(displ_n_, "Displacement");
+		registerAVariable<Vecd>(princ_stres_n_, "Principal Stress");
+		registerAVariable<Vecd>(princ_strain_n_, "Principal Strain");
+		registerAVariable<Real>(von_misses_strain_n_, "Von Mises Strain");
+		registerAVariable<Real>(von_misses_stress_n_, "Von Mises Stress");
 		//----------------------------------------------------------------------
 		//		add restart output particle data
 		//----------------------------------------------------------------------
@@ -135,6 +140,26 @@ namespace SPH
 			strain_vector.push_back(strain);
 		}
 		return strain_vector;
+	}
+	//=================================================================================================//
+	StdLargeVec<Vecd> ElasticSolidParticles::getPrincipalStresses()
+	{
+		StdLargeVec<Vecd> vector = {};
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			vector.push_back(get_Principal_stresses(index_i));
+		}
+		return vector;
+	}
+	//=================================================================================================//
+	StdLargeVec<Vecd> ElasticSolidParticles::getPrincipalStrains()
+	{
+		StdLargeVec<Vecd> vector = {};
+		for (size_t index_i = 0; index_i < pos_0_.size(); index_i++)
+		{
+			vector.push_back(get_Principal_strains(index_i));
+		}
+		return vector;
 	}
 	//=================================================================================================//
 	Real ElasticSolidParticles::getVonMisesStrainMax(std::string strain_measure)

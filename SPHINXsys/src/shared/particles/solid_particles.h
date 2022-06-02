@@ -131,6 +131,10 @@ namespace SPH
 		StdLargeVec<Real> getVonMisesStressVector();
 		/**< Computing maximum von Mises stress from all particles. - "Cauchy" or "PK2" decided based on the stress_measure_ */
 		Real getVonMisesStressMax();
+		/**< Computing principal stresses for each particle. - "Cauchy" or "PK2" decided based on the stress_measure_ */
+		StdLargeVec<Vec3d> getPrincipalStressVector();
+		/**< Computing maximum principal stress for each particle. - "Cauchy" or "PK2" decided based on the stress_measure_ */
+		StdLargeVec<Real> getMaxPrincipalStressVector();
 
 		/**< Computing displacemnt. */
 		Vecd displacement(size_t particle_i);

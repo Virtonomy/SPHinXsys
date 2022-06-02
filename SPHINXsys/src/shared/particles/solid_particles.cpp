@@ -176,6 +176,29 @@ namespace SPH
 		return stress_max;
 	}
 	//=================================================================================================//
+	StdLargeVec<Vec3d> ElasticSolidParticles::getPrincipalStressVector(){
+		// principal stresses for all particles (in each direction)
+		StdLargeVec<Vec3d> principal_stresses = {};
+		for (size_t index = 0; index < pos_0_.size(); index++){
+			Vec3d principal_stress = get_Principal_stresses(index);
+			principal_stresses.push_back(principal_stress);
+		}
+
+		return principal_stresses;
+
+	}
+	//=================================================================================================//
+	StdLargeVec<Real> ElasticSolidParticles:: getMaxPrincipalStressVector(){
+		// max. principal stress per particle
+		StdLargeVec<Real> max_principal_stresses = {};
+		for (size_t index = 0; index < pos_0_.size(); index++){
+			Vec3d principal_stress = get_Principal_stresses(index);
+			max_principal_stresses.push_back(max(principal_stress));
+		}
+
+		return max_principal_stresses;
+	}
+	//=================================================================================================//
 	Vecd ElasticSolidParticles::displacement(size_t particle_i)
 	{
 		return pos_n_[particle_i]-pos_0_[particle_i];

@@ -30,7 +30,6 @@
 #ifndef PARTICLE_SORTING_H
 #define PARTICLE_SORTING_H
 
-#include <tbb/tbb_stddef.h>
 #include "base_data_package.h"
 #include "sph_data_containers.h"
 
@@ -41,8 +40,11 @@ namespace tbb
 	{
 		/** sorting particle */
 		template <typename RandomAccessIterator, typename Compare, typename SwapType>
-		class QuickSortParticleRange : private tbb::internal::no_assign
+		class QuickSortParticleRange
 		{
+			// void operator=(const QuickSortParticleRange&) = delete;
+			// QuickSortParticleRange(const QuickSortParticleRange&) = default;
+			// QuickSortParticleRange() = default;
 
 			inline size_t median_of_three(const RandomAccessIterator &array, size_t l, size_t m, size_t r) const
 			{

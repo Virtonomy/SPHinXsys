@@ -36,9 +36,9 @@
 /** this is a reformulation of tbb parallel_sort for particle data */
 namespace tbb
 {
-	namespace interface
+	namespace interface9
 	{
-		namespace internal
+		namespace detail
 		{
 			/** sorting particle */
 			template <typename RandomAccessIterator, typename Compare, typename SwapType>
@@ -244,7 +244,7 @@ namespace SPH
 	private:
 		UniquePtrKeeper<SwapSortableParticleData> swap_particle_ptr_keeper_;
 		UniquePtrKeeper<
-			tbb::interafce9::internal::QuickSortParticleRange<size_t *, CompareParticleSequence, SwapSortableParticleData>>
+			tbb::interface9::internal::QuickSortParticleRange<size_t *, CompareParticleSequence, SwapSortableParticleData>>
 			quick_sort_particle_range_ptr_keeper_;
 
 	protected:
@@ -253,9 +253,9 @@ namespace SPH
 		/** using pointer because it is constructed after particles. */
 		SwapSortableParticleData *swap_sortable_particle_data_;
 		CompareParticleSequence compare_;
-		tbb::interafce9::internal::QuickSortParticleRange<
+		tbb::interface9::internal::QuickSortParticleRange<
 			size_t *, CompareParticleSequence, SwapSortableParticleData> *quick_sort_particle_range_;
-		tbb::interafce9::internal::QuickSortParticleBody<
+		tbb::interface9::internal::QuickSortParticleBody<
 			size_t *, CompareParticleSequence, SwapSortableParticleData>
 			quick_sort_particle_body_;
 

@@ -30,6 +30,7 @@
 #ifndef PARTICLE_SORTING_H
 #define PARTICLE_SORTING_H
 
+#include <tbb/tbb_stddef.h>
 #include "base_data_package.h"
 #include "sph_data_containers.h"
 

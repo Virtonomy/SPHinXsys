@@ -42,10 +42,6 @@ namespace tbb
 		template <typename RandomAccessIterator, typename Compare, typename SwapType>
 		class QuickSortParticleRange
 		{
-			// void operator=(const QuickSortParticleRange&) = delete;
-			// QuickSortParticleRange(const QuickSortParticleRange&) = default;
-			// QuickSortParticleRange() = default;
-
 			inline size_t median_of_three(const RandomAccessIterator &array, size_t l, size_t m, size_t r) const
 			{
 				return comp_(array[l], array[m]) ? (comp_(array[m], array[r]) ? m : (comp_(array[l], array[r]) ? r : l))
@@ -105,6 +101,10 @@ namespace tbb
 			}
 
 		public:
+			void operator=(const QuickSortParticleRange&) = delete;
+			QuickSortParticleRange(const QuickSortParticleRange&) = default;
+			QuickSortParticleRange() = default;
+			
 			static const size_t grainsize_ = 500;
 			const Compare &comp_;
 			SwapType &swap_sortable_particle_data_;

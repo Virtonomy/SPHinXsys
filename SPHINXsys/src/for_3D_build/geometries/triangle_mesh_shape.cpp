@@ -179,4 +179,15 @@ namespace SPH
 		triangle_mesh_ = generateTriangleMesh(polymesh.transformMesh(translation));
 	}
 	//=================================================================================================//
+	TriangleMeshShapeCylinder::
+		TriangleMeshShapeCylinder(SimTK::UnitVec3 axis, Real radius, Real halflength, int resolution,
+								  Mat3d rotation, Vec3d translation, const std::string &shape_name)
+		: TriangleMeshShape(shape_name)
+	{
+		SimTK::PolygonalMesh polymesh =
+			SimTK::PolygonalMesh::createCylinderMesh(axis, radius, halflength, resolution);
+		SimTK::Transform_<Real> transform( SimTK::Rotation_<Real>(rotation), translation );
+		triangle_mesh_ = generateTriangleMesh(polymesh.transformMesh(transform));
+	}
+	//=================================================================================================//
 }

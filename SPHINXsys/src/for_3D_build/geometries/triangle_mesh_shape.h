@@ -126,6 +126,8 @@ namespace SPH
 		//constructor for cylinder shape
 		explicit TriangleMeshShapeCylinder(SimTK::UnitVec3 axis, Real radius, Real halflength, int resolution, Vec3d translation,
 										   const std::string &shape_name = "TriangleMeshShapeCylinder");
+		explicit TriangleMeshShapeCylinder(SimTK::UnitVec3 axis, Real radius, Real halflength, int resolution, Mat3d rotation, Vec3d translation,
+										   const std::string &shape_name = "TriangleMeshShapeCylinder");
 		virtual ~TriangleMeshShapeCylinder(){};
 	};
 }

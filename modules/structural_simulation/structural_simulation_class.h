@@ -221,7 +221,6 @@ protected:
 	// data storage
 	vector<Real> von_mises_stress_max_;
 	StdLargeVec<StdLargeVec<Real>> von_mises_stress_particles_;
-	StdLargeVec<StdLargeVec<Real>> principal_stress_particles_;
 
 	vector<Real> von_mises_strain_max_;
 	StdLargeVec<StdLargeVec<Real>> von_mises_strain_particles_;

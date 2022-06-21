@@ -218,8 +218,7 @@ StructuralSimulation::StructuralSimulation(StructuralSimulationInput &input)
 
 	  // data storage
 	  von_mises_stress_max_({}),
-	  von_mises_stress_particles_({}),
-	  principal_stress_particles_({})
+	  von_mises_stress_particles_({})
 
 {
 	// scaling of translation and resolution
@@ -917,8 +916,6 @@ void StructuralSimulation::runSimulation(Real end_time)
 		// record data for test
 		von_mises_stress_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressMax());
 		von_mises_stress_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStressVector());
-
-		principal_stress_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getMaxPrincipalStressVector());
 
 		von_mises_strain_max_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrainMax());
 		von_mises_strain_particles_.push_back(solid_body_list_[0].get()->getElasticSolidParticles()->getVonMisesStrainVector());

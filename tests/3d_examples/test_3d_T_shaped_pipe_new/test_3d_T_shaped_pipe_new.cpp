@@ -2,100 +2,92 @@
  * @file 	T_shaped_pipe.cpp
  * @brief 	This is the benchmark test of multi-inlet and multi-outlet.
  * @details We consider a flow with one inlet and two outlets in a T-shaped pipe in 2D.
- * @author 	Xiangyu Hu, Shuoguo Zhang
+ * @author 	Bence Rochlitz
  */
 
 #include "sphinxsys.h"
+
 using namespace SPH;
-//----------------------------------------------------------------------
-//	Basic geometry parameters and numerical setup.
-//----------------------------------------------------------------------
-Real DL = 5.0;						  /**< Reference length. */
-Real DH = 3.0;						  /**< Reference height. */
-Real DL1 = 0.7 * DL;				  /**< The length of the main channel. */
-Real resolution_ref = 0.15;			  /**< Initial reference particle spacing. */
-Real BW = resolution_ref * 4;		  /**< Reference size of the emitter. */
-Real DL_sponge = resolution_ref * 20; /**< Reference size of the emitter buffer to impose inflow condition. */
+
+Real scale = 0.001;
+Real End_Time = 1.0;			/**< End time. */
+
+Real resolution_ref = 7.5 * scale; // particle spacing
+Real wall_resolution = 3.0 * scale;
+Real emitter_length = resolution_ref * 4;		  /**< Reference size of the emitter. */
+Real buffer_length = resolution_ref * 20; /**< Reference size of the emitter buffer to impose inflow condition. */
+
+Real vessel_radius = 100.0 * 0.5 * scale;
+Real fluid_radius = 80.0 * 0.5 * scale;
+Real vessel_length_half = 200 * scale;
+
+Real vertical_cylinder_length_half = vessel_length_half * 0.5;
+Real cannula_outer_radius = 100.0 * 0.5 * scale;
+Real cannula_inner_radius = 80.0 * 0.5 * scale;
+
+Real cannula_angle = 0.0;
+
+int resolution_SimTK = 10;
+
+// for material properties of the fluid
+Real rho0_f = 1.0;
+Real U_f = 1.0;
+Real L_f = 0.5; // reference length
+Real c_f = 10.0 * U_f;
+Real Re = 100.0;
+Real mu_f = rho0_f * U_f * L_f / Re;
+
+// material wall
+Real youngs_modulus = 1e5;
+Real rho_wall = 1e3;
+Real possion = 0.35;
+
 /** Domain bounds of the system. */
-BoundingBox system_domain_bounds(Vec2d(-DL_sponge, -DH), Vec2d(DL + BW, 2.0 * DH));
-/** Prescribed fluid body domain bounds*/
-BoundingBox fluid_body_domain_bounds(Vec2d(-DL_sponge, -DH), Vec2d(DL + BW, 2.0 * DH));
-//----------------------------------------------------------------------
-//	Global parameters on the fluid properties
-//----------------------------------------------------------------------
-Real rho0_f = 1.0;					/**< Reference density of fluid. */
-Real U_f = 1.0;						/**< Characteristic velocity. */
-/** Reference sound speed needs to consider the flow speed in the narrow channels. */
-Real c_f = 10.0 * U_f * SMAX(1.0, DH / (2.0 * (DL - DL1)));
-Real Re = 100.0;					/**< Reynolds number. */
-Real mu_f = rho0_f * U_f * DH / Re; /**< Dynamics viscosity. */
-//----------------------------------------------------------------------
-//	define geometry of SPH bodies
-//----------------------------------------------------------------------
-/** the water block in T shape polygen. */
-std::vector<Vecd> water_block_shape{
-	Vecd(-DL_sponge, 0.0), Vecd(-DL_sponge, DH), Vecd(DL1, DH), Vecd(DL1, 2.0 * DH),
-	Vecd(DL, 2.0 * DH), Vecd(DL, -DH), Vecd(DL1, -DH), Vecd(DL1, 0.0), Vecd(-DL_sponge, 0.0)};
-/** the outer wall polygen. */
-std::vector<Vecd> outer_wall_shape{
-	Vecd(-DL_sponge, -BW), Vecd(-DL_sponge, DH + BW), Vecd(DL1 - BW, DH + BW), Vecd(DL1 - BW, 2.0 * DH),
-	Vecd(DL + BW, 2.0 * DH), Vecd(DL + BW, -DH), Vecd(DL1 - BW, -DH), Vecd(DL1 - BW, -BW), Vecd(-DL_sponge, -BW)};
-/** the inner wall polygen. */
-std::vector<Vecd> inner_wall_shape{
-	Vecd(-DL_sponge - BW, 0.0), Vecd(-DL_sponge - BW, DH), Vecd(DL1, DH), Vecd(DL1, 2.0 * DH + BW),
-	Vecd(DL, 2.0 * DH + BW), Vecd(DL, -DH - BW), Vecd(DL1, -DH - BW), Vecd(DL1, 0.0), Vecd(-DL_sponge - BW, 0.0)};
-//----------------------------------------------------------------------
-//	Define case dependent SPH bodies.
-//----------------------------------------------------------------------
-/** Water block body definition. */
+BoundingBox system_domain_bounds(
+	Vecd(-vessel_radius, -vessel_length_half, -vessel_radius),
+	Vecd(vessel_radius, vessel_length_half, vertical_cylinder_length_half * 2) // max z coordinate with 0° rotation
+);
+
+//	import the fluid body
 class WaterBlock : public FluidBody
 {
 public:
 	WaterBlock(SPHSystem &system, const std::string &body_name)
-		: FluidBody(system, body_name)
+		: FluidBody(system, body_name, makeShared<SPHAdaptation>(1.3, 1.0, 0.75, resolution_ref/wall_resolution))
 	{
-		MultiPolygon multi_polygon;
-		multi_polygon.addAPolygon(water_block_shape, ShapeBooleanOps::add);
-		body_shape_.add<MultiPolygonShape>(multi_polygon);
+		// it's the nagative of the WallBoundary 
+		ComplexShape _temp_shape;
+		// vessel inner fluid
+		_temp_shape.add<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0, 1.0, 0), fluid_radius, vessel_length_half, resolution_SimTK, Vec3d(0));
+		// angled cannula part
+		_temp_shape.add<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0, 0, 1.0), cannula_inner_radius, vertical_cylinder_length_half, resolution_SimTK, Vec3d(0, 0, vertical_cylinder_length_half));
+
+		// actual LevelSetShape
+		body_shape_.add<LevelSetShape>(this, _temp_shape, true, false);
 	}
 };
-/** Wall boundary body definition. */
+
+//	import the static solid wall boundary
 class WallBoundary : public SolidBody
 {
 public:
 	WallBoundary(SPHSystem &system, const std::string &body_name)
-		: SolidBody(system, body_name)
+		: SolidBody(system, body_name, makeShared<SPHAdaptation>(1.15, resolution_ref/wall_resolution, 0.75, 1.0))
 	{
-		MultiPolygon multi_polygon;
-		multi_polygon.addAPolygon(outer_wall_shape, ShapeBooleanOps::add);
-		multi_polygon.addAPolygon(inner_wall_shape, ShapeBooleanOps::sub);
-		multi_polygon.addAPolygon(water_block_shape, ShapeBooleanOps::sub);
-		body_shape_.add<MultiPolygonShape>(multi_polygon);
+		ComplexShape _temp_shape;
+		// vessel outer
+		_temp_shape.add<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0, 1.0, 0), vessel_radius, vessel_length_half, resolution_SimTK, Vec3d(0));
+		// angled cannula part
+		_temp_shape.add<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0, 0, 1.0), cannula_outer_radius, vertical_cylinder_length_half, resolution_SimTK, Vec3d(0, 0, vertical_cylinder_length_half));
+		// vessel inner fluid
+		_temp_shape.substract<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0, 1.0, 0), fluid_radius, vessel_length_half, resolution_SimTK, Vec3d(0));
+		// angled cannula part
+		_temp_shape.substract<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0, 0, 1.0), cannula_inner_radius, vertical_cylinder_length_half, resolution_SimTK, Vec3d(0, 0, vertical_cylinder_length_half));
+
+		// actual LevelSetShape
+		body_shape_.add<LevelSetShape>(this, _temp_shape, true, false);
 	}
 };
-//----------------------------------------------------------------------
-//	Define case dependent SPH body parts.
-//----------------------------------------------------------------------
-/** create the emitter shape. */
-MultiPolygon creatEmitterShape()
-{
-	std::vector<Vecd> emmiter_shape{
-		Vecd(-DL_sponge, 0.0), Vecd(-DL_sponge, DH), Vecd(-DL_sponge + BW, DH), Vecd(-DL_sponge + BW, 0.0), Vecd(-DL_sponge, 0.0)};
-
-	MultiPolygon multi_polygon;
-	multi_polygon.addAPolygon(emmiter_shape, ShapeBooleanOps::add);
-	return multi_polygon;
-}
-/** create the emitter buffer shape . */
-MultiPolygon createEmitterBufferShape()
-{
-	std::vector<Vecd> emitter_buffer_shape{
-		Vecd(-DL_sponge, 0.0), Vecd(-DL_sponge, DH), Vecd(0.0, DH), Vecd(0.0, 0.0), Vecd(-DL_sponge, 0.0)};
-
-	MultiPolygon multi_polygon;
-	multi_polygon.addAPolygon(emitter_buffer_shape, ShapeBooleanOps::add);
-	return multi_polygon;
-}
 //----------------------------------------------------------------------
 //	Define emitter buffer inflow boundary condition
 //----------------------------------------------------------------------
@@ -112,13 +104,15 @@ public:
 	{
 		Real u = velocity[0];
 		Real v = velocity[1];
+		Real w = velocity[1];
 
-		if (position[0] < 0.0)
+		if (position[1] > vertical_cylinder_length_half)
 		{
-			u = 6.0 * u_ave_ * position[1] * (DH - position[1]) / DH / DH;
-			v = 0.0;
+			u = 0.0;
+			v = -u_ave_;
+			w = 0.0;
 		}
-		return Vecd(u, v);
+		return Vecd(u, v, w);
 	}
 
 	void setupDynamics(Real dt = 0.0) override
@@ -145,7 +139,7 @@ int main(int ac, char *av[])
 	//	Creating body, materials and particles.cd
 	//----------------------------------------------------------------------
 	WaterBlock water_block(system, "WaterBody");
-	water_block.setBodyDomainBounds(fluid_body_domain_bounds);
+	// water_block.setBodyDomainBounds(fluid_body_domain_bounds);
 	FluidParticles fluid_particles(water_block, makeShared<WeaklyCompressibleFluid>(rho0_f, c_f, mu_f));
 
 	WallBoundary wall_boundary(system, "Wall");
@@ -164,11 +158,11 @@ int main(int ac, char *av[])
 	/** Initialize particle acceleration. */
 	TimeStepInitialization initialize_a_fluid_step(water_block);
 	/** Emmiter. */
-	MultiPolygonShape emitter_shape(creatEmitterShape());
+	TriangleMeshShapeCylinder emitter_shape(SimTK::UnitVec3(0, 1.0, 0), fluid_radius, emitter_length * 0.5, resolution_SimTK, Vec3d(0, 0, vessel_length_half*2 - emitter_length * 0.5));
 	BodyRegionByParticle emitter(water_block, "Emitter", emitter_shape);
-	fluid_dynamics::EmitterInflowInjecting emitter_inflow_injecting(water_block, emitter, 300, 0, true);
+	fluid_dynamics::EmitterInflowInjecting emitter_inflow_injecting(water_block, emitter, 300, 1, false);
 	/** Emitter condition. */
-	MultiPolygonShape emitter_buffer_shape(createEmitterBufferShape());
+	TriangleMeshShapeCylinder emitter_buffer_shape(SimTK::UnitVec3(0, 1.0, 0), fluid_radius, buffer_length * 0.5, resolution_SimTK, Vec3d(0, 0, vessel_length_half*2 - buffer_length * 0.5));
 	BodyRegionByCell emitter_buffer(water_block, "EmitterBuffer", emitter_buffer_shape);
 	EmitterBufferInflowCondition emitter_buffer_inflow_condition(water_block, emitter_buffer);
 	/** time-space method to detect surface particles. */
@@ -223,8 +217,8 @@ int main(int ac, char *av[])
 	size_t number_of_iterations = system.restart_step_;
 	int screen_output_interval = 100;
 	int restart_output_interval = screen_output_interval * 10;
-	Real End_Time = 100.0;			/**< End time. */
-	Real D_Time = End_Time / 200.0; /**< Time stamps for output of body states. */
+
+	Real D_Time = End_Time / 100.0; /**< Time stamps for output of body states. */
 	Real dt = 0.0;					/**< Default acoustic time step sizes. */
 	//----------------------------------------------------------------------
 	//	Statistics for CPU time

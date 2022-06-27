@@ -98,19 +98,19 @@ class EmitterBufferInflowCondition : public fluid_dynamics::InflowBoundaryCondit
 public:
 	EmitterBufferInflowCondition(FluidBody &body, BodyPartByCell &body_part)
 		: InflowBoundaryCondition(body, body_part),
-		  u_ave_(0), u_ref_(U_f), t_ref_(4.0) {}
+		  u_ave_(0), u_ref_(U_f), t_ref_(End_Time) {}
 
 	Vecd getTargetVelocity(Vecd &position, Vecd &velocity) override
 	{
 		Real u = velocity[0];
 		Real v = velocity[1];
-		Real w = velocity[1];
+		Real w = velocity[2];
 
 		if (position[1] > vertical_cylinder_length_half)
 		{
 			u = 0.0;
-			v = -u_ave_;
-			w = 0.0;
+			v = 0.0;
+			w = -u_ave_;
 		}
 		return Vecd(u, v, w);
 	}
@@ -158,11 +158,11 @@ int main(int ac, char *av[])
 	/** Initialize particle acceleration. */
 	TimeStepInitialization initialize_a_fluid_step(water_block);
 	/** Emmiter. */
-	TriangleMeshShapeCylinder emitter_shape(SimTK::UnitVec3(0, 1.0, 0), fluid_radius, emitter_length * 0.5, resolution_SimTK, Vec3d(0, 0, vessel_length_half*2 - emitter_length * 0.5));
+	TriangleMeshShapeCylinder emitter_shape(SimTK::UnitVec3(0, 0, 1.0), fluid_radius, emitter_length * 0.5, resolution_SimTK, Vec3d(0, 0, vessel_length_half*2 - emitter_length * 0.5));
 	BodyRegionByParticle emitter(water_block, "Emitter", emitter_shape);
 	fluid_dynamics::EmitterInflowInjecting emitter_inflow_injecting(water_block, emitter, 300, 1, false);
 	/** Emitter condition. */
-	TriangleMeshShapeCylinder emitter_buffer_shape(SimTK::UnitVec3(0, 1.0, 0), fluid_radius, buffer_length * 0.5, resolution_SimTK, Vec3d(0, 0, vessel_length_half*2 - buffer_length * 0.5));
+	TriangleMeshShapeCylinder emitter_buffer_shape(SimTK::UnitVec3(0, 0, 1.0), fluid_radius, buffer_length * 0.5, resolution_SimTK, Vec3d(0, 0, vessel_length_half*2 - buffer_length * 0.5));
 	BodyRegionByCell emitter_buffer(water_block, "EmitterBuffer", emitter_buffer_shape);
 	EmitterBufferInflowCondition emitter_buffer_inflow_condition(water_block, emitter_buffer);
 	/** time-space method to detect surface particles. */

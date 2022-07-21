@@ -54,10 +54,7 @@ namespace SPH
 	ElasticSolidParticles::
 		ElasticSolidParticles(SPHBody &sph_body, ElasticSolid *elastic_solid)
 		: SolidParticles(sph_body, elastic_solid),
-		elastic_solid_(elastic_solid) {
-			// get which stress measure is relevant for the material
-			stress_measure_ = elastic_solid_->getRelevantStressMeasureName();
-		}
+		elastic_solid_(elastic_solid) {}
 	//=================================================================================================//
 	void ElasticSolidParticles::initializeOtherVariables()
 	{
@@ -81,6 +78,8 @@ namespace SPH
 		addDerivedVariableToWrite<VonMisesStress>();
 		addDerivedVariableToWrite<VonMisesStrain>();
 		addAVariableToRestart<Matd>("DeformationGradient");
+		// get which stress measure is relevant for the material
+		stress_measure_ = elastic_solid_->getRelevantStressMeasureName();
 	}
 	//=================================================================================================//
 	StdLargeVec<Real> ElasticSolidParticles::getVonMisesStrainVector(std::string strain_measure)

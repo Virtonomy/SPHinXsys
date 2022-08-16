@@ -155,7 +155,7 @@ int main(int ac, char *av[])
 	pkj_body_RV.defineParticlesAndMaterial<
 		ElectroPhysiologyReducedParticles, MonoFieldElectroPhysiology>(
 			pkj_reaction_model_RV, diffusion_coff * acceleration_factor, bias_coff, fiber_direction);
-	pkj_body_RV.generateParticles<NetworkGeneratorWithExtraCheck>(starting_point_RV, second_point_RV, 50, 1.0, 1.79, 10);
+	pkj_body_RV.generateParticles<NetworkGeneratorWithExtraCheck>(starting_point_RV, second_point_RV, 50, 1.0, 0.3, 10);
 	TreeTerminates pkj_leaves_RV(pkj_body_RV);
 
 	/** Creat a Purkinje network for fast diffusion, material and particles - Left Ventricle */
@@ -164,7 +164,7 @@ int main(int ac, char *av[])
 	pkj_body_LV.defineParticlesAndMaterial<
 		ElectroPhysiologyReducedParticles, MonoFieldElectroPhysiology>(
 			pkj_reaction_model_LV, diffusion_coff * acceleration_factor, bias_coff, fiber_direction);
-	pkj_body_LV.generateParticles<NetworkGeneratorWithExtraCheck>(starting_point_LV, second_point_LV, 50, 1.0, 1.79, 10);
+	pkj_body_LV.generateParticles<NetworkGeneratorWithExtraCheck>(starting_point_LV, second_point_LV, 50, 1.0, 0.3, 10);
 	TreeTerminates pkj_leaves_LV(pkj_body_LV);
 	//----------------------------------------------------------------------
 	//	SPH Observation section

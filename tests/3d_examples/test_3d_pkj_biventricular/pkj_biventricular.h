@@ -225,9 +225,9 @@ class MuscleBaseShapeParameters : public TriangleMeshShapeBrick::ShapeParameters
 public:
 	MuscleBaseShapeParameters() : TriangleMeshShapeBrick::ShapeParameters()
 	{
-		Real l = domain_upper_bound[0] - domain_lower_bound[0];
-		Real w = domain_upper_bound[1] - domain_lower_bound[1];
-		Real h = domain_upper_bound[2];
+		Real l = domain_upper_bound[1] - domain_lower_bound[1];
+		Real w = domain_upper_bound[2] - domain_lower_bound[2];
+		Real h = domain_upper_bound[0];
 		halfsize_ = Vec3d(1.0 * dp_0, 0.5 * l, 0.5 * w);
 		resolution_ = 20;
 		translation_ = Vec3d(33.1861, -194.358, -152.545);

@@ -150,7 +150,7 @@ int main(int ac, char *av[])
 	} 
 
 	/** Creat a Purkinje network for fast diffusion, material and particles - Right Ventricle */
-	TreeBody pkj_body_RV(system, makeShared<Heart>("Purkinje"));
+	TreeBody pkj_body_RV(system, makeShared<Heart>("Purkinje-RV"));
 	AlievPanfilowModel pkj_reaction_model_RV(k_a, c_m, k, a, b, mu_1, mu_2, epsilon);
 	pkj_body_RV.defineParticlesAndMaterial<
 		ElectroPhysiologyReducedParticles, MonoFieldElectroPhysiology>(
@@ -159,7 +159,7 @@ int main(int ac, char *av[])
 	TreeTerminates pkj_leaves_RV(pkj_body_RV);
 
 	/** Creat a Purkinje network for fast diffusion, material and particles - Left Ventricle */
-	TreeBody pkj_body_LV(system, makeShared<Heart>("Purkinje"));
+	TreeBody pkj_body_LV(system, makeShared<Heart>("Purkinje-LV"));
 	AlievPanfilowModel pkj_reaction_model_LV(k_a, c_m, k, a, b, mu_1, mu_2, epsilon);
 	pkj_body_LV.defineParticlesAndMaterial<
 		ElectroPhysiologyReducedParticles, MonoFieldElectroPhysiology>(

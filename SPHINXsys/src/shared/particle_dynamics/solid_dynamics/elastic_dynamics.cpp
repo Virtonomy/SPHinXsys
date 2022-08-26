@@ -99,7 +99,9 @@ namespace SPH
 		{
 			pos_n_[index_i] += vel_n_[index_i] * dt * 0.5;
 			F_[index_i] += dF_dt_[index_i] * dt * 0.5;
-			rho_n_[index_i] = rho0_ / det(F_[index_i]);
+			Real J = det(F_[index_i]);
+			if (J < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative J: " + std::to_string(J));
+			rho_n_[index_i] = rho0_ / J;
 			// obtain the first Piola-Kirchhoff stress from the second Piola-Kirchhoff stress
 			// it seems using reproducing correction here increases convergence rate near the free surface
 			stress_PK1_[index_i] = F_[index_i] * material_->ConstitutiveRelation(F_[index_i], index_i) * B_[index_i];
@@ -145,6 +147,7 @@ namespace SPH
 			F_[index_i] += dF_dt_[index_i] * dt * 0.5;
 			rho_n_[index_i] = rho0_ / det(F_[index_i]);
 			Real J = det(F_[index_i]);
+			if (J < TinyReal) throw std::runtime_error("KirchhoffParticleStressRelaxationFirstHalf: negative J: " + std::to_string(J));
 			Real one_over_J = 1.0 / J;
 			rho_n_[index_i] = rho0_ * one_over_J;
 			Real J_to_minus_2_over_dimension = pow(one_over_J, 2.0 * one_over_dimensions_);
@@ -173,6 +176,7 @@ namespace SPH
 			pos_n_[index_i] += vel_n_[index_i] * dt * 0.5;
 			F_[index_i] += dF_dt_[index_i] * dt * 0.5;
 			Real J = det(F_[index_i]);
+			if (J < TinyReal) throw std::runtime_error("KirchhoffStressRelaxationFirstHalf: negative J: " + std::to_string(J));
 			Real one_over_J = 1.0 / J;
 			rho_n_[index_i] = rho0_ * one_over_J;
 			J_to_minus_2_over_dimension_[index_i] = pow(one_over_J * one_over_J, one_over_dimensions_);

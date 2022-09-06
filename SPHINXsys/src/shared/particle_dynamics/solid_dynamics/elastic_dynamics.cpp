@@ -100,7 +100,7 @@ namespace SPH
 			pos_n_[index_i] += vel_n_[index_i] * dt * 0.5;
 			F_[index_i] += dF_dt_[index_i] * dt * 0.5;
 			Real J = det(F_[index_i]);
-			if (J < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative J: " + std::to_string(J));
+			if (J < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative J: " + std::to_string(J) + "particle id: " + std::to_string(index_i));
 			rho_n_[index_i] = rho0_ / J;
 			// obtain the first Piola-Kirchhoff stress from the second Piola-Kirchhoff stress
 			// it seems using reproducing correction here increases convergence rate near the free surface
@@ -128,7 +128,7 @@ namespace SPH
 								 numerical_dissipation_factor_ * weight * numerical_stress_ij) *
 								inner_neighborhood.dW_ij_[n] * e_ij * Vol_[index_j] * inv_rho0_;
 			}
-
+			if (acceleration < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative acceleration; particle id: " + std::to_string(index_i));
 			dvel_dt_[index_i] = acceleration;
 		}
 		//=================================================================================================//
@@ -147,7 +147,7 @@ namespace SPH
 			F_[index_i] += dF_dt_[index_i] * dt * 0.5;
 			rho_n_[index_i] = rho0_ / det(F_[index_i]);
 			Real J = det(F_[index_i]);
-			if (J < TinyReal) throw std::runtime_error("KirchhoffParticleStressRelaxationFirstHalf: negative J: " + std::to_string(J));
+			if (J < TinyReal) throw std::runtime_error("KirchhoffParticleStressRelaxationFirstHalf: negative J: " + std::to_string(J) + "particle id: " + std::to_string(index_i));
 			Real one_over_J = 1.0 / J;
 			rho_n_[index_i] = rho0_ * one_over_J;
 			Real J_to_minus_2_over_dimension = pow(one_over_J, 2.0 * one_over_dimensions_);
@@ -176,7 +176,7 @@ namespace SPH
 			pos_n_[index_i] += vel_n_[index_i] * dt * 0.5;
 			F_[index_i] += dF_dt_[index_i] * dt * 0.5;
 			Real J = det(F_[index_i]);
-			if (J < TinyReal) throw std::runtime_error("KirchhoffStressRelaxationFirstHalf: negative J: " + std::to_string(J));
+			if (J < TinyReal) throw std::runtime_error("KirchhoffStressRelaxationFirstHalf: negative J: " + std::to_string(J) + "particle id: " + std::to_string(index_i));
 			Real one_over_J = 1.0 / J;
 			rho_n_[index_i] = rho0_ * one_over_J;
 			J_to_minus_2_over_dimension_[index_i] = pow(one_over_J * one_over_J, one_over_dimensions_);
@@ -202,6 +202,7 @@ namespace SPH
 				acceleration += ((stress_on_particle_[index_i] + stress_on_particle_[index_j]) * inner_neighborhood.e_ij_[n] + shear_force_ij) *
 								inner_neighborhood.dW_ij_[n] * Vol_[index_j] * inv_rho0_;
 			}
+			if (acceleration < TinyReal) throw std::runtime_error("KirchhoffStressRelaxationFirstHalf: negative acceleration; particle id: " + std::to_string(index_i));
 			dvel_dt_[index_i] = acceleration;
 		}
 		//=================================================================================================//

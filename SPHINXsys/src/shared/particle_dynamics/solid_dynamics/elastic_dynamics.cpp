@@ -128,7 +128,7 @@ namespace SPH
 								 numerical_dissipation_factor_ * weight * numerical_stress_ij) *
 								inner_neighborhood.dW_ij_[n] * e_ij * Vol_[index_j] * inv_rho0_;
 			}
-			if (acceleration < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative acceleration; particle id: " + std::to_string(index_i));
+			//if (acceleration < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative acceleration; particle id: " + std::to_string(index_i));
 			dvel_dt_[index_i] = acceleration;
 		}
 		//=================================================================================================//

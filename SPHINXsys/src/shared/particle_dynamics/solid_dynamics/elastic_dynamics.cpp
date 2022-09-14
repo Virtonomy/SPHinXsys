@@ -100,7 +100,7 @@ namespace SPH
 			pos_n_[index_i] += vel_n_[index_i] * dt * 0.5;
 			F_[index_i] += dF_dt_[index_i] * dt * 0.5;
 			Real J = det(F_[index_i]);
-			if (J < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative J: " + std::to_string(J) + "particle id: " + std::to_string(index_i));
+			if (J < TinyReal) throw std::runtime_error("StressRelaxationFirstHalf: negative J: " + std::to_string(J) + " particle id: " + std::to_string(index_i));
 			rho_n_[index_i] = rho0_ / J;
 			// obtain the first Piola-Kirchhoff stress from the second Piola-Kirchhoff stress
 			// it seems using reproducing correction here increases convergence rate near the free surface

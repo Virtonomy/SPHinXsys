@@ -65,10 +65,16 @@ namespace SPH
             return center_;
         }
 
+        const Real& radius()
+        {
+            return radius_;
+        }
+
     private:
         StdVec<Vecd> boundary_points_;
         Vecd direction_;
         Vecd center_;
+        Real radius_;
     };
 
     /**

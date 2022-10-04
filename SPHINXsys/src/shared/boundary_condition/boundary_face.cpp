@@ -5,7 +5,8 @@ namespace SPH
 {
     SegmentFace::SegmentFace(StdVec<Vecd> boundary_points, Vecd direction)
         : boundary_points_(boundary_points),
-          direction_(direction.normalize())
+          direction_(direction.normalize()),
+          radius_(INFINITY)
     {
         center_ = Vecd(0);
         for (size_t i = 0; i < boundary_points_.size(); i++)
@@ -18,16 +19,19 @@ namespace SPH
     SegmentFace::SegmentFace(StdVec<Vecd> boundary_points, Vecd direction, Vecd center)
         : boundary_points_(boundary_points),
           direction_(direction.normalize()),
-          center_(center)
+          center_(center),
+          radius_(INFINITY)
     {
     }
 
     SegmentFace::SegmentFace(const Vecd &direction, const Vecd &center)
-        : direction_(direction.normalize()), center_(center)
+        : direction_(direction.normalize()),
+            center_(center),
+            radius_(INFINITY)
     {
     }
     SegmentFace::SegmentFace(const Vecd& direction, const Vecd& center, Real radius)
-    : center_(center), direction_(direction.normalize()) 
+    : center_(center), direction_(direction.normalize()), radius_(radius)
     {
         Vecd default_normal(1.0,0.0,0.0);
         // calculate rotation matrix from defualt_normal to direction_

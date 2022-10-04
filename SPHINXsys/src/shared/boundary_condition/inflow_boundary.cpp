@@ -16,7 +16,9 @@ namespace SPH
         {
             const auto &pos = base_particles_->pos_n_[i];
             auto d = getSignedDistance(pos);
-            if (d < region_width_)
+            Real r2 = dot((pos - segment_face_.center()), (pos - segment_face_.center())) - d*d;
+
+            if (d < region_width_ && (r2<segment_face_.radius()*segment_face_.radius()))
             {
                 body_part_particles_.push_back(i);
             }

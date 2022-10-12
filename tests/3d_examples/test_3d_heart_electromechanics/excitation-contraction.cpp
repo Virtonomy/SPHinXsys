@@ -28,15 +28,17 @@ BoundingBox system_domain_bounds(domain_lower_bound, domain_upper_bound);
 /** Material properties. */
 Real rho0_s = 1.06e-3;
 /** Active stress factor */
-Real k_a = 100 * stress_scale;
-Real a0[4] = {496.0 * stress_scale, 15196.0 * stress_scale, 3283.0 * stress_scale, 662.0 * stress_scale};
-Real b0[4] = {7.209, 20.417, 11.176, 9.466};
+Real k_a = 1.0e2 * stress_scale;
+// Real a0[4] = {496.0 * stress_scale, 15196.0 * stress_scale, 3283.0 * stress_scale, 662.0 * stress_scale};
+// Real b0[4] = {7.209, 20.417, 11.176, 9.466};
+Real a0[4] = {59.0 * stress_scale, 18472.0 * stress_scale, 2841.0 * stress_scale, 216.0 * stress_scale};
+Real b0[4] = {8.023, 16.026, 11.12, 11.436};
 /** reference stress to achieve weakly compressible condition */
 Real poisson = 0.4995;
-Real bulk_modulus = 2.0 * a0[0] * (1.0 + poisson) / (3.0 * (1.0 - 2.0 * poisson));
+Real bulk_modulus = 5.0e6 * stress_scale; // 2.0 * a0[0] * (1.0 + poisson) / (3.0 * (1.0 - 2.0 * poisson));
 /** Electrophysiology parameters. */
 StdVec<std::string> species_name_list{"Phi"};
-Real diffusion_coff = 0.8;
+Real diffusion_coff = 1.0;
 Real bias_coff = 0.0;
 /** Electrophysiology parameters. */
 Real c_m = 1.0;
@@ -194,13 +196,16 @@ protected:
 
 	void Update(size_t index_i, Real dt) override
 	{
-		if (-30.0 * length_scale <= pos_n_[index_i][0] && pos_n_[index_i][0] <= -15.0 * length_scale)
+		// if (-30.0 * length_scale <= pos_n_[index_i][0] && pos_n_[index_i][0] <= -15.0 * length_scale)
+		if (-11.0 * length_scale <= pos_n_[index_i][0] && pos_n_[index_i][0] <= -4.0 * length_scale)
 		{
-			if (-2.0 * length_scale <= pos_n_[index_i][1] && pos_n_[index_i][1] <= 0.0)
+			// if (-2.0 * length_scale <= pos_n_[index_i][1] && pos_n_[index_i][1] <= 0.0)
+			if (-68.7042 * length_scale <= pos_n_[index_i][1] && pos_n_[index_i][1] <= -66.7042)
 			{
-				if (-3.0 * length_scale <= pos_n_[index_i][2] && pos_n_[index_i][2] <= 3.0 * length_scale)
+				// if (-3.0 * length_scale <= pos_n_[index_i][2] && pos_n_[index_i][2] <= 3.0 * length_scale)
+				if (-1.9806 * length_scale <= pos_n_[index_i][2] && pos_n_[index_i][2] <= 4.0194 * length_scale)
 				{
-					species_n_[voltage_][index_i] = 0.92;
+					species_n_[voltage_][index_i] = 1.2;
 				}
 			}
 		}
@@ -434,14 +439,54 @@ int main(int ac, char *av[])
 	/** active and passive stress relaxation. */
 	solid_dynamics::StressRelaxationFirstHalf stress_relaxation_first_half(mechanics_body_inner);
 	solid_dynamics::StressRelaxationSecondHalf stress_relaxation_second_half(mechanics_body_inner);
+	SimpleDynamics<NormalDirectionFromBodyShape>(mechanics_heart).parallel_exec();
+	solid_dynamics::UpdateElasticNormalDirection body_update_normal(mechanics_heart);
 	/** Constrain region of the inserted body. */
 	MuscleBaseShapeParameters muscle_base_parameters;
 	BodyRegionByParticle muscle_base(mechanics_heart, makeShared<TriangleMeshShapeBrick>(muscle_base_parameters, "Holder"));
 	solid_dynamics::ConstrainSolidBodyRegion constrain_holder(mechanics_heart, muscle_base);
+	BodySurface surface_layer(mechanics_heart);
+	IndexVector all_surface_ids = surface_layer.body_part_particles_;
+	auto myocardium_particles = dynamic_cast<ElasticSolidParticles*>(mechanics_heart.base_particles_);
+	// Boundary conditions
+	// Pressure initial conditions and conversion factors
+	Real mmHg_to_Pa = 133.3224;
+	Real initial_IVC_pressure_LV = 0.0; // 10.0 *  mmHg_to_Pa * 1e-6;
+	Real initial_IVC_pressure_RV = 0.0; // 6.0 *  mmHg_to_Pa * 1e-6;
+	Real initial_ejection_pressure_LV = 50.0 * mmHg_to_Pa * stress_scale; // 50mmHg initial pressure at start of ejection phase
+	Real initial_ejection_pressure_RV = 15.0 * mmHg_to_Pa * stress_scale; // 15mmHg initial pressure at start of ejection phase
+	Real duration_IVC = 50.0; // duration isovolumic constraction phase = 50ms
+	Real IVC_pressure_slope_LV = (initial_ejection_pressure_LV - initial_IVC_pressure_LV)  / duration_IVC;
+	Real IVC_pressure_slope_RV = (initial_ejection_pressure_RV - initial_IVC_pressure_RV) / duration_IVC;
+	BodyPartByParticle LV_body(mechanics_heart, "LeftVentricle");
+	Vecd source_point_LV = Vec3d(11.94363656084621, -24.4540245, -1.36504656); // Vecd(3.265584517 , -24.4540245 , -1.36504656);
+	StdVec<array<Real, 2>> pressure_over_time_LV = {
+	 	{0.0, 0.0},
+	 	{duration_IVC, initial_ejection_pressure_LV}};
+	// BodyPartByParticle RV_body(mechanics_heart, "RightVentricle");
+	// Vecd source_point_RV = Vecd(-38.46060618712892, -18.19030649377814, -0.20931284741483314);
+	// StdVec<array<Real, 2>> pressure_over_time_RV = {
+	// 	{0.0, 0.0},
+	// 	{duration_IVC, initial_ejection_pressure_RV}};
+	solid_dynamics::SurfacePressureFromSource surface_pressure_LV(mechanics_heart, LV_body, source_point_LV, pressure_over_time_LV);
+	StdVec<Vecd> LV_particles_by_sourcepoint_pos_0 = surface_pressure_LV.GetPressureParticles();
+	IndexVector pressure_particle_ids = surface_pressure_LV.GetPressureParticlesIDs();
+	ObserverBody LV_source_point_observer(system, "LV_source_point_observer");
+	LV_source_point_observer.generateParticles<ObserverParticleGenerator>(LV_particles_by_sourcepoint_pos_0);
+	// solid_dynamics::SurfacePressureFromSource surface_pressure_RV(mechanics_heart, RV_body, source_point_RV, pressure_over_time_RV);
+	// StdVec<Vecd> RV_particles_by_sourcepoint_pos_0 = surface_pressure_RV.GetPressureParticles();
+	// ObserverBody RV_source_point_observer(system, "RV_source_point_observer");
+	// RV_source_point_observer.generateParticles<ObserverParticleGenerator>(RV_particles_by_sourcepoint_pos_0);
+	Real stiffness = 50.0 * 1e3 * stress_scale; // 0.1 kPa/mm --> 100 Pa/mm --> 100 * 1e-6 * [pressure unit] / mm --> 1e-4
+	Real damping_ratio = 0.0; // 1 kPa*s/mm --> 1e3 Pa*s/mm --> 1e3 * 1e-6 * [pressure unit] * s / mm --> 1e3 * 1e-6 * 1e3 [pressure unit] * ms / mm --> 1
+	Vecd outer_soure_point = Vecd(3.265584517, -75.0, -1.36504656);
+	BodyPartByParticle body_part(mechanics_heart, "Pericardium");
+	solid_dynamics::SpringNormalOnSurfaceParticles spring_damper_constraint(mechanics_heart, body_part, true, outer_soure_point, stiffness, damping_ratio);
 	//----------------------------------------------------------------------
 	//	SPH Output section
 	//----------------------------------------------------------------------
 	BodyStatesRecordingToVtp write_states(in_output, system.real_bodies_);
+	BodyStatesRecordingToVtp write_observers(in_output, system.observation_bodies_);
 	RegressionTestDynamicTimeWarping<ObservedQuantityRecording<Real>>
 		write_voltage("Voltage", in_output, voltage_observer_contact);
 	RegressionTestDynamicTimeWarping<ObservedQuantityRecording<Vecd>>
@@ -456,6 +501,7 @@ int main(int ac, char *av[])
 	correct_kernel_weights_for_interpolation.parallel_exec();
 	/** Output initial states and observations */
 	write_states.writeToFile(0);
+	write_observers.writeToFile(0);
 	write_voltage.writeToFile(0);
 	write_displacement.writeToFile(0);
 	//----------------------------------------------------------------------
@@ -528,9 +574,25 @@ int main(int ac, char *av[])
 					dt_s = get_mechanics_time_step.parallel_exec();
 					if (dt - dt_s_sum < dt_s)
 						dt_s = dt - dt_s_sum;
+					auto gravity = Gravity({0,0,0});
+                    TimeStepInitialization(mechanics_heart, gravity).parallel_exec(dt_s);
+					body_update_normal.parallel_exec(dt_s);
+					surface_pressure_LV.parallel_exec(dt_s);
+					spring_damper_constraint.parallel_exec(dt_s);
+					// surface_pressure_RV.parallel_exec(dt_s);
 					stress_relaxation_first_half.parallel_exec(dt_s);
-					constrain_holder.parallel_exec(dt_s);
+					// constrain_holder.parallel_exec(dt_s);
 					stress_relaxation_second_half.parallel_exec(dt_s);
+					Real current_velocity = 0.0;
+					for(size_t i = 0; i < pressure_particle_ids.size(); i++)
+					{
+						size_t index_j = pressure_particle_ids[i];
+						if(std::find(all_surface_ids.begin(), all_surface_ids.end(), index_j) != all_surface_ids.end())
+						{
+							current_velocity += myocardium_particles->vel_n_[index_j].norm();
+						}
+					}
+					if (ite % 20 == 0) std::cout << "current surface velocities: " << current_velocity << std::endl;
 					dt_s_sum += dt_s;
 				}
 

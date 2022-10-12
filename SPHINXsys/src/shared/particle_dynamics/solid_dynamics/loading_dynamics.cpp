@@ -146,6 +146,7 @@ namespace SPH
 		{
 			try
 			{
+				std::cout << "Spring Update" << std::endl;
 				if (apply_spring_force_to_particle_[index_i])
 				{
 					Vecd delta_x = pos_n_[index_i] - pos_0_[index_i];
@@ -285,11 +286,19 @@ namespace SPH
 				Real cos_theta = getCosineOfAngleBetweenTwoVectors(vector_to_particle, normal);
 				// if the angle is less than 90°, we apply the pressure to the surface particle
 				// ignore exactly perpendicular surfaces
-				if (cos_theta > 1e-6) 
+				if (cos_theta > 1e-6 && vector_to_particle.norm() < 37.4) // generic heart: 37.4, registered heart: 50.0
 				{
 					apply_pressure_to_particle_[particle_i] = true;
+					pressure_particles_ids_.push_back(particle_i);
 				}
 			}
+
+			for (size_t j = 0; j < apply_pressure_to_particle_.size(); j++)
+			{
+				if(apply_pressure_to_particle_[j] == true) pressure_particles_.push_back(particles_->pos_0_[j]);
+			}
+
+			std::cout << "Number of pressure particles: " << pressure_particles_.size() << std::endl;
 
 			particles_->total_ghost_particles_ = 0;
 		}
@@ -336,7 +345,9 @@ namespace SPH
 					// vector is made by multiplying it with the surface normal
 					// add the acceleration to the particle
 					dvel_dt_prior_[index_i] += (-1.0) * n_[index_i] * acc_from_pressure;
+					std::cout << particles_->vel_n_[index_i].norm() << std::endl;
 				}
+				
 			}
 			catch (std::out_of_range &e)
 			{

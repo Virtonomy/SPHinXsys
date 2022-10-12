@@ -202,11 +202,17 @@ namespace SPH
 
             StdLargeVec<bool> &GetApplyPressureToParticle() { return apply_pressure_to_particle_; }
 
+            StdVec<Vecd> &GetPressureParticles() { return pressure_particles_; }
+
+            IndexVector &GetPressureParticlesIDs() { return pressure_particles_ids_; }
+
         protected:
             StdLargeVec<Vecd> &pos_0_, &n_, &dvel_dt_prior_;
             StdLargeVec<Real> &mass_;
             StdVec<std::array<Real, 2>> pressure_over_time_;
             StdLargeVec<bool> apply_pressure_to_particle_;
+            StdVec<Vecd> pressure_particles_;
+            IndexVector pressure_particles_ids_;
             Real getPressure();
             virtual void Update(size_t index_i, Real dt = 0.0) override;
         };

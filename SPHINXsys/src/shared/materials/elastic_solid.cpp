@@ -309,4 +309,35 @@ namespace SPH
 		}
 	}
 	//=================================================================================================//
+	void NeoHookeanSolidQuasiIncompressible::setSoundSpeedsCorrected()
+	{
+		Real coefficient = 1 - 2.0 * 0.499;
+		c0_ = sqrt(K0_ / coefficient / rho0_);
+	};
+	//=================================================================================================//
+	Matd NeoHookeanSolidQuasiIncompressible::ConstitutiveRelation(Matd &F, size_t particle_index_i)
+	{
+		Matd right_cauchy = ~F * F;
+		Real I_1 = right_cauchy.trace();
+		Real J = det(F);
+		Real a = std::pow(J, -2.0/3.0);
+		Matd sigmaPK2 = G0_ * a * Matd(1.0) + (K0_ * log(J) - G0_ * a * I_1/ 3.0) * inverse(right_cauchy);
+		return sigmaPK2;
+	}
+	//=================================================================================================//
+	Matd NeoHookeanSolidQuasiIncompressible::EulerianConstitutiveRelation(Matd &almansi_strain, Matd &F, size_t particle_index_i)
+	{
+		Real J = det(F);
+		Matd B = inverse(-2.0 * almansi_strain + Matd(1.0));
+		Real I_1 = B.trace();
+		Real a = std::pow(J, -5./3.);
+		Matd cauchy_stress = (K0_ * log(J) / J - 1./3. * G0_ * a * I_1) * Matd(1.0) + G0_ * a * B;
+		return cauchy_stress;
+	}
+	//=================================================================================================//
+	Real NeoHookeanSolidQuasiIncompressible::VolumetricKirchhoff(Real J)
+	{
+		return 0.5 * K0_ * (J * J - 1);
+	}
+	//=================================================================================================//
 }

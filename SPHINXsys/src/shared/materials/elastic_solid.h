@@ -298,5 +298,31 @@ namespace SPH
 		/** Define the calculation of the stress matrix for postprocessing */
 		virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
 	};
+
+	/**
+	* @class NeoHookeanSolid
+	* @brief Neo-Hookean solid, quasi incompressible formulation!
+	*/
+	class NeoHookeanSolidQuasiIncompressible : public LinearElasticSolid
+	{
+	public:
+		explicit NeoHookeanSolidQuasiIncompressible(Real rho0, Real youngs_modulus, Real poisson_ratio)
+			: LinearElasticSolid(rho0, youngs_modulus, poisson_ratio)
+		{
+			//setSoundSpeedsCorrected();
+			material_type_name_ = "NeoHookeanSolidQuasiIncompressible";
+		};
+		virtual ~NeoHookeanSolidQuasiIncompressible(){};
+
+		/** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
+		virtual Matd ConstitutiveRelation(Matd &deformation, size_t particle_index_i) override;
+		virtual Matd EulerianConstitutiveRelation(Matd &almansi_strain, Matd &F, size_t particle_index_i) override;
+		/** Volumetric Kirchhoff stress from determinate */
+		virtual Real VolumetricKirchhoff(Real J) override;
+		/** Define the calculation of the stress matrix for postprocessing */
+		virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
+	protected:
+		void setSoundSpeedsCorrected();
+	};
 }
 #endif //ELASTIC_SOLID_H

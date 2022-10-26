@@ -100,6 +100,18 @@ namespace SPH
 				}
 				/** Buffer Particle state copied from real particle. */
 				particles_->copyFromAnotherParticle(particles_->total_real_particles_, sorted_index_i);
+				//// Update sorted id
+        		//size_t last_unsorted_id = unsorted_id_[particles_->total_real_particles_];
+        		//size_t stored_sorted_id = sorted_id_[last_unsorted_id];
+        		//size_t stored_unsorted_id = unsorted_id_[stored_sorted_id];
+        		//if (stored_unsorted_id == last_unsorted_id && 
+        		//    stored_sorted_id < particles_->total_real_particles_ &&
+        		//    stored_unsorted_id != last_unsorted_id)
+        		//{
+        		//    std::cout << "checkUpperBound: incorrect sorted id overwrite!" << std::endl;
+        		//    exit(0);
+        		//}
+        		//sorted_id_[last_unsorted_id] = particles_->total_real_particles_;
 				/** Realize the buffer particle by increasing the number of real particle in the body.  */
 				particles_->total_real_particles_ += 1;
 				/** Periodic bounding. */
@@ -123,9 +135,21 @@ namespace SPH
 				}
 				/** Buffer Particle state copied from real particle. */
 				particles_->copyFromAnotherParticle(particles_->total_real_particles_, sorted_index_i);
+				//// Update sorted id
+        		//size_t last_unsorted_id = unsorted_id_[particles_->total_real_particles_];
+        		//size_t stored_sorted_id = sorted_id_[last_unsorted_id];
+        		//size_t stored_unsorted_id = unsorted_id_[stored_sorted_id];
+        		//if (stored_unsorted_id == last_unsorted_id && 
+        		//    stored_sorted_id < particles_->total_real_particles_ &&
+        		//    stored_unsorted_id != last_unsorted_id)
+        		//{
+        		//    std::cout << "checkLowerBound: incorrect sorted id overwrite!" << std::endl;
+        		//    exit(0);
+        		//}
+        		//sorted_id_[last_unsorted_id] = particles_->total_real_particles_;
 				/** Realize the buffer particle by increasing the number of real particle in the body.  */
 				particles_->total_real_particles_ += 1;
-				pos_n_[sorted_index_i] = aligned_box_.getUpperPeriodic(axis_, pos_n_[sorted_index_i]);
+				pos_n_[sorted_index_i] = aligned_box_.getLowerPeriodic(axis_, pos_n_[sorted_index_i]);
 			}
 		}
 		//=================================================================================================//

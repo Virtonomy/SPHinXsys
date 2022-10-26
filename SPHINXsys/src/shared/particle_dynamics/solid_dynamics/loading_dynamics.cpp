@@ -275,6 +275,7 @@ namespace SPH
 			// get the surface layer of particles
 			BodySurface surface_layer(sph_body);
 			// select which particles the pressure is applied to
+			size_t number_of_particles = 0;
 			for (size_t particle_i : surface_layer.body_part_particles_)
 			{
 				// vector to the source point from the particle
@@ -288,9 +289,10 @@ namespace SPH
 				if (cos_theta > 1e-6) 
 				{
 					apply_pressure_to_particle_[particle_i] = true;
+					number_of_particles++;
 				}
 			}
-
+			std::cout << "Number of particles to exert pressure: " << number_of_particles << std::endl;
 			particles_->total_ghost_particles_ = 0;
 		}
 		//=================================================================================================//

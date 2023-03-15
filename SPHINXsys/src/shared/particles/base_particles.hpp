@@ -128,7 +128,7 @@ namespace SPH
     template <class DerivedVariableMethod, class... Ts>
     void BaseParticles::addDerivedVariable(Ts&&... args)
     {
-        SimpleDynamics<DerivedVariableMethod> *derived_data = derived_particle_data_.createPtr<SimpleDynamics<DerivedVariableMethod>>(sph_body_,std::forward<Ts>(args)...);
+        SimpleDynamics<DerivedVariableMethod> *derived_data = derived_particle_data_.createPtr<SimpleDynamics<DerivedVariableMethod>>(sph_body_, std::forward<Ts>(args)...);
         derived_variables_.push_back(derived_data);
     }
     //=================================================================================================//

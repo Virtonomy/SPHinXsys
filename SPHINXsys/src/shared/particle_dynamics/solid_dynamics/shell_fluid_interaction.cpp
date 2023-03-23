@@ -7,7 +7,7 @@ namespace SPH
 	{
 		//=================================================================================================//
 		FluidViscousForceOnShell::FluidViscousForceOnShell(BaseContactRelation &contact_relation)
-			: LocalDynamics(contact_relation.sph_body_)
+			: LocalDynamics(contact_relation.getSPHBody())
             , FluidShellContactData(contact_relation)
             , Vol_(particles_->Vol_)
             , vel_ave_(*particles_->AverageVelocity())

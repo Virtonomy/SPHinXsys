@@ -35,7 +35,7 @@ namespace SPH
 					Vecd nablaW_ijV_j = contact_neighborhood.dW_ijV_j_[n] * contact_neighborhood.e_ij_[n];
 
 					// acceleration for transport velocity
-					acceleration_trans -= 2.0 * nablaW_ijV_j;
+					acceleration_trans -= 2.0 * nablaW_ijV_j * this->contact_particles_[k]->DegeneratedSpacing(index_j);
 				}
 			}
 
@@ -57,7 +57,7 @@ namespace SPH
 					Vecd nablaW_ijV_j = contact_neighborhood.dW_ijV_j_[n] * contact_neighborhood.e_ij_[n];
 
 					// acceleration for transport velocity
-					acceleration_trans -= 2.0 * nablaW_ijV_j;
+					acceleration_trans -= 2.0 * nablaW_ijV_j * this->contact_particles_[k]->DegeneratedSpacing(index_j);
 				}
 			}
 

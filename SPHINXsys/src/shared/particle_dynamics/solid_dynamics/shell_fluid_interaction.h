@@ -95,7 +95,7 @@ namespace SPH
 		{
 		public:
 			explicit BaseFluidPressureForceOnShell(BaseContactRelation &contact_relation)
-				: LocalDynamics(contact_relation.sph_body_)
+				: LocalDynamics(contact_relation.getSPHBody())
                 , FluidShellContactData(contact_relation)
                 , vel_ave_(*particles_->AverageVelocity())
                 , acc_prior_(particles_->acc_prior_)
@@ -138,7 +138,6 @@ namespace SPH
 					StdLargeVec<Real> &p_k = *(contact_p_[k]);
 					StdLargeVec<Vecd> &vel_n_k = *(contact_vel_n_[k]);
 					StdLargeVec<Vecd> &acc_prior_k = *(contact_acc_prior_[k]);
-					Fluid *fluid_k = contact_fluids_[k];
 					RiemannSolverType &riemann_solver_k = riemann_solvers_[k];
 					Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
 					for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)

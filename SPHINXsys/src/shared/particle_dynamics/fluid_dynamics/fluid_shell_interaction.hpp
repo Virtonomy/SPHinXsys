@@ -43,7 +43,7 @@ namespace SPH
 			: BaseIntegrationType(base_body_relation, std::forward<Args>(args)...)
 			, FluidShellData(contact_relation)
 		{
-			if (&base_body_relation.sph_body_ != &contact_relation.sph_body_)
+			if (&base_body_relation.getSPHBody() != &contact_relation.getSPHBody())
 			{
 				std::cout << "\n Error: the two body_realtions do not have the same source body!" << std::endl;
 				std::cout << __FILE__ << ':' << __LINE__ << std::endl;

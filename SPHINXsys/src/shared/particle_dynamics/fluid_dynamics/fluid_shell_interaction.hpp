@@ -74,9 +74,9 @@ namespace SPH
 			Real rho_dissipation = 0.0;
 			for (size_t k = 0; k < FluidShellData::contact_configuration_.size(); ++k)
 			{
-				StdLargeVec<Vecd> &vel_ave_k = *(this->shell_vel_ave_[k]);
+				// StdLargeVec<Vecd> &vel_ave_k = *(this->shell_vel_ave_[k]);
 				StdLargeVec<Vecd> &acc_ave_k = *(this->shell_acc_ave_[k]);
-				StdLargeVec<Vecd> &n_k = *(this->shell_n_[k]);
+				// StdLargeVec<Vecd> &n_k = *(this->shell_n_[k]);
 				StdLargeVec<Real> &thickness_k = *(this->shell_thickness_[k]);
 
 				Neighborhood &shell_neighborhood = (*FluidShellData::contact_configuration_[k])[index_i];
@@ -113,10 +113,10 @@ namespace SPH
 
 			for (size_t k = 0; k < FluidShellData::contact_configuration_.size(); ++k)
 			{
-				Vecd &acc_prior_i = this->acc_prior_[index_i];
+				// Vecd &acc_prior_i = this->acc_prior_[index_i];
 
 				StdLargeVec<Vecd> &vel_ave_k = *(this->shell_vel_ave_[k]);
-				StdLargeVec<Vecd> &acc_ave_k = *(this->shell_acc_ave_[k]);
+				// StdLargeVec<Vecd> &acc_ave_k = *(this->shell_acc_ave_[k]);
 				StdLargeVec<Vecd> &n_k = *(this->shell_n_[k]);
 				StdLargeVec<Real> &thickness_k = *(this->shell_thickness_[k]);
 				Neighborhood &shell_neighborhood = (*FluidShellData::contact_configuration_[k])[index_i];
@@ -124,7 +124,7 @@ namespace SPH
 				{
 					size_t index_j = shell_neighborhood.j_[n];
 					Vecd &e_ij = shell_neighborhood.e_ij_[n];
-					Real r_ij = shell_neighborhood.r_ij_[n];
+					// Real r_ij = shell_neighborhood.r_ij_[n];
 					Real dW_ijV_j = shell_neighborhood.dW_ijV_j_[n];
 					Vecd correct_n = SGN( e_ij.dot(n_k[index_j]) ) * n_k[index_j];
 

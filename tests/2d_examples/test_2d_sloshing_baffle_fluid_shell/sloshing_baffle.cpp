@@ -76,7 +76,7 @@ int main(int ac, char *av[])
 	solid_dynamics::AverageVelocityAndAcceleration average_velocity_and_acceleration(shell_baffle);
 	/** constraint and damping */
 	BoundaryGeometry shell_boundary_geometry(shell_baffle, "BoundaryGeometry");
-	SimpleDynamics<thin_structure_dynamics::ConstrainShellBodyRegion, BoundaryGeometry> baffle_constrain(shell_boundary_geometry);
+	SimpleDynamics<thin_structure_dynamics::ConstrainShellBodyRegion> baffle_constrain(shell_boundary_geometry);
 	DampingWithRandomChoice<InteractionSplit<DampingPairwiseInner<Vec2d>>>
 		baffle_position_damping(0.2, baffle_inner, "Velocity", physical_viscosity);
 	DampingWithRandomChoice<InteractionSplit<DampingPairwiseInner<Vec2d>>>
@@ -95,15 +95,15 @@ int main(int ac, char *av[])
 	/** WaveProbes. */
 	/** #1.*/
 	BodyRegionByCell wave_probe_buffer_no_1(water_block, makeShared<MultiPolygonShape>(CreateWaveProbeShape1(), "WaveProbe_01"));
-	ReducedQuantityRecording<ReduceDynamics<fluid_dynamics::FreeSurfaceHeight, BodyRegionByCell>>
+	ReducedQuantityRecording<ReduceDynamics<fluid_dynamics::FreeSurfaceHeight>>
 		wave_probe_1(io_environment, wave_probe_buffer_no_1);
 	/** #2.*/
 	BodyRegionByCell wave_probe_buffer_no_2(water_block, makeShared<MultiPolygonShape>(CreateWaveProbeShape2(), "WaveProbe_02"));
-	ReducedQuantityRecording<ReduceDynamics<fluid_dynamics::FreeSurfaceHeight, BodyRegionByCell>>
+	ReducedQuantityRecording<ReduceDynamics<fluid_dynamics::FreeSurfaceHeight>>
 		wave_probe_2(io_environment, wave_probe_buffer_no_2);
 	/** #3.*/
 	BodyRegionByCell wave_probe_buffer_no_3(water_block, makeShared<MultiPolygonShape>(CreateWaveProbeShape3(), "WaveProbe_03"));
-	ReducedQuantityRecording<ReduceDynamics<fluid_dynamics::FreeSurfaceHeight, BodyRegionByCell>>
+	ReducedQuantityRecording<ReduceDynamics<fluid_dynamics::FreeSurfaceHeight>>
 		wave_probe_3(io_environment, wave_probe_buffer_no_3);
 	/**
 	 * @brief The time stepping starts here.
@@ -124,8 +124,8 @@ int main(int ac, char *av[])
 	/** Time parameters. */
 	int number_of_iterations = 0;
 	int screen_output_interval = 100;
-	int observation_sample_interval = screen_output_interval * 2;
-	int restart_output_interval = screen_output_interval * 10;
+	// int observation_sample_interval = screen_output_interval * 2;
+	// int restart_output_interval = screen_output_interval * 10;
 	Real End_Time = 5.0;			/**< End time. */
 	Real D_Time = End_Time /100;	/**< time stamps for output. */
 	Real Dt = 0.0;					/**< Default advection time step sizes. */

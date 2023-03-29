@@ -57,22 +57,24 @@ using namespace SPH;
  */
 
 const Real scale = 0.001;
-const Real diameter = 6.35 * scale*50;
+const Real diameter = 6.35 * scale*1;
 const Real fluid_radius = 0.5 * diameter;
 const Real full_length = 15 * fluid_radius;
 const int number_of_particles = 10;
 const Real resolution_ref = diameter / number_of_particles;
 const Real inflow_length = resolution_ref * 20.0; // Inflow region
 const Real wall_thickness = resolution_ref * 4.0;
-const Real shell_thickness = resolution_ref * 1.0;
+const Real shell_thickness_ori = resolution_ref * 1.0;
 const int simtk_resolution = 20;
 const Vec3d translation_fluid(0.,full_length*0.5,0.);
 /**
  * @brief Geometry parameters for shell.
  */
 // const Real radius_mid_surface = fluid_radius + shell_thickness / 2.0; /** Radius of the mid surface. */
-const Real r_out = fluid_radius + shell_thickness;
-const Real radius_mid_surface = (r_out*r_out - fluid_radius*fluid_radius)/2/shell_thickness;
+const Real r_out = fluid_radius + shell_thickness_ori;
+const Real radius_mid_surface = (r_out*r_out - fluid_radius*fluid_radius)/2/shell_thickness_ori; // 2*Pi*radius_mid_surface*shell_thickness = pi*(r_out*r_out - fluid_radius*fluid_radius)
+const Real shell_thickness = (radius_mid_surface -  fluid_radius)*2;
+
 const int particle_number_mid_surface = int(2.0 * radius_mid_surface * Pi / resolution_ref);
 const int particle_number_height = 2 * int( (full_length*0.5 + wall_thickness) / resolution_ref);
 const int BWD = 1; /** Width of the boundary layer measured by number of particles. */
@@ -107,7 +109,7 @@ class WaterBlock : public ComplexShape
 public:
 	explicit WaterBlock(const std::string &shape_name) : ComplexShape(shape_name)
 	{		
-		add<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0., 1., 0.), fluid_radius-resolution_ref, full_length*0.5, simtk_resolution, translation_fluid);
+		add<TriangleMeshShapeCylinder>(SimTK::UnitVec3(0., 1., 0.), fluid_radius, full_length*0.5, simtk_resolution, translation_fluid);
 	}
 };
 /**
@@ -127,7 +129,7 @@ public:
 					Real y = (j - particle_number_height / 2) * resolution_ref + resolution_ref * 0.5 + full_length*0.5;
 					Real z = radius_mid_surface * sin(Pi + (i - BWD + 0.5) * 2 * Pi / (Real)particle_number_mid_surface);
 					// initializePositionAndVolumetricMeasure(Vecd(x, y, z), resolution_ref * resolution_ref);
-					Real particle_area = radius_mid_surface*2*Pi*(full_length*0.5 + wall_thickness)*2/( (particle_number_mid_surface + 2 * BWD) * (particle_number_height));
+					Real particle_area = radius_mid_surface*2*Pi* ((full_length*0.5 + wall_thickness)*2)/( (particle_number_mid_surface + 2 * BWD) * (particle_number_height));
 					initializePositionAndVolumetricMeasure(Vecd(x, y, z), particle_area);
 					Vec3d n_0 = Vec3d(x / radius_mid_surface, 0.0, z / radius_mid_surface);
 					initializeSurfaceProperties(n_0, shell_thickness);

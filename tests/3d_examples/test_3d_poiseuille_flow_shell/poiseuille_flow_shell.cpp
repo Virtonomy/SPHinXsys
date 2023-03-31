@@ -3,7 +3,7 @@
  * @brief 	3D poiseuille flow example
  * @details This is the one of the basic test cases for validating viscous flow, with using emitter as inlet and disposer as outlet.  
 			// TODO: include shell in next patch.
- * @author 	Yu
+ * @author 	
  */
 /**
   * @brief 	SPHinXsys Library.
@@ -11,8 +11,6 @@
 #include <gtest/gtest.h>
 #include "base_data_type.h"
 #include "sphinxsys.h"
-#include "plot_particles.hpp"
-#include "matplotlibcpp.h"
 using namespace SPH;
 
 
@@ -26,7 +24,7 @@ public:
         {
             double y = full_length / (ny - 1) * i;
             Vec3d point_coordinate(0.0, y, 0.0);            
-            positions_.push_back(point_coordinate + translation);
+            positions_.emplace_back(point_coordinate + translation);
         }
     }
 };
@@ -42,8 +40,8 @@ public:
         for (int i = 0; i < n - 1; i++) // we leave out the point clsoe to the boundary as the interpolation there is incorrect
         {
             double z = diameter / 2.0 * i / double(n);
-            positions_.push_back(Vec3d(0.0, y, z) + translation);
-            positions_.push_back(Vec3d(0.0, y, -z) + translation);
+            positions_.emplace_back(Vec3d(0.0, y, z) + translation);
+            positions_.emplace_back(Vec3d(0.0, y, -z) + translation);
         }
     }
 };
@@ -64,17 +62,13 @@ const int number_of_particles = 10;
 const Real resolution_ref = diameter / number_of_particles;
 const Real inflow_length = resolution_ref * 20.0; // Inflow region
 const Real wall_thickness = resolution_ref * 4.0;
-const Real shell_thickness_ori = resolution_ref * 1.0;
+const Real shell_thickness = resolution_ref * 1.0;
 const int simtk_resolution = 20;
 const Vec3d translation_fluid(0.,full_length*0.5,0.);
 /**
  * @brief Geometry parameters for shell.
  */
-// const Real radius_mid_surface = fluid_radius + shell_thickness / 2.0; /** Radius of the mid surface. */
-const Real r_out = fluid_radius + shell_thickness_ori;
-const Real radius_mid_surface = (r_out*r_out - fluid_radius*fluid_radius)/2/shell_thickness_ori; // 2*Pi*radius_mid_surface*shell_thickness = pi*(r_out*r_out - fluid_radius*fluid_radius)
-const Real shell_thickness = (radius_mid_surface -  fluid_radius)*2;
-
+const Real radius_mid_surface = fluid_radius + shell_thickness; 
 const int particle_number_mid_surface = int(2.0 * radius_mid_surface * Pi / resolution_ref);
 const int particle_number_height = 2 * int( (full_length*0.5 + wall_thickness) / resolution_ref);
 const int BWD = 1; /** Width of the boundary layer measured by number of particles. */
@@ -82,15 +76,15 @@ const int BWD = 1; /** Width of the boundary layer measured by number of particl
 /**
  * @brief Geometry parameters for boundary condition.
  */
-Vec3d emitter_halfsize = Vec3d(fluid_radius, resolution_ref*2 ,fluid_radius);
-Vec3d emitter_translation = Vec3d(0., resolution_ref*2 ,0.);
-Vec3d emitter_buffer_halfsize = Vec3d(fluid_radius, inflow_length*0.5 ,fluid_radius);
-Vec3d emitter_buffer_translation = Vec3d(0., inflow_length*0.5 ,0.);
-Vec3d disposer_halfsize = Vec3d(fluid_radius*2, resolution_ref*2 ,fluid_radius*2);
-Vec3d disposer_translation = Vec3d(0., full_length, 0.) - Vec3d(0., disposer_halfsize[1], 0.);
+const Vec3d emitter_halfsize = Vec3d(fluid_radius, resolution_ref*2 ,fluid_radius);
+const Vec3d emitter_translation = Vec3d(0., resolution_ref*2 ,0.);
+const Vec3d emitter_buffer_halfsize = Vec3d(fluid_radius, inflow_length*0.5 ,fluid_radius);
+const Vec3d emitter_buffer_translation = Vec3d(0., inflow_length*0.5 ,0.);
+const Vec3d disposer_halfsize = Vec3d(fluid_radius*2, resolution_ref*2 ,fluid_radius*2);
+const Vec3d disposer_translation = Vec3d(0., full_length, 0.) - Vec3d(0., disposer_halfsize[1], 0.);
 
 /** Domain bounds of the system. */
-BoundingBox system_domain_bounds(Vec3d(-diameter , 0, -diameter) - Vec3d(wall_thickness, wall_thickness, wall_thickness), Vec3d(diameter , full_length, diameter) + Vec3d(wall_thickness, wall_thickness, wall_thickness));
+const BoundingBox system_domain_bounds(Vec3d(-diameter , 0, -diameter) - Vec3d(wall_thickness, wall_thickness, wall_thickness), Vec3d(diameter , full_length, diameter) + Vec3d(wall_thickness, wall_thickness, wall_thickness));
 /**
  * @brief Material properties of the fluid.
  */
@@ -119,7 +113,7 @@ public:
 {
 public:
 	explicit ShellBoundary(SPHBody &sph_body) : SurfaceParticleGenerator(sph_body){};
-	virtual void initializeGeometricVariables() override
+	void initializeGeometricVariables() override
 	{
 			for (int i = 0; i < particle_number_mid_surface + 2 * BWD; i++)
 			{
@@ -128,9 +122,7 @@ public:
 					Real x = radius_mid_surface * cos( Pi + (i - BWD + 0.5) * 2 * Pi / (Real)particle_number_mid_surface);
 					Real y = (j - particle_number_height / 2) * resolution_ref + resolution_ref * 0.5 + full_length*0.5;
 					Real z = radius_mid_surface * sin(Pi + (i - BWD + 0.5) * 2 * Pi / (Real)particle_number_mid_surface);
-					// initializePositionAndVolumetricMeasure(Vecd(x, y, z), resolution_ref * resolution_ref);
-					Real particle_area = radius_mid_surface*2*Pi* ((full_length*0.5 + wall_thickness)*2)/( (particle_number_mid_surface + 2 * BWD) * (particle_number_height));
-					initializePositionAndVolumetricMeasure(Vecd(x, y, z), particle_area);
+					initializePositionAndVolumetricMeasure(Vec3d(x, y, z), resolution_ref * resolution_ref);					
 					Vec3d n_0 = Vec3d(x / radius_mid_surface, 0.0, z / radius_mid_surface);
 					initializeSurfaceProperties(n_0, shell_thickness);
 				}
@@ -144,7 +136,7 @@ struct InflowVelocity
 {
 	Real u_ref_, t_ref_;
 	AlignedBoxShape &aligned_box_;
-	Vecd halfsize_;
+	Vec3d halfsize_;
 
 	template <class BoundaryConditionType>
 	InflowVelocity(BoundaryConditionType &boundary_condition)
@@ -152,9 +144,9 @@ struct InflowVelocity
 		  aligned_box_(boundary_condition.getAlignedBox()),
 		  halfsize_(aligned_box_.HalfSize()) {}
 
-	Vecd operator()(Vecd &position, Vecd &velocity)
+	Vec3d operator()(Vec3d &position, Vec3d &velocity)
 	{
-		Vecd target_velocity = Vec3d(0,0,0);
+		Vec3d target_velocity = Vec3d(0,0,0);
 		if (aligned_box_.checkInBounds(0, position))
 		{
 			target_velocity[1] = 2.0 * U_f * (1.0 - (position[0] * position[0] + position[2] * position[2]) / fluid_radius/ fluid_radius);
@@ -303,8 +295,7 @@ int main()
 			{
 				dt = SMIN(get_fluid_time_step_size.parallel_exec(),  Dt - relaxation_time);
 				pressure_relaxation.parallel_exec(dt);
-				emitter_buffer_inflow_condition.parallel_exec();
-				// viscous_acceleration.parallel_exec(dt);
+				emitter_buffer_inflow_condition.parallel_exec();				
 				density_relaxation.parallel_exec(dt);
 				relaxation_time += dt;
 				integration_time += dt;
@@ -369,16 +360,16 @@ int main()
         );
     };
 	/* Compare all simulation to the anayltical solution. */
+	//Axial direction. 
 	for (size_t i = 0; i < observer_axial.getBaseParticles().pos_.size(); i++)
-		/* Axial direction. */
-        {			
-            EXPECT_NEAR(inflow_velocity(observer_axial.getBaseParticles().pos_[i])[1], observer_axial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
-        }
-		/* Radial direction. */
-        for (size_t i = 0; i < observer_radial.getBaseParticles().pos_.size(); i++)
-        {
-            EXPECT_NEAR(inflow_velocity(observer_radial.getBaseParticles().pos_[i])[1], observer_radial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
-        }
+	{ 
+		ASSERT_NEAR(inflow_velocity(observer_axial.getBaseParticles().pos_[i])[1], observer_axial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
+	}
+	// Radial direction
+	for (size_t i = 0; i < observer_radial.getBaseParticles().pos_.size(); i++)
+	{
+		ASSERT_NEAR(inflow_velocity(observer_radial.getBaseParticles().pos_[i])[1], observer_radial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
+	}
 
 	return 0;
 }

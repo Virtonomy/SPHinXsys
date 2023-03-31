@@ -335,12 +335,12 @@ int main()
 	//Axial direction. 
 	for (size_t i = 0; i < observer_axial.getBaseParticles().pos_.size(); i++)
 	{ 
-		ASSERT_NEAR(inflow_velocity(observer_axial.getBaseParticles().pos_[i])[1], observer_axial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
+		EXPECT_NEAR(inflow_velocity(observer_axial.getBaseParticles().pos_[i])[1], observer_axial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
 	}
 	// Radial direction
 	for (size_t i = 0; i < observer_radial.getBaseParticles().pos_.size(); i++)
 	{
-		ASSERT_NEAR(inflow_velocity(observer_radial.getBaseParticles().pos_[i])[1], observer_radial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
+		EXPECT_NEAR(inflow_velocity(observer_radial.getBaseParticles().pos_[i])[1], observer_radial.getBaseParticles().vel_[i][1], U_max * 10e-2); // it's below 5% but 10% for CI
 	}
 
 

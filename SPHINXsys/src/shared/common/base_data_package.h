@@ -28,7 +28,6 @@
 #ifndef BASE_DATA_PACKAGE_H
 #define BASE_DATA_PACKAGE_H
 
-#include "scalar_functions.h"
 #include "data_type.h"
 #include "array_allocation.h"
 #include "large_data_containers.h"
@@ -40,7 +39,6 @@ namespace SPH
 {
     constexpr Real OneOverDimensions = 1.0 / (Real)Dimensions;
 
-    typedef blocked_range<size_t> IndexRange;
     /** Generalized data container assemble type */
     template <template <typename DataType> typename DataContainerType>
     using DataContainerAssemble =

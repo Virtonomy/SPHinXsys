@@ -142,7 +142,7 @@ namespace SPH
         public:
             SpringOnSurfaceParticles(SPHBody &sph_body, Real stiffness, Real damping_ratio = 0.05);
             
-            const StdLargeVec<bool> &GetApplySpringForceToParticle() { return apply_spring_force_to_particle_; }
+            const StdLargeVec<bool> &GetApplySpringForceToParticle() const { return apply_spring_force_to_particle_; }
             void update(size_t index_i, Real dt = 0.0);
         };
         /**

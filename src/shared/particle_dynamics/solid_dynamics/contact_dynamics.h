@@ -31,6 +31,7 @@
 #define CONTACT_DYNAMICS_H
 
 #include "general_solid_dynamics.h"
+#include "thin_structure_dynamics.h"
 
 namespace SPH
 {
@@ -153,6 +154,45 @@ class ShellContactDensity : public ContactDensityAccessor, public LocalDynamics,
     StdVec<Real> calibration_factor_;
     StdVec<Real> offset_W_ij_;
     StdVec<StdLargeVec<Real> *> contact_Vol_;
+
+    /** Abscissas and weights for Gauss-Legendre quadrature integration with n=3 nodes */
+    const StdVec<Real> three_gaussian_points_ = {-0.7745966692414834, 0.0, 0.7745966692414834};
+    const StdVec<Real> three_gaussian_weights_ = {0.5555555555555556, 0.8888888888888889, 0.5555555555555556};
+};
+
+class ShellSelfContactDensity : public ContactDensityAccessor, public LocalDynamics, public thin_structure_dynamics::ShellDataInner
+{
+  public:
+    explicit ShellSelfContactDensity(SelfSurfaceContactRelation &solid_body_contact_relation);
+    virtual ~ShellSelfContactDensity(){};
+
+    inline void interaction(size_t index_i, Real dt = 0.0)
+    {
+        Real sigma = 0.0;
+        const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
+        for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
+        {
+            Real corrected_W_ij = std::max(inner_neighborhood.W_ij_[n] - offset_W_ij_, Real(0));
+            // sigma += corrected_W_ij * mass_[inner_neighborhood.j_[n]];
+            sigma += corrected_W_ij * Vol_[inner_neighborhood.j_[n]];
+        }
+        constexpr Real heuristic_limiter = 0.1;
+        // With heuristic_limiter, the maximum contact pressure is heuristic_limiter * K (Bulk modulus).
+        // The contact pressure applied to fewer particles than on solids, yielding high acceleration locally,
+        // which is one source of instability. Thus, we add a heuristic_limiter
+        // to maintain enough contact pressure to prevent penetration while also maintaining stability.
+        contact_density_[index_i] = heuristic_limiter * sigma * calibration_factor_;
+    };
+
+  protected:
+    Solid &solid_;
+    Kernel *kernel_;
+    // StdLargeVec<Real> &mass_;
+    StdLargeVec<Real> &Vol_;
+
+    Real particle_spacing_;
+    Real calibration_factor_;
+    Real offset_W_ij_;
 
     /** Abscissas and weights for Gauss-Legendre quadrature integration with n=3 nodes */
     const StdVec<Real> three_gaussian_points_ = {-0.7745966692414834, 0.0, 0.7745966692414834};

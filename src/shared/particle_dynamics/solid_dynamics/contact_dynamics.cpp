@@ -76,6 +76,30 @@ ShellContactDensity::ShellContactDensity(SurfaceContactRelation &solid_body_cont
     }
 }
 //=================================================================================================//
+ShellSelfContactDensity::
+    ShellSelfContactDensity(SelfSurfaceContactRelation &self_contact_relation)
+    : ContactDensityAccessor(self_contact_relation.base_particles_, "SelfContactDensity"),
+      LocalDynamics(self_contact_relation.getSPHBody()),
+      thin_structure_dynamics::ShellDataInner(self_contact_relation),
+      solid_(particles_->solid_),
+      kernel_(self_contact_relation.getSPHBody().sph_adaptation_->getKernel()),
+      Vol_(particles_->Vol_)
+{
+    Real dp_1 = self_contact_relation.getSPHBody().sph_adaptation_->ReferenceSpacing();
+    offset_W_ij_ = kernel_->W(dp_1, ZeroVecd);
+
+    Real contact_max = 0;
+    for (int l = 0; l != 3; ++l)
+    {
+        Real temp = three_gaussian_points_[l] * dp_1 * 0.5 + dp_1 * 0.5;
+        Real contact_temp = 2.0 * (kernel_->W(temp, ZeroVecd) - offset_W_ij_) *
+                            dp_1 * 0.5 * three_gaussian_weights_[l];
+        contact_max += Dimensions == 2 ? contact_temp : contact_temp * Pi * temp;
+    }
+    /** a calibration factor to avoid particle penetration into shell structure */
+    calibration_factor_ = solid_.ReferenceDensity() / (contact_max + Eps);
+}
+//=================================================================================================//
 SelfContactForce::
     SelfContactForce(SelfSurfaceContactRelation &self_contact_relation)
     : LocalDynamics(self_contact_relation.getSPHBody()),

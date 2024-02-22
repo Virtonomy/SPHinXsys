@@ -48,7 +48,7 @@ class FlowPressureBuffer : public BaseFlowBoundaryCondition
   public:
     FlowPressureBuffer(BodyPartByCell &body_part, Vecd normal_vector);
     virtual ~FlowPressureBuffer(){};
-    void update(size_t index_i, Real dt = 0.0);
+    virtual void update(size_t index_i, Real dt = 0.0);
 
   protected:
     StdLargeVec<Vecd> &kernel_sum_;

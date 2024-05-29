@@ -102,6 +102,12 @@ class ElasticSolid : public Solid
     virtual Real VolumetricKirchhoff(Real J) = 0;
     /** Define the calculation of the stress matrix for postprocessing */
     virtual std::string getRelevantStressMeasureName() = 0;
+    /** Set the density at a later stage of a simulation */
+    void setDensity(Real rho0)
+    {
+        rho0_ = rho0;
+        setSoundSpeeds(); // needs to be rerun after density change
+    };
 
     virtual ElasticSolid *ThisObjectPtr() override { return this; };
 };

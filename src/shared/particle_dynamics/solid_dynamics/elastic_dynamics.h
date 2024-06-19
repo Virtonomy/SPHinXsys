@@ -186,11 +186,14 @@ class Integration1stHalf : public BaseIntegration1stHalf
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
             size_t index_j = inner_neighborhood.j_[n];
+            Vecd vel_jump = vel_[index_i] - vel_[index_j];
+            double vel_squared_magnitude = vel_jump.squaredNorm();
+            if (vel_squared_magnitude <= std::numeric_limits<double>::epsilon())
+                continue;
             Vecd e_ij = inner_neighborhood.e_ij_[n];
             Real r_ij = inner_neighborhood.r_ij_[n];
             Real dim_r_ij_1 = Dimensions / r_ij;
             Vecd pos_jump = pos_[index_i] - pos_[index_j];
-            Vecd vel_jump = vel_[index_i] - vel_[index_j];
             Real strain_rate = dim_r_ij_1 * dim_r_ij_1 * pos_jump.dot(vel_jump);
             Real weight = inner_neighborhood.W_ij_[n] * inv_W0_;
             Matd numerical_stress_ij =

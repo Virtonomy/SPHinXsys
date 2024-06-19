@@ -180,28 +180,42 @@ class Integration1stHalf : public BaseIntegration1stHalf
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
-        // including gravity and force from fluid
         Vecd acceleration = Vecd::Zero();
         const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
+        const Vecd &vel_i = vel_[index_i];
+        const Real inv_rho0 = inv_rho0_; // Assuming inv_rho0_ is a class member
+        const double epsilon = std::numeric_limits<double>::epsilon();
+
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
-            size_t index_j = inner_neighborhood.j_[n];
-            Vecd vel_jump = vel_[index_i] - vel_[index_j];
+            const size_t index_j = inner_neighborhood.j_[n];
+            const Vecd &vel_j = vel_[index_j];
+            Vecd vel_jump = vel_i - vel_j;
             double vel_squared_magnitude = vel_jump.squaredNorm();
-            if (vel_squared_magnitude <= std::numeric_limits<double>::epsilon())
-                continue;
-            Vecd e_ij = inner_neighborhood.e_ij_[n];
-            Real r_ij = inner_neighborhood.r_ij_[n];
-            Real dim_r_ij_1 = Dimensions / r_ij;
-            Vecd pos_jump = pos_[index_i] - pos_[index_j];
-            Real strain_rate = dim_r_ij_1 * dim_r_ij_1 * pos_jump.dot(vel_jump);
-            Real weight = inner_neighborhood.W_ij_[n] * inv_W0_;
-            Matd numerical_stress_ij =
-                0.5 * (F_[index_i] + F_[index_j]) * elastic_solid_.PairNumericalDamping(strain_rate, smoothing_length_);
-            acceleration += inv_rho0_ * inner_neighborhood.dW_ijV_j_[n] *
-                            (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] +
-                             numerical_dissipation_factor_ * weight * numerical_stress_ij) *
-                            e_ij;
+
+            const Vecd &e_ij = inner_neighborhood.e_ij_[n];
+            Real dW_ijV_j = inner_neighborhood.dW_ijV_j_[n];
+
+            if (vel_squared_magnitude <= epsilon)
+            {
+                const Real r_ij = inner_neighborhood.r_ij_[n];
+                const Real dim_r_ij_1 = Dimensions / r_ij;
+                Vecd pos_jump = pos_[index_i] - pos_[index_j];
+                Real strain_rate = dim_r_ij_1 * dim_r_ij_1 * pos_jump.dot(vel_jump);
+                Real weight = inner_neighborhood.W_ij_[n] * inv_W0_;
+                Matd numerical_stress_ij = 0.5 * (F_[index_i] + F_[index_j]) * elastic_solid_.PairNumericalDamping(strain_rate, smoothing_length_);
+
+                acceleration += inv_rho0 * dW_ijV_j *
+                                (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] +
+                                 numerical_dissipation_factor_ * weight * numerical_stress_ij) *
+                                e_ij;
+            }
+            else
+            {
+                acceleration += inv_rho0 * dW_ijV_j *
+                                (stress_PK1_B_[index_i] + stress_PK1_B_[index_j]) *
+                                e_ij;
+            }
         }
 
         acc_[index_i] = acceleration;
@@ -312,19 +326,25 @@ class Integration2ndHalf : public BaseElasticIntegration
 
         Matd deformation_gradient_change_rate = Matd::Zero();
         const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
+        const auto &B_i = B_[index_i];
+        const double epsilon = std::numeric_limits<double>::epsilon();
+
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
             size_t index_j = inner_neighborhood.j_[n];
-
             Vecd gradW_ij = inner_neighborhood.dW_ijV_j_[n] * inner_neighborhood.e_ij_[n];
-            deformation_gradient_change_rate -= (vel_n_i - vel_[index_j]) * gradW_ij.transpose();
-        }
+            const Vecd vel_diff = vel_n_i - vel_[index_j];
+            const double vel_squared_magnitude = vel_diff.squaredNorm();
+            if (vel_squared_magnitude <= epsilon)
+            {
+                Matd gradW_ij_transpose = gradW_ij.transpose();
+                deformation_gradient_change_rate -= vel_diff * gradW_ij_transpose;
+            }
+        };
+        dF_dt_[index_i] = deformation_gradient_change_rate * B_i[index_i];
 
-        dF_dt_[index_i] = deformation_gradient_change_rate * B_[index_i];
+        void update(size_t index_i, Real dt = 0.0);
     };
-
-    void update(size_t index_i, Real dt = 0.0);
-};
 } // namespace solid_dynamics
 } // namespace SPH
 #endif // ELASTIC_DYNAMICS_H

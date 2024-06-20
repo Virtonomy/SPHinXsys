@@ -333,9 +333,9 @@ class Integration2ndHalf : public BaseElasticIntegration
             size_t index_j = inner_neighborhood.j_[n];
             const Vecd vel_diff = vel_n_i - vel_[index_j];
             const double vel_squared_magnitude = vel_diff.squaredNorm();
-            Vecd gradW_ij = inner_neighborhood.dW_ijV_j_[n] * inner_neighborhood.e_ij_[n];
             if (vel_squared_magnitude > epsilon)
             {
+                Vecd gradW_ij = inner_neighborhood.dW_ijV_j_[n] * inner_neighborhood.e_ij_[n];
                 deformation_gradient_change_rate -= vel_diff * gradW_ij.transpose();
             }
         }

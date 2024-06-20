@@ -330,9 +330,9 @@ class Integration2ndHalf : public BaseElasticIntegration
 
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
+            size_t index_j = inner_neighborhood.j_[n];
             const Vecd vel_diff = vel_n_i - vel_[index_j];
             const double vel_squared_magnitude = vel_diff.squaredNorm();
-            size_t index_j = inner_neighborhood.j_[n];
             Vecd gradW_ij = inner_neighborhood.dW_ijV_j_[n] * inner_neighborhood.e_ij_[n];
             if (vel_squared_magnitude > epsilon)
             {

@@ -337,13 +337,15 @@ class Integration2ndHalf : public BaseElasticIntegration
             const double vel_squared_magnitude = vel_diff.squaredNorm();
             if (vel_squared_magnitude <= epsilon)
             {
-                Matd gradW_ij_transpose = gradW_ij.transpose();
-                deformation_gradient_change_rate -= vel_diff * gradW_ij_transpose;
+                deformation_gradient_change_rate -= vel_diff * gradW_ij.transpose();
             }
-        };
-        dF_dt_[index_i] = deformation_gradient_change_rate * B_i[index_i];
+        }
+
+        dF_dt_[index_i] = deformation_gradient_change_rate * B_[index_i];
     };
+
     void update(size_t index_i, Real dt = 0.0);
+};
 } // namespace solid_dynamics
 } // namespace SPH
 #endif // ELASTIC_DYNAMICS_H

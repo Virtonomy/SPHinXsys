@@ -326,18 +326,12 @@ class Integration2ndHalf : public BaseElasticIntegration
 
         Matd deformation_gradient_change_rate = Matd::Zero();
         const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
-        const double epsilon = std::numeric_limits<double>::epsilon();
-
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
             size_t index_j = inner_neighborhood.j_[n];
-            const Vecd vel_diff = vel_n_i - vel_[index_j];
-            const double vel_squared_magnitude = vel_diff.squaredNorm();
-            if (vel_squared_magnitude > epsilon)
-            {
-                Vecd gradW_ij = inner_neighborhood.dW_ijV_j_[n] * inner_neighborhood.e_ij_[n];
-                deformation_gradient_change_rate -= vel_diff * gradW_ij.transpose();
-            }
+
+            Vecd gradW_ij = inner_neighborhood.dW_ijV_j_[n] * inner_neighborhood.e_ij_[n];
+            deformation_gradient_change_rate -= (vel_n_i - vel_[index_j]) * gradW_ij.transpose();
         }
 
         dF_dt_[index_i] = deformation_gradient_change_rate * B_[index_i];

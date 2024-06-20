@@ -342,9 +342,8 @@ class Integration2ndHalf : public BaseElasticIntegration
             }
         };
         dF_dt_[index_i] = deformation_gradient_change_rate * B_i[index_i];
-
-        void update(size_t index_i, Real dt = 0.0);
     };
+    void update(size_t index_i, Real dt = 0.0);
 } // namespace solid_dynamics
 } // namespace SPH
 #endif // ELASTIC_DYNAMICS_H

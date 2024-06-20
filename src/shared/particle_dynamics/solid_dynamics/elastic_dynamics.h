@@ -196,7 +196,7 @@ class Integration1stHalf : public BaseIntegration1stHalf
             const Vecd &e_ij = inner_neighborhood.e_ij_[n];
             Real dW_ijV_j = inner_neighborhood.dW_ijV_j_[n];
 
-            if (vel_squared_magnitude <= epsilon)
+            if (vel_squared_magnitude > epsilon)
             {
                 const Real r_ij = inner_neighborhood.r_ij_[n];
                 const Real dim_r_ij_1 = Dimensions / r_ij;

@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef ELASTIC_DYNAMICS_H
-#define ELASTIC_DYNAMICS_H
+#ifndef VIRTOSIM_ELASTIC_DYNAMICS_H_C0E2274F_EA9C_462F_B9FA_890BC5B12F2B
+#define VIRTOSIM_ELASTIC_DYNAMICS_H_C0E2274F_EA9C_462F_B9FA_890BC5B12F2B
 
 #include "all_body_relations.h"
 #include "all_particle_dynamics.h"
@@ -341,11 +341,11 @@ class Integration2ndHalf : public BaseElasticIntegration
             }
         }
 
-        dF_dt_[index_i] = deformation_gradient_change_rate * B_[index_i];
+        dF_dt_[index_i] = deformation_gradient_change_rate * B_i[index_i];
     };
 
     void update(size_t index_i, Real dt = 0.0);
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // ELASTIC_DYNAMICS_H
+#endif // VIRTOSIM_ELASTIC_DYNAMICS_H_C0E2274F_EA9C_462F_B9FA_890BC5B12F2B

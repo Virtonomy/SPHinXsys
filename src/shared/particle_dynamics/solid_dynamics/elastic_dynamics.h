@@ -326,7 +326,6 @@ class Integration2ndHalf : public BaseElasticIntegration
 
         Matd deformation_gradient_change_rate = Matd::Zero();
         const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
-        const auto &B_i = B_[index_i];
         const double epsilon = std::numeric_limits<double>::epsilon();
 
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
@@ -341,7 +340,7 @@ class Integration2ndHalf : public BaseElasticIntegration
             }
         }
 
-        dF_dt_[index_i] = deformation_gradient_change_rate * B_i[index_i];
+        dF_dt_[index_i] = deformation_gradient_change_rate * B_[index_i];
     };
 
     void update(size_t index_i, Real dt = 0.0);

@@ -119,7 +119,7 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
     rho_[index_i] = rho0_ / J;
 
     /** Calculate the current normal direction of mid-surface. */
-    const auto& Q_L = transformation_matrix_[index_i];
+    const Matd& Q_L = transformation_matrix_[index_i];
     n_[index_i] = Q_L.transpose() * getNormalFromDeformationGradientTensor(F_[index_i]);
 
     /** Get transformation matrix from global coordinates to current local coordinates. */

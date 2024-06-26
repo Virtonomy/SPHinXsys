@@ -106,25 +106,28 @@ ShellStressRelaxationFirstHalf::
 //=================================================================================================//
 void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
 {
+    const auto& Q_L = transformation_matrix_[index_i];
     // Note that F_[index_i], F_bending_[index_i], dF_dt_[index_i], dF_bending_dt_[index_i]
     // and rotation_[index_i], angular_vel_[index_i], dangular_vel_dt_[index_i], B_[index_i]
     // are defined in local coordinates, while others in global coordinates.
     pos_[index_i] += vel_[index_i] * dt * 0.5;
     rotation_[index_i] += angular_vel_[index_i] * dt * 0.5;
-    pseudo_n_[index_i] += dpseudo_n_dt_[index_i] * dt * 0.5;
 
     F_[index_i] += dF_dt_[index_i] * dt * 0.5;
-    F_bending_[index_i] += dF_bending_dt_[index_i] * dt * 0.5;
-
-    Real J = F_[index_i].determinant();
-    Matd inverse_F = F_[index_i].inverse();
-
+    const Real J = F_[index_i].determinant();
     rho_[index_i] = rho0_ / J;
 
+    F_bending_[index_i] += dF_bending_dt_[index_i] * dt * 0.5;
+
     /** Calculate the current normal direction of mid-surface. */
-    n_[index_i] = transformation_matrix_[index_i].transpose() * getNormalFromDeformationGradientTensor(F_[index_i]);
+    n_[index_i] = Q_L.transpose() * getNormalFromDeformationGradientTensor(F_[index_i]);
+
     /** Get transformation matrix from global coordinates to current local coordinates. */
-    Matd current_transformation_matrix = getTransformationMatrix(pseudo_n_[index_i]);
+    pseudo_n_[index_i] += dpseudo_n_dt_[index_i] * dt * 0.5;
+    const Matd Q_l = getTransformationMatrix(pseudo_n_[index_i]);
+    const Matd Q = Q_l * Q_L.transpose();
+
+    const Real t = thickness_[index_i];
 
     Matd resultant_stress = Matd::Zero();
     Matd resultant_moment = Matd::Zero();
@@ -132,46 +135,46 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
 
     for (int i = 0; i != number_of_gaussian_points_; ++i)
     {
-        Matd F_gaussian_point = F_[index_i] + gaussian_point_[i] * F_bending_[index_i] * thickness_[index_i] * 0.5;
-        Matd dF_gaussian_point_dt = dF_dt_[index_i] + gaussian_point_[i] * dF_bending_dt_[index_i] * thickness_[index_i] * 0.5;
-        Matd inverse_F_gaussian_point = F_gaussian_point.inverse();
-        Matd current_local_almansi_strain = current_transformation_matrix * transformation_matrix_[index_i].transpose() * 0.5 *
-                                            (Matd::Identity() - inverse_F_gaussian_point.transpose() * inverse_F_gaussian_point) *
-                                            transformation_matrix_[index_i] * current_transformation_matrix.transpose();
+        const Matd F_gaussian_point = F_[index_i] + gaussian_point_[i] * F_bending_[index_i] * t * 0.5;
+        const Matd inverse_F_gaussian_point = F_gaussian_point.inverse();
+        Matd current_local_almansi_strain = Q * 0.5 * (Matd::Identity() - inverse_F_gaussian_point.transpose() * inverse_F_gaussian_point) * Q.transpose();
 
         /** correct Almansi strain tensor according to plane stress problem. */
         current_local_almansi_strain = getCorrectedAlmansiStrain(current_local_almansi_strain, nu_);
 
         /** correct out-plane numerical damping. */
-        Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i) + current_transformation_matrix * transformation_matrix_[index_i].transpose() * F_gaussian_point *
-                                                                                                                        elastic_solid_.NumericalDampingRightCauchy(F_gaussian_point, dF_gaussian_point_dt, numerical_damping_scaling_[index_i], index_i) * F_gaussian_point.transpose() * transformation_matrix_[index_i] * current_transformation_matrix.transpose() / F_gaussian_point.determinant();
+        Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
+        
+        Matd dF_gaussian_point_dt = dF_dt_[index_i] + gaussian_point_[i] * dF_bending_dt_[index_i] * t * 0.5;
+        cauch_stress += Q * F_gaussian_point * elastic_solid_.NumericalDampingRightCauchy(F_gaussian_point, dF_gaussian_point_dt, numerical_damping_scaling_[index_i], index_i) * F_gaussian_point.transpose() * Q.transpose() / F_gaussian_point.determinant();
 
         /** Impose modeling assumptions. */
         cauchy_stress.col(Dimensions - 1) *= shear_correction_factor_;
         cauchy_stress.row(Dimensions - 1) *= shear_correction_factor_;
         cauchy_stress(Dimensions - 1, Dimensions - 1) = 0.0;
 
+        /** Integrate Cauchy stress along thickness. */
+        resultant_stress +=
+            0.5 * t * gaussian_weight_[i] * cauchy_stress;
+        resultant_moment +=
+            0.5 * t * gaussian_weight_[i] * (cauchy_stress * gaussian_point_[i] * t * 0.5);
+        resultant_shear_stress -=
+            0.5 * t * gaussian_weight_[i] * cauchy_stress.col(Dimensions - 1);
+
+        resultant_stress.col(Dimensions - 1) = Vecd::Zero();
+        resultant_moment.col(Dimensions - 1) = Vecd::Zero();
+
         if (i == 0)
         {
             mid_surface_cauchy_stress_[index_i] = cauchy_stress;
         }
-
-        /** Integrate Cauchy stress along thickness. */
-        resultant_stress +=
-            0.5 * thickness_[index_i] * gaussian_weight_[i] * cauchy_stress;
-        resultant_moment +=
-            0.5 * thickness_[index_i] * gaussian_weight_[i] * (cauchy_stress * gaussian_point_[i] * thickness_[index_i] * 0.5);
-        resultant_shear_stress -=
-            0.5 * thickness_[index_i] * gaussian_weight_[i] * cauchy_stress.col(Dimensions - 1);
-
-        resultant_stress.col(Dimensions - 1) = Vecd::Zero();
-        resultant_moment.col(Dimensions - 1) = Vecd::Zero();
     }
 
+    const Matd inverse_F_T = F_[index_i].inverse().transpose();
     /** stress and moment in global coordinates for pair interaction */
-    global_stress_[index_i] = J * current_transformation_matrix.transpose() * resultant_stress * current_transformation_matrix * transformation_matrix_[index_i].transpose() * inverse_F.transpose() * transformation_matrix_[index_i];
-    global_moment_[index_i] = J * current_transformation_matrix.transpose() * resultant_moment * current_transformation_matrix * transformation_matrix_[index_i].transpose() * inverse_F.transpose() * transformation_matrix_[index_i];
-    global_shear_stress_[index_i] = J * current_transformation_matrix.transpose() * resultant_shear_stress;
+    global_stress_[index_i] = J * Q_l.transpose() * resultant_stress * Q * inverse_F_T * Q_L;
+    global_moment_[index_i] = J * Q_l.transpose() * resultant_moment * Q * inverse_F_T * Q_L;
+    global_shear_stress_[index_i] = J * Q_l.transpose() * resultant_shear_stress;
 }
 //=================================================================================================//
 void ShellStressRelaxationFirstHalf::update(size_t index_i, Real dt)

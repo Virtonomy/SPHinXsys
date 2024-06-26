@@ -106,20 +106,20 @@ ShellStressRelaxationFirstHalf::
 //=================================================================================================//
 void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
 {
-    const auto& Q_L = transformation_matrix_[index_i];
     // Note that F_[index_i], F_bending_[index_i], dF_dt_[index_i], dF_bending_dt_[index_i]
     // and rotation_[index_i], angular_vel_[index_i], dangular_vel_dt_[index_i], B_[index_i]
     // are defined in local coordinates, while others in global coordinates.
     pos_[index_i] += vel_[index_i] * dt * 0.5;
     rotation_[index_i] += angular_vel_[index_i] * dt * 0.5;
 
+    F_bending_[index_i] += dF_bending_dt_[index_i] * dt * 0.5;
+
     F_[index_i] += dF_dt_[index_i] * dt * 0.5;
     const Real J = F_[index_i].determinant();
     rho_[index_i] = rho0_ / J;
 
-    F_bending_[index_i] += dF_bending_dt_[index_i] * dt * 0.5;
-
     /** Calculate the current normal direction of mid-surface. */
+    const auto& Q_L = transformation_matrix_[index_i];
     n_[index_i] = Q_L.transpose() * getNormalFromDeformationGradientTensor(F_[index_i]);
 
     /** Get transformation matrix from global coordinates to current local coordinates. */

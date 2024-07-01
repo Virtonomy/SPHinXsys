@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef ELASTIC_DYNAMICS_H
-#define ELASTIC_DYNAMICS_H
+#ifndef VIRTOSIM_ELASTIC_DYNAMICS_H_C0E2274F_EA9C_462F_B9FA_890BC5B12F2B
+#define VIRTOSIM_ELASTIC_DYNAMICS_H_C0E2274F_EA9C_462F_B9FA_890BC5B12F2B
 
 #include "all_body_relations.h"
 #include "all_particle_dynamics.h"
@@ -180,25 +180,42 @@ class Integration1stHalf : public BaseIntegration1stHalf
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
-        // including gravity and force from fluid
         Vecd acceleration = Vecd::Zero();
         const Neighborhood &inner_neighborhood = inner_configuration_[index_i];
+        const Vecd &vel_i = vel_[index_i];
+        const Real inv_rho0 = inv_rho0_; // Assuming inv_rho0_ is a class member
+        const double epsilon = std::numeric_limits<double>::epsilon();
+
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
-            size_t index_j = inner_neighborhood.j_[n];
-            Vecd e_ij = inner_neighborhood.e_ij_[n];
-            Real r_ij = inner_neighborhood.r_ij_[n];
-            Real dim_r_ij_1 = Dimensions / r_ij;
-            Vecd pos_jump = pos_[index_i] - pos_[index_j];
-            Vecd vel_jump = vel_[index_i] - vel_[index_j];
-            Real strain_rate = dim_r_ij_1 * dim_r_ij_1 * pos_jump.dot(vel_jump);
-            Real weight = inner_neighborhood.W_ij_[n] * inv_W0_;
-            Matd numerical_stress_ij =
-                0.5 * (F_[index_i] + F_[index_j]) * elastic_solid_.PairNumericalDamping(strain_rate, smoothing_length_);
-            acceleration += inv_rho0_ * inner_neighborhood.dW_ijV_j_[n] *
-                            (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] +
-                             numerical_dissipation_factor_ * weight * numerical_stress_ij) *
-                            e_ij;
+            const size_t index_j = inner_neighborhood.j_[n];
+            const Vecd &vel_j = vel_[index_j];
+            Vecd vel_jump = vel_i - vel_j;
+            double vel_squared_magnitude = vel_jump.squaredNorm();
+
+            const Vecd &e_ij = inner_neighborhood.e_ij_[n];
+            Real dW_ijV_j = inner_neighborhood.dW_ijV_j_[n];
+
+            if (vel_squared_magnitude > epsilon)
+            {
+                const Real r_ij = inner_neighborhood.r_ij_[n];
+                const Real dim_r_ij_1 = Dimensions / r_ij;
+                Vecd pos_jump = pos_[index_i] - pos_[index_j];
+                Real strain_rate = dim_r_ij_1 * dim_r_ij_1 * pos_jump.dot(vel_jump);
+                Real weight = inner_neighborhood.W_ij_[n] * inv_W0_;
+                Matd numerical_stress_ij = 0.5 * (F_[index_i] + F_[index_j]) * elastic_solid_.PairNumericalDamping(strain_rate, smoothing_length_);
+
+                acceleration += inv_rho0 * dW_ijV_j *
+                                (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] +
+                                 numerical_dissipation_factor_ * weight * numerical_stress_ij) *
+                                e_ij;
+            }
+            else
+            {
+                acceleration += inv_rho0 * dW_ijV_j *
+                                (stress_PK1_B_[index_i] + stress_PK1_B_[index_j]) *
+                                e_ij;
+            }
         }
 
         acc_[index_i] = acceleration;
@@ -324,4 +341,4 @@ class Integration2ndHalf : public BaseElasticIntegration
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // ELASTIC_DYNAMICS_H
+#endif // VIRTOSIM_ELASTIC_DYNAMICS_H_C0E2274F_EA9C_462F_B9FA_890BC5B12F2B

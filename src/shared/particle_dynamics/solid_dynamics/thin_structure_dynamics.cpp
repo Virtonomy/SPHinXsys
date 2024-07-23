@@ -146,7 +146,7 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
         Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
         
         Matd dF_gaussian_point_dt = dF_dt_[index_i] + gaussian_point_[i] * dF_bending_dt_[index_i] * t * 0.5;
-        cauch_stress += Q * F_gaussian_point * elastic_solid_.NumericalDampingRightCauchy(F_gaussian_point, dF_gaussian_point_dt, numerical_damping_scaling_[index_i], index_i) * F_gaussian_point.transpose() * Q.transpose() / F_gaussian_point.determinant();
+        cauchy_stress += Q * F_gaussian_point * elastic_solid_.NumericalDampingRightCauchy(F_gaussian_point, dF_gaussian_point_dt, numerical_damping_scaling_[index_i], index_i) * F_gaussian_point.transpose() * Q.transpose() / F_gaussian_point.determinant();
 
         /** Impose modeling assumptions. */
         cauchy_stress.col(Dimensions - 1) *= shear_correction_factor_;

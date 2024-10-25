@@ -140,11 +140,27 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
                                             transformation_matrix_[index_i] * current_transformation_matrix.transpose();
 
         /** correct Almansi strain tensor according to plane stress problem. */
-        current_local_almansi_strain = getCorrectedAlmansiStrain(current_local_almansi_strain, nu_);
+        // current_local_almansi_strain = getCorrectedAlmansiStrain(current_local_almansi_strain, nu_);
+        current_local_almansi_strain(2, 2) = 0;
 
         /** correct out-plane numerical damping. */
-        Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i) + current_transformation_matrix * transformation_matrix_[index_i].transpose() * F_gaussian_point *
-                                                                                                                        elastic_solid_.NumericalDampingRightCauchy(F_gaussian_point, dF_gaussian_point_dt, numerical_damping_scaling_[index_i], index_i) * F_gaussian_point.transpose() * transformation_matrix_[index_i] * current_transformation_matrix.transpose() / F_gaussian_point.determinant();
+        double B = E0_;
+        double de = 1.0;
+        Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
+        for (int it = 0; de > 1e-6 && it < 10; ++it)
+        {
+            double e_prev = current_local_almansi_strain(2, 2);
+            double s_prev = cauchy_stress(2, 2);
+            double e_next = e_prev - s_prev / B;
+            current_local_almansi_strain(2, 2) = e_next;
+            cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
+            double s_next = cauchy_stress(2, 2);
+            B = (s_next - s_prev) / (e_next - e_prev);
+            de = std::abs(e_next - e_prev);
+        }
+
+        Matd damping = current_transformation_matrix * transformation_matrix_[index_i].transpose() * F_gaussian_point * elastic_solid_.NumericalDampingRightCauchy(F_gaussian_point, dF_gaussian_point_dt, numerical_damping_scaling_[index_i], index_i) * F_gaussian_point.transpose() * transformation_matrix_[index_i] * current_transformation_matrix.transpose() / F_gaussian_point.determinant();
+        cauchy_stress += damping;
 
         /** Impose modeling assumptions. */
         cauchy_stress.col(Dimensions - 1) *= shear_correction_factor_;

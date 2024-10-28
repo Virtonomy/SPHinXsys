@@ -144,20 +144,23 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
         current_local_almansi_strain(2, 2) = 0;
 
         /** correct out-plane numerical damping. */
-        double E = E0_;
-        double de = 1.0;
+        double E = E0_; // Take the default Young's modulus of the material as the initial derivative.
         Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
-        for (int it = 0; de > 1e-6 && it < 100; ++it)
+        int it = 0;
+        int max_it = 20;
+        for (double s_next = 1.0; abs(s_next) > 1e-9 && it < max_it; ++it)
         {
             double e_prev = current_local_almansi_strain(2, 2);
             double s_prev = cauchy_stress(2, 2);
             double e_next = e_prev - s_prev / E;
             current_local_almansi_strain(2, 2) = e_next;
             cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
-            double s_next = cauchy_stress(2, 2);
+            s_next = cauchy_stress(2, 2);
             E = (s_next - s_prev) / (e_next - e_prev);
-            de = std::abs(e_next - e_prev);
+            // de = std::abs(e_next - e_prev);
         }
+        if (it == max_it)
+            throw std::runtime_error("Secant algorithm enforcing `Szz = 0` could not converge.");
 
         Matd damping = current_transformation_matrix * transformation_matrix_[index_i].transpose() * F_gaussian_point * elastic_solid_.NumericalDampingRightCauchy(F_gaussian_point, dF_gaussian_point_dt, numerical_damping_scaling_[index_i], index_i) * F_gaussian_point.transpose() * transformation_matrix_[index_i] * current_transformation_matrix.transpose() / F_gaussian_point.determinant();
         cauchy_stress += damping;

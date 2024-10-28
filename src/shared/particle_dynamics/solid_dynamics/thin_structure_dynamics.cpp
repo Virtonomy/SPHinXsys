@@ -32,8 +32,8 @@ Real ShellAcousticTimeStepSize::reduce(size_t index_i, Real dt)
     Real time_setp_1 = SMIN((Real)sqrt(1.0 / (dangular_vel_dt_[index_i].norm() + TinyReal)),
                             Real(1.0) / (angular_vel_[index_i].norm() + TinyReal));
     Real time_setp_2 = smoothing_length_ * (Real)sqrt(rho0_ * (1.0 - nu_ * nu_) / E0_ /
-                                                (2.0 + (Pi * Pi / 12.0) * (1.0 - nu_) *
-                                                           (1.0 + 1.5 * pow(smoothing_length_ / thickness_[index_i], 2))));
+                                                      (2.0 + (Pi * Pi / 12.0) * (1.0 - nu_) *
+                                                                 (1.0 + 1.5 * pow(smoothing_length_ / thickness_[index_i], 2))));
     return CFL_ * SMIN(time_setp_0, time_setp_1, time_setp_2);
 }
 //=================================================================================================//
@@ -144,18 +144,18 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
         current_local_almansi_strain(2, 2) = 0;
 
         /** correct out-plane numerical damping. */
-        double B = E0_;
+        double E = E0_;
         double de = 1.0;
         Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
-        for (int it = 0; de > 1e-6 && it < 10; ++it)
+        for (int it = 0; de > 1e-6 && it < 100; ++it)
         {
             double e_prev = current_local_almansi_strain(2, 2);
             double s_prev = cauchy_stress(2, 2);
-            double e_next = e_prev - s_prev / B;
+            double e_next = e_prev - s_prev / E;
             current_local_almansi_strain(2, 2) = e_next;
             cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
             double s_next = cauchy_stress(2, 2);
-            B = (s_next - s_prev) / (e_next - e_prev);
+            E = (s_next - s_prev) / (e_next - e_prev);
             de = std::abs(e_next - e_prev);
         }
 
@@ -179,7 +179,10 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
             0.5 * thickness_[index_i] * gaussian_weight_[i] * (cauchy_stress * gaussian_point_[i] * thickness_[index_i] * 0.5);
         resultant_shear_stress -=
             0.5 * thickness_[index_i] * gaussian_weight_[i] * cauchy_stress.col(Dimensions - 1);
-
+        if (resultant_shear_stress.array().allFinite() == false)
+        {
+            throw std::runtime_error("Error: resultant_shear_stress is not finite.");
+        }
         resultant_stress.col(Dimensions - 1) = Vecd::Zero();
         resultant_moment.col(Dimensions - 1) = Vecd::Zero();
     }

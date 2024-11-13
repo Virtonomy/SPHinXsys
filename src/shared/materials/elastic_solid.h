@@ -28,9 +28,8 @@
  *			and anisotropic muscle, are derived from the basic elastic solid class.
  * @author	Chi Zhang and Xiangyu Hu
  */
-
-#ifndef VIRTOSIM_ELASTIC_SOLID_H_BFFCE97E_D31E_455A_96E5_D1904C02E06E
-#define VIRTOSIM_ELASTIC_SOLID_H_BFFCE97E_D31E_455A_96E5_D1904C02E06E
+#ifndef ELASTIC_SOLID_H
+#define ELASTIC_SOLID_H
 
 #include "base_material.h"
 #include <fstream>
@@ -339,4 +338,4 @@ class LocallyOrthotropicMuscle : public Muscle
     virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
 };
 } // namespace SPH
-#endif // VIRTOSIM_ELASTIC_SOLID_H_BFFCE97E_D31E_455A_96E5_D1904C02E06E
+#endif // ELASTIC_SOLID_H

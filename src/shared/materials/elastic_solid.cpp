@@ -169,6 +169,11 @@ Matd OrthotropicSolid::StressPK2(Matd &F, size_t index_i)
     return stress_PK2;
 }
 //=================================================================================================//
+Matd OrthotropicSolid::StressCauchy(Matd &almansi_strain, Matd &F, size_t index_i)
+{
+    throw std::runtime_error("OrthotropicSolid::StressCauchy is not implemented.");
+}
+//=================================================================================================//
 Real OrthotropicSolid::VolumetricKirchhoff(Real J)
 {
     return K0_ * J * (J - 1);
@@ -187,6 +192,11 @@ Matd FeneNeoHookeanSolid::StressPK2(Matd &F, size_t index_i)
     Real J = F.determinant();
     return G0_ / (1.0 - 2.0 * strain.trace() / j1_m_) * Matd::Identity() +
            (lambda0_ * (J - 1.0) - G0_) * J * right_cauchy.inverse();
+}
+//=================================================================================================//
+Matd FeneNeoHookeanSolid::StressCauchy(Matd &almansi_strain, Matd &F, size_t index_i)
+{
+    throw std::runtime_error("FeneNeoHookeanSolid::StressCauchy is not implemented.");
 }
 //=================================================================================================//
 Real Muscle::getShearModulus(const Real (&a0)[4], const Real (&b0)[4])
@@ -224,6 +234,11 @@ Matd Muscle::StressPK2(Matd &F, size_t i)
            a0_[3] * I_fs * exp(b0_[3] * I_fs * I_fs) * f0s0_;
 }
 //=================================================================================================//
+Matd Muscle::StressCauchy(Matd &almansi_strain, Matd &F, size_t index_i)
+{
+    throw std::runtime_error("Muscle::StressCauchy is not implemented.");
+}
+//=================================================================================================//
 Real Muscle::VolumetricKirchhoff(Real J)
 {
     return K0_ * J * (J - 1);
@@ -242,6 +257,11 @@ Matd LocallyOrthotropicMuscle::StressPK2(Matd &F, size_t i)
            2.0 * a0_[1] * I_ff_1 * exp(b0_[1] * I_ff_1 * I_ff_1) * local_f0f0_[i] +
            2.0 * a0_[2] * I_ss_1 * exp(b0_[2] * I_ss_1 * I_ss_1) * local_s0s0_[i] +
            a0_[3] * I_fs * exp(b0_[3] * I_fs * I_fs) * local_f0s0_[i];
+}
+//=================================================================================================//
+Matd LocallyOrthotropicMuscle::StressCauchy(Matd &almansi_strain, Matd &F, size_t index_i)
+{
+    throw std::runtime_error("LocallyOrthotropicMuscle::StressCauchy is not implemented.");
 }
 //=================================================================================================//
 void LocallyOrthotropicMuscle::registerReloadLocalParameters(BaseParticles *base_particles)

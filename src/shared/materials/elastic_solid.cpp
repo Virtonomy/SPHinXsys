@@ -80,6 +80,16 @@ Matd SaintVenantKirchhoffSolid::StressPK2(Matd &F, size_t index_i)
     return lambda0_ * strain.trace() * Matd::Identity() + 2.0 * G0_ * strain;
 }
 //=================================================================================================//
+Matd SaintVenantKirchhoffSolid::StressCauchy(Matd &almansi_strain, Matd &F, size_t index_i)
+{
+    const auto I = SPH::Mat3d::Identity();
+    const SPH::Mat3d B = (I - 2 * almansi_strain).inverse();
+    const double J = std::sqrt(B.determinant());
+    const double trE = 0.5 * (B.trace() - 3); // tr(C) == tr(B)
+    const auto F_E_FT = 0.5 * (B * B - B);
+    return (lambda0_ * trE * B + 2.0 * G0_ * F_E_FT) / J;
+}
+//=================================================================================================//
 Matd NeoHookeanSolid::StressPK2(Matd &F, size_t index_i)
 {
     // This formulation allows negative determinant of F. Please refer Eq. (12) in
@@ -116,8 +126,7 @@ Matd NeoHookeanSolidIncompressible::StressPK2(Matd &F, size_t index_i)
 Matd NeoHookeanSolidIncompressible::
     StressCauchy(Matd &almansi_strain, Matd &F, size_t index_i)
 {
-    // TODO: implement
-    return {};
+    throw std::runtime_error("NeoHookeanSolidIncompressible::StressCauchy is not implemented.");
 }
 //=================================================================================================//
 Real NeoHookeanSolidIncompressible::VolumetricKirchhoff(Real J)

@@ -28,6 +28,7 @@
  *			and anisotropic muscle, are derived from the basic elastic solid class.
  * @author	Chi Zhang and Xiangyu Hu
  */
+
 #ifndef ELASTIC_SOLID_H
 #define ELASTIC_SOLID_H
 

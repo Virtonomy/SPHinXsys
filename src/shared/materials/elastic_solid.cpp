@@ -101,11 +101,9 @@ Matd NeoHookeanSolid::StressPK2(Matd &F, size_t index_i)
 //=================================================================================================//
 Matd NeoHookeanSolid::StressCauchy(Matd &almansi_strain, Matd &F, size_t index_i)
 {
-    Real J = F.determinant();
     Matd B = (-2.0 * almansi_strain + Matd::Identity()).inverse();
-    Matd cauchy_stress = 0.5 * K0_ * (J - 1.0 / J) * Matd::Identity() +
-                         G0_ * pow(J, -2.0 * OneOverDimensions - 1.0) *
-                             (B - OneOverDimensions * B.trace() * Matd::Identity());
+    Real J = sqrt(B.determinant());
+    Matd cauchy_stress = G0_ / J * B + (lambda0_ * (J - 1.0) - G0_) * Matd::Identity();
     return cauchy_stress;
 }
 //=================================================================================================//

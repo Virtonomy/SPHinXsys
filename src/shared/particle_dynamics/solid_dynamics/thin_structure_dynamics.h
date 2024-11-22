@@ -236,8 +236,8 @@ class ShellStressRelaxationFirstHalf : public BaseShellRelaxation
 
     void update(size_t index_i, Real dt = 0.0);
 
-    inline double hourglass_control_factor() const { return hourglass_control_factor_; };
-    inline void hourglass_control_factor(double value) { hourglass_control_factor_ = value; };
+    inline Real hourglass_control_factor() const { return hourglass_control_factor_; };
+    inline void hourglass_control_factor(Real value) { hourglass_control_factor_ = value; };
 
   protected:
     ElasticSolid &elastic_solid_;

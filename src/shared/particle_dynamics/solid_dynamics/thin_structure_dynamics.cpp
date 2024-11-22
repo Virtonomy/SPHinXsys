@@ -148,8 +148,15 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
 
             double E = E0_; // Take the default Young's modulus of the material as the initial derivative.
             int it = 0;
-            int max_it = 20;
-            for (double s_next = 1.0; abs(s_next) > 1e-9 && it < max_it; ++it) // @WARN Hardcoded tolerance and iteration limit.
+            constexpr int max_iterations = 20; // @WARN hard-coded maximum number of iterations
+            constexpr auto infinity = std::numeric_limits<Real>::infinity();
+            auto tolerance_sqr = [](const Matd &stress)
+            {
+                return std::max(Eps, Eps * stress.colwise().squaredNorm().minCoeff());
+            };
+            for (double s_next = infinity;
+                 s_next * s_next > tolerance_sqr(cauchy_stress) && it < max_iterations;
+                 ++it)
             {
                 double e_prev = current_local_almansi_strain(2, 2);
                 double s_prev = cauchy_stress(2, 2);
@@ -159,8 +166,8 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
                 s_next = cauchy_stress(2, 2);
                 E = (s_next - s_prev) / (e_next - e_prev);
             }
-            if (cauchy_stress.allFinite() == false || it == max_it)
-                throw std::runtime_error("Algorithm enforcing plane stress condition for shell failed.");
+            if (cauchy_stress.allFinite() == false || it == max_iterations)
+                throw std::runtime_error("[ShellStressRelaxationFirstHalf::initialization] Enforcing plane stress condition for shell failed.");
         }
         /// Impact of including numerical damping in the algorithm above unclear
         /// Left here in absence of discriminating factors

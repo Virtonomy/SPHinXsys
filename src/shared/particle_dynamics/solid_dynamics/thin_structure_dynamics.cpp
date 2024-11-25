@@ -152,7 +152,7 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
             constexpr auto infinity = std::numeric_limits<Real>::infinity();
             auto tolerance_sqr = [](const Matd &stress)
             {
-                return std::max(Eps, Eps * stress.colwise().squaredNorm().minCoeff());
+                return std::max(Eps, Eps * stress.block<2, 2>(0, 0).colwise().squaredNorm().minCoeff());
             };
             for (double s_next = infinity;
                  s_next * s_next > tolerance_sqr(cauchy_stress) && it < max_iterations;

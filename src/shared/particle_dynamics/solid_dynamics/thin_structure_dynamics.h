@@ -206,7 +206,7 @@ class ShellStressRelaxationFirstHalf : public BaseShellRelaxation
                 Vecd pos_jump = getLinearVariableJump(e_ij, r_ij, pos_[index_i],
                                                       transformation_matrix_[index_i].transpose() * F_[index_i] * transformation_matrix_[index_i],
                                                       pos_[index_j],
-                                                      transformation_matrix_[index_i].transpose() * F_[index_j] * transformation_matrix_[index_i]);
+                                                      transformation_matrix_[index_j].transpose() * F_[index_j] * transformation_matrix_[index_j]);
                 Real limiter_pos = SMIN(2.0 * pos_jump.norm() / r_ij, 1.0);
                 acceleration += hourglass_control_factor_ * weight * G0_ * pos_jump * Dimensions *
                                 inner_neighborhood.dW_ijV_j_[n] * limiter_pos;

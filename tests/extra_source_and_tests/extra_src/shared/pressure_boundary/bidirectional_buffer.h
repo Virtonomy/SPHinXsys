@@ -61,6 +61,8 @@ class BidirectionalBuffer
             : BaseLocalDynamics<BodyPartByCell>(aligned_box_part),
               part_id_(aligned_box_part.getPartID()),
               pos_(particles_->getVariableDataByName<Vecd>("Position")),
+              Vol_(particles_->getVariableDataByName<Real>("VolumetricMeasure")),
+              Vel_(particles_->getVariableDataByName<Vecd>("Velocity")),
               aligned_box_(aligned_box_part.getAlignedBox()),
               buffer_particle_indicator_(particles_->registerStateVariable<int>("BufferParticleIndicator"))
         {
@@ -70,17 +72,36 @@ class BidirectionalBuffer
 
         virtual void update(size_t index_i, Real dt = 0.0)
         {
-            if (aligned_box_.checkContain(pos_[index_i]))
+            if (aligned_box_.checkInBounds(pos_[index_i]))
             {
                 buffer_particle_indicator_[index_i] = part_id_;
             }
+            if (buffer_particle_indicator_[index_i] != 0)
+            {
+                mutex_switch_to_real_.lock();
+
+                flowrate_ += Vol_[index_i] * Vel_[index_i];
+                mutex_switch_to_real_.unlock();
+            }
         };
+        virtual void reset_flowrate()
+        {
+            flowrate_ = Vecd::Zero();
+        }
+        virtual Vecd get_flowrate() const
+        {
+            return flowrate_;
+        }
 
       protected:
         int part_id_;
         Vecd *pos_;
+        Real *Vol_;
+        Vecd *Vel_;
         AlignedBox &aligned_box_;
         int *buffer_particle_indicator_;
+        Vecd flowrate_ = Vecd::Zero();
+        std::mutex mutex_switch_to_real_;
     };
 
     class Injection : public BaseLocalDynamics<BodyPartByCell>

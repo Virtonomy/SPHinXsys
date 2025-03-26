@@ -252,7 +252,7 @@ class DisposerOutflowDeletionCK : public BaseLocalDynamics<AlignedBoxPartByCell>
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0); // only works in sequenced policy
+        inline void update(size_t index_i, Real dt = 0.0); // only works in sequenced policy
 
       protected:
         AlignedBox *aligned_box_;
@@ -297,7 +297,7 @@ class TagBufferParticlesCK : public BaseLocalDynamics<AlignedBoxPartByCell>
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0); // only works in sequenced policy
+        inline void update(size_t index_i, Real dt = 0.0); // only works in sequenced policy
 
       protected:
         AlignedBox *aligned_box_;

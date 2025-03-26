@@ -19,19 +19,6 @@ EmitterInflowInjectionCK<AlignedBoxPartType>::
     buffer_.checkParticlesReserved();
 }
 //=================================================================================================//
-template <typename AlignedBoxPartType>
-EmitterInflowInjectionCK<AlignedBoxPartType>::FinishDynamics::
-    FinishDynamics(EmitterInflowInjectionCK<AlignedBoxPartType> &encloser)
-    : particles_(encloser.particles_), buffer_(encloser.buffer_)
-{
-}
-//=================================================================================================//
-template <typename AlignedBoxPartType>
-void EmitterInflowInjectionCK<AlignedBoxPartType>::FinishDynamics::operator()()
-{
-    buffer_.checkEnoughBuffer(*particles_);
-}
-//=================================================================================================//
 DisposerOutflowDeletionCK::
     DisposerOutflowDeletionCK(AlignedBoxPartByCell &aligned_box_part)
     : BaseLocalDynamics<AlignedBoxPartByCell>(aligned_box_part),

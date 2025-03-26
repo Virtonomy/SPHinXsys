@@ -44,19 +44,20 @@ namespace continuum_dynamics
 class VerticalStressCK : public BaseDerivedVariable<Real>
 {
   public:
-    explicit VerticalStressCK(SPHBody &sph_body);
-    virtual ~VerticalStressCK(){};
+    inline explicit VerticalStressCK(SPHBody &sph_body);
+    virtual ~VerticalStressCK() {};
     class UpdateKernel
     {
       public:
         template <class ExecutionPolicy, class EncloserType>
-        UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0);
+        inline UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
+        inline void update(size_t index_i, Real dt = 0.0);
 
       protected:
         Mat3d *stress_tensor_3D_;
         Real *derived_variable_;
     };
+
   protected:
     DiscreteVariable<Mat3d> *dv_stress_tensor_3D_;
     DiscreteVariable<Real> *dv_derived_variable_;
@@ -67,17 +68,18 @@ class VerticalStressCK : public BaseDerivedVariable<Real>
  */
 class AccDeviatoricPlasticStrainCK : public BaseDerivedVariable<Real>
 {
-  using PlasticKernel = typename PlasticContinuum::PlasticKernel;
+    using PlasticKernel = typename PlasticContinuum::PlasticKernel;
+
   public:
-    explicit AccDeviatoricPlasticStrainCK(SPHBody &sph_body);
-    virtual ~AccDeviatoricPlasticStrainCK(){};
+    inline explicit AccDeviatoricPlasticStrainCK(SPHBody &sph_body);
+    virtual ~AccDeviatoricPlasticStrainCK() {};
 
     class UpdateKernel
     {
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0);
+        inline void update(size_t index_i, Real dt = 0.0);
 
       protected:
         PlasticKernel plastic_kernel_;

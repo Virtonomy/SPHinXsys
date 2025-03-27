@@ -67,6 +67,8 @@ class InflowConditionCK<AlignedBoxPartType, ConditionFunction>
         ConditionKernel condition_;
     };
 
+    ConditionFunction &get_condition_function() { return condition_function_; }
+
   protected:
     SingularVariable<Real> *sv_physical_time_;
     SingularVariable<AlignedBox> *sv_aligned_box_;
@@ -278,6 +280,7 @@ class DisposerOutflowDeletionCK : public BaseLocalDynamics<AlignedBoxPartByCell>
     DiscreteVariable<Vecd> *dv_pos_;
     DiscreteVariable<Real> *dv_rho_, *dv_p_;
 };
+
 } // namespace fluid_dynamics
 } // namespace SPH
 namespace SPH
@@ -323,6 +326,8 @@ class PressureConditionCK<AlignedBoxPartType, KernelCorrectionType, ConditionFun
 
   public:
     PressureConditionCK(AlignedBoxPartType &aligned_box_part);
+
+    ConditionFunction &get_condition_function() { return condition_function_; }
 
     class UpdateKernel
     {

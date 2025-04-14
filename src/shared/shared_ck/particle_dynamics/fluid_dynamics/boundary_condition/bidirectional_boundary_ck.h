@@ -118,7 +118,7 @@ class BufferInflowInjectionCK : public BaseLocalDynamics<AlignedBoxPartByCell>
     int part_id_;
     ParticleBuffer<Base> &buffer_;
     FluidType &fluid_;
-    ConditionType condition_;
+    // ConditionType condition_;
     SingularVariable<AlignedBox> *sv_aligned_box_;
     SingularVariable<UnsignedInt> *sv_total_real_particles_;
     SpawnRealParticle spawn_real_particle_method_;
@@ -188,6 +188,7 @@ class PressureVelocityCondition : public BaseLocalDynamics<AlignedBoxPartByCell>
 
     class UpdateKernel : public BaseStateCondition::ComputingKernel
     {
+
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
@@ -203,10 +204,10 @@ class PressureVelocityCondition : public BaseLocalDynamics<AlignedBoxPartByCell>
         Transform *transform_;
     };
 
-  protected:
+  public:
     SingularVariable<AlignedBox> *sv_aligned_box_;
     KernelCorrectionType kernel_correction_method_;
-    ConditionType condition_;
+    // ConditionType condition_;
     SingularVariable<Real> *sv_physical_time_;
     DiscreteVariable<Vecd> *dv_zero_gradient_residue_;
 };
@@ -227,6 +228,7 @@ class BidirectionalBoundaryCK
     void applyBoundaryCondition(Real dt) { boundary_condition_.exec(dt); }
     void injectParticles() { inflow_injection_.exec(); }
     void deleteParticles() { outflow_deletion_.exec(); }
+    ConditionType &getCondition() { return boundary_condition_.getCondition(); }
 };
 } // namespace fluid_dynamics
 } // namespace SPH

@@ -32,7 +32,7 @@ BufferInflowInjectionCK<ConditionType>::
     : BaseLocalDynamics<AlignedBoxPartByCell>(aligned_box_part),
       part_id_(aligned_box_part.getPartID()), buffer_(buffer),
       fluid_(DynamicCast<FluidType>(this, sph_body_.getBaseMaterial())),
-      condition_(std::forward<Args>(args)...),
+      //   condition_(std::forward<Args>(args)...),
       sv_aligned_box_(aligned_box_part.svAlignedBox()),
       sv_total_real_particles_(this->particles_->svTotalRealParticles()),
       spawn_real_particle_method_(this->particles_),
@@ -50,7 +50,9 @@ template <class ConditionType>
 template <class ExecutionPolicy, class EncloserType>
 BufferInflowInjectionCK<ConditionType>::
     UpdateKernel::UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser)
-    : part_id_(encloser.part_id_), eos_(encloser.fluid_), condition_(encloser.condition_),
+    : part_id_(encloser.part_id_), eos_(encloser.fluid_),
+      // condition_(encloser.condition_),
+      condition_(ex_policy, encloser),
       aligned_box_(encloser.sv_aligned_box_->DelegatedData(ex_policy)),
       total_real_particles_(encloser.sv_total_real_particles_->DelegatedData(ex_policy)),
       spawn_real_particle_(ex_policy, encloser.spawn_real_particle_method_),
@@ -59,7 +61,9 @@ BufferInflowInjectionCK<ConditionType>::
       physical_time_(encloser.sv_physical_time_->DelegatedData(ex_policy)),
       p_(encloser.dv_p_->DelegatedData(ex_policy)),
       rho_(encloser.dv_rho_->DelegatedData(ex_policy)),
-      upper_bound_fringe_(encloser.upper_bound_fringe_) {}
+      upper_bound_fringe_(encloser.upper_bound_fringe_)
+{
+}
 //=================================================================================================//
 template <class ConditionType>
 void BufferInflowInjectionCK<ConditionType>::UpdateKernel::update(size_t index_i, Real dt)
@@ -108,9 +112,11 @@ PressureVelocityCondition<KernelCorrectionType, ConditionType>::
       BaseStateCondition(this->particles_),
       sv_aligned_box_(aligned_box_part.svAlignedBox()),
       kernel_correction_method_(this->particles_),
-      condition_(std::forward<Args>(args)...),
+      //   condition_(this->particles_),
       sv_physical_time_(this->sph_system_.template getSystemVariableByName<Real>("PhysicalTime")),
-      dv_zero_gradient_residue_(this->particles_->template getVariableByName<Vecd>("ZeroGradientResidue")) {}
+      dv_zero_gradient_residue_(this->particles_->template getVariableByName<Vecd>("ZeroGradientResidue"))
+{
+}
 //=================================================================================================//
 template <class KernelCorrectionType, typename ConditionType>
 template <class ExecutionPolicy, class EncloserType>
@@ -119,10 +125,13 @@ PressureVelocityCondition<KernelCorrectionType, ConditionType>::UpdateKernel::
     : BaseStateCondition::ComputingKernel(ex_policy, encloser),
       aligned_box_(encloser.sv_aligned_box_->DelegatedData(ex_policy)),
       correction_kernel_(ex_policy, encloser.kernel_correction_method_),
-      condition_(encloser.condition_),
+      //   condition_(encloser.sv_aligned_box_->DelegatedData(ex_policy)),
+      condition_(ex_policy, encloser),
       physical_time_(encloser.sv_physical_time_->DelegatedData(ex_policy)),
       zero_gradient_residue_(encloser.dv_zero_gradient_residue_->DelegatedData(ex_policy)),
-      axis_(aligned_box_->AlignmentAxis()), transform_(&aligned_box_->getTransform()) {}
+      axis_(aligned_box_->AlignmentAxis()), transform_(&aligned_box_->getTransform())
+{
+}
 //=================================================================================================//
 template <class KernelCorrectionType, typename ConditionType>
 void PressureVelocityCondition<KernelCorrectionType, ConditionType>::
@@ -131,7 +140,8 @@ void PressureVelocityCondition<KernelCorrectionType, ConditionType>::
     if (aligned_box_->checkContain(pos_[index_i]))
     {
         Vecd corrected_residue = correction_kernel_(index_i) * zero_gradient_residue_[index_i];
-        vel_[index_i] += dt * condition_.getPressure(p_[index_i], *physical_time_) /
+        Real test_p = condition_.getPressure(p_[index_i], *physical_time_);
+        vel_[index_i] += dt * test_p /
                          rho_[index_i] * corrected_residue;
 
         Vecd frame_velocity = Vecd::Zero();

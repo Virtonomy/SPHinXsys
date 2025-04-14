@@ -63,23 +63,22 @@ Vec2d normal(1.0, 0.0);
 //----------------------------------------------------------------------
 //  Inlet velocity profile for the left boundary (Poiseuille-like).
 //----------------------------------------------------------------------
-class InflowVelocityPrescribed : public VelocityPrescribed<>
-{
-  public:
-    InflowVelocityPrescribed(Real DH, Real U_f, Real mu_f)
-        : VelocityPrescribed<>(),
-          DH_(DH), U_f_(U_f), tau_((DH * DH) / (M_PI * M_PI * mu_f)) {};
+// class InflowVelocityPrescribed : public VelocityPrescribed<>
+// {
+//   public:
+//     template <class ExecutionPolicy, class EncloserType>
+//     InflowVelocityPrescribed(ExecutionPolicy &ex_policy, EncloserType &encloser)
+//         : VelocityPrescribed<>(), DH_(encloser.getBaseParticles()->template getSingularVariableByName<SPH::Real>("RightPressure")->DelegatedData(ex_policy)), U_f_(0), tau_(0){};
 
-    Real getAxisVelocity(const Vecd &input_position, const Real &input_axis_velocity, Real time)
-    {
-        Real y_centered = input_position[1];
-        Real u_steady = U_f_ * (1.0 - math::pow((2.0 * y_centered / DH_), 2));
-        Real transient_factor = 1.0 - math::exp(-time / tau_);
-        return u_steady * transient_factor;
-    };
-
-    Real DH_, U_f_, tau_;
-};
+//     Real getAxisVelocity(const Vecd &input_position, const Real &input_axis_velocity, Real time)
+//     {
+//         // Shift the y-coordinate so that y_centered = 0 at the channel center.
+//         Real y_centered = input_position[1];
+//         Real u_steady = U_f_ * (1.0 - math::pow((2.0 * y_centered / DH_), 2));
+//         Real transient_factor = 1.0 - math::exp(-time / tau_);
+//         return u_steady * transient_factor;
+//     };
+// };
 //----------------------------------------------------------------------
 //  Helper function for the analytical solution.
 //----------------------------------------------------------------------
@@ -221,6 +220,97 @@ int velocity_validation(
     }
     return 0;
 }
+template <class FluidType = WeaklyCompressibleFluid>
+struct PressurePrescribedUpdateSingularVariable
+{
+    using Fluid = FluidType;
+
+    Real *p_;
+    template <class ExecutionPolicy, class EncloserType>
+    PressurePrescribedUpdateSingularVariable(const ExecutionPolicy &ex_policy, EncloserType &encloser)
+        : p_(encloser.getSPHBody().getBaseParticles().template getSingularVariableByName<SPH::Real>("RightPressure")->DelegatedData(ex_policy))
+    {
+    }
+
+    // template <class ExecutionPolicy>
+    // void setupDelegatedPointer(ExecutionPolicy &ex_policy)
+    // {
+    //     p_ = current_pressure_->DelegatedData(ex_policy);
+    // }
+
+    inline void setPressure(Real new_pressure)
+    {
+        *p_ = new_pressure;
+    }
+
+    inline Real getPressure(const Real &, Real) const
+    {
+        return *p_;
+        // return 0.;
+    }
+    inline void showPressure() const
+    {
+        // std::cout << "Pressure: " << *p_ << std::endl;
+    }
+
+    inline Real getAxisVelocity(const Vecd &, const Real &input_axis_velocity, Real) const
+    {
+        return input_axis_velocity;
+    }
+};
+
+template <class FluidType = WeaklyCompressibleFluid>
+struct PressurePrescribedUpdateSingularVariableleft
+{
+    using Fluid = FluidType;
+
+    template <class ExecutionPolicy, class EncloserType>
+    PressurePrescribedUpdateSingularVariableleft(const ExecutionPolicy &ex_policy, EncloserType &encloser)
+    {
+    }
+
+    // template <class ExecutionPolicy>
+    // void setupDelegatedPointer(ExecutionPolicy &ex_policy)
+    // {
+    //     p_ = current_pressure_->DelegatedData(ex_policy);
+    // }
+
+    // inline void setPressure(Real new_pressure)
+    // {
+    //     *p_ = new_pressure;
+    // }
+
+    inline Real getPressure(const Real &, Real) const
+    {
+        return 0.;
+    }
+    inline void showPressure() const
+    {
+        // std::cout << "Pressure: " << *p_ << std::endl;
+    }
+
+    inline Real getAxisVelocity(const Vecd &, const Real &input_axis_velocity, Real) const
+    {
+        return input_axis_velocity;
+    }
+};
+class InflowVelocityPrescribedSingularVariable : public VelocityPrescribed<>
+{
+  public:
+    template <class ExecutionPolicy, class EncloserType>
+    InflowVelocityPrescribedSingularVariable(const ExecutionPolicy &ex_policy, EncloserType &encloser)
+        : VelocityPrescribed<>(), DH_(DH), U_f_(DL), tau_((DH * DH) / (M_PI * M_PI * mu_f)){};
+
+    Real getAxisVelocity(const Vecd &input_position, const Real &input_axis_velocity, Real time)
+    {
+        // Shift the y-coordinate so that y_centered = 0 at the channel center.
+        Real y_centered = input_position[1];
+        Real u_steady = U_f_ * (1.0 - math::pow((2.0 * y_centered / DH_), 2));
+        Real transient_factor = 1.0 - math::exp(-time / tau_);
+        return u_steady * transient_factor;
+    };
+    Real DH_, U_f_, tau_;
+};
 //----------------------------------------------------------------------
 //	Main program starts here.
 //----------------------------------------------------------------------
@@ -235,9 +325,11 @@ int main(int ac, char *av[])
     //	Creating bodies with corresponding materials and particles.
     //----------------------------------------------------------------------
     FluidBody water_body(sph_system, makeShared<WaterBlock>("WaterBody"));
-    water_body.defineClosure<WeaklyCompressibleFluid, Viscosity>(ConstructArgs(rho0_f, c_f), mu_f);
+    water_body.defineClosure<WeaklyCompressibleFluid, Viscosity>(ConstructArgs(rho0_f, 2 * c_f), mu_f);
     ParticleBuffer<ReserveSizeFactor> particle_buffer(0.5);
     water_body.generateParticlesWithReserve<BaseParticles, Lattice>(particle_buffer);
+    water_body.getBaseParticles().registerSingularVariable<Real>("RightPressure");
+    water_body.getBaseParticles().registerSingularVariable<Real>("LeftVelocity");
 
     SolidBody wall(sph_system, makeShared<WallBoundary>("WallBoundary"));
     wall.defineMaterial<Solid>();
@@ -265,6 +357,7 @@ int main(int ac, char *av[])
     // //----------------------------------------------------------------------
     AlignedBoxPartByCell left_emitter_by_cell(water_body, AlignedBox(xAxis, Transform(left_bidirectional_translation), bidirectional_buffer_halfsize));
     AlignedBoxPartByCell right_emitter_by_cell(water_body, AlignedBox(xAxis, Transform(Rotation2d(Pi), Vec2d(right_disposer_translation)), bidirectional_buffer_halfsize));
+
     //----------------------------------------------------------------------
     //	Define body relation map.
     //	The contact map gives the topological connections between the bodies.
@@ -311,16 +404,28 @@ int main(int ac, char *av[])
         fluid_boundary_indicator(water_body_inner, water_wall_contact);
     InteractionDynamicsCK<MainExecutionPolicy, fluid_dynamics::TransportVelocityCorrectionWallNoCorrectionBulkParticlesCK>
         transport_correction_ck(water_body_inner, water_wall_contact);
-    ReduceDynamicsCK<MainExecutionPolicy, fluid_dynamics::AdvectionTimeStepCK> fluid_advection_time_step(water_body, U_f);
+    ReduceDynamicsCK<MainExecutionPolicy, fluid_dynamics::AdvectionTimeStepCK> fluid_advection_time_step(water_body, 2 * U_f);
     ReduceDynamicsCK<MainExecutionPolicy, fluid_dynamics::AcousticTimeStepCK<>> fluid_acoustic_time_step(water_body);
     InteractionDynamicsCK<MainExecutionPolicy, fluid_dynamics::ViscousForceWithWallCK>
         fluid_viscous_force(water_body_inner, water_wall_contact);
     InteractionDynamicsCK<MainExecutionPolicy, fluid_dynamics::TransportVelocityLimitedCorrectionCorrectedComplexBulkParticlesCKWithoutUpdate>
         zero_gradient_ck(water_body_inner, water_wall_contact);
-    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, InflowVelocityPrescribed>
-        bidirectional_velocity_condition_left(left_emitter_by_cell, particle_buffer, DH, U_f, mu_f);
-    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, PressurePrescribed<>>
-        bidirectional_pressure_condition_right(right_emitter_by_cell, particle_buffer, Outlet_pressure);
+
+    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, PressurePrescribedUpdateSingularVariableleft<>>
+        bidirectional_velocity_condition_left(left_emitter_by_cell, particle_buffer);
+
+    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, PressurePrescribedUpdateSingularVariable<>>
+        bidirectional_pressure_condition_right(right_emitter_by_cell, particle_buffer);
+    // bidirectional_pressure_condition_right.getCondition().setPressure(0.);
+
+    auto *p_var = water_body.getBaseParticles().getSingularVariableByName<Real>("RightPressure");
+    *p_var->DelegatedData(MainExecutionPolicy{}) = 0.;
+
+    // Real outlet_pressure_value = 0.1;
+    // PressurePrescribedUpdatePointer<> outlet_pressure_condition(&outlet_pressure_value);
+    // fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, PressurePrescribedUpdatePointer<>>
+    //     bidirectional_pressure_condition_right(right_emitter_by_cell, particle_buffer, &outlet_pressure_value);
+
     //----------------------------------------------------------------------
     //	Define the methods for I/O operations, observations
     //	and regression tests of the simulation.
@@ -328,7 +433,8 @@ int main(int ac, char *av[])
     IOEnvironment io_environment(sph_system);
     BodyStatesRecordingToVtp body_states_recording(sph_system);
     body_states_recording.addToWrite<Real>(water_body, "Pressure");
-    ObservedQuantityRecording<MainExecutionPolicy, Vecd, RestoringCorrection> write_centerline_velocity("Velocity", velocity_observer_contact);
+    body_states_recording.addToWrite<int>(water_body, "BufferIndicator");
+    ObservedQuantityRecording<MainExecutionPolicy, Vecd> write_centerline_velocity("Velocity", velocity_observer_contact);
     //----------------------------------------------------------------------
     //	Prepare the simulation with cell linked list, configuration
     //	and case specified initial condition if necessary.
@@ -348,22 +454,23 @@ int main(int ac, char *av[])
     size_t number_of_iterations = 0;
     size_t screen_output_interval = 100;
     size_t observation_sample_interval = screen_output_interval * 2;
-    Real end_time = 2.0;
-    Real output_interval = 0.1;
+    Real end_time = 20.0;
+    Real output_interval = 0.01;
     //----------------------------------------------------------------------
     //	Statistics for CPU time
     //----------------------------------------------------------------------
-    TickCount tick_start = TickCount::now();
-    TimeInterval interval_io;
-    TimeInterval interval_outer_loop;
-    TimeInterval interval_inner_loop;
+    TickCount t1 = TickCount::now();
+    TimeInterval interval;
+    TimeInterval interval_computing_time_step;
+    TimeInterval interval_computing_pressure_relaxation;
     TimeInterval interval_updating_configuration;
-    TickCount tick_instance;
+    TickCount time_instance;
     //----------------------------------------------------------------------
     //	First output before the main loop.
     //----------------------------------------------------------------------
     body_states_recording.writeToFile(MainExecutionPolicy{});
     write_centerline_velocity.writeToFile(number_of_iterations);
+    Real updated_pressure = 0.;
     //----------------------------------------------------------------------
     //	Main loop starts here.
     //----------------------------------------------------------------------
@@ -373,22 +480,26 @@ int main(int ac, char *av[])
         /** Integrate time (loop) until the next output time. */
         while (integration_time < output_interval)
         {
-            tick_instance = TickCount::now();
             fluid_density_regularization.exec();
             water_advection_step_setup.exec();
             fluid_viscous_force.exec();
             transport_correction_ck.exec();
             Real advection_dt = fluid_advection_time_step.exec();
             fluid_linear_correction_matrix.exec();
-            interval_outer_loop += TickCount::now() - tick_instance;
+            interval_computing_time_step += TickCount::now() - time_instance;
 
-            tick_instance = TickCount::now();
+            /** Dynamics including pressure relaxation. */
             Real relaxation_time = 0.0;
             Real acoustic_dt = 0.0;
+
             while (relaxation_time < advection_dt)
             {
                 acoustic_dt = SMIN(fluid_acoustic_time_step.exec(), advection_dt);
                 fluid_acoustic_step_1st_half.exec(acoustic_dt);
+                {
+                    updated_pressure = sin(sv_physical_time->getValue() * (8 * M_PI) / end_time) * 0.25;
+                    *p_var->DelegatedData(MainExecutionPolicy{}) = updated_pressure;
+                }
                 zero_gradient_ck.exec();
                 bidirectional_velocity_condition_left.applyBoundaryCondition(acoustic_dt);
                 bidirectional_pressure_condition_right.applyBoundaryCondition(acoustic_dt);
@@ -398,23 +509,22 @@ int main(int ac, char *av[])
                 sv_physical_time->incrementValue(acoustic_dt);
             }
             water_advection_step_close.exec();
-            interval_inner_loop += TickCount::now() - tick_instance;
+            interval_computing_pressure_relaxation += TickCount::now() - time_instance;
 
             if (number_of_iterations % screen_output_interval == 0)
             {
                 std::cout << std::fixed << std::setprecision(9) << "N=" << number_of_iterations << "	Time = "
                           << sv_physical_time->getValue()
                           << "	Dt = " << advection_dt << "	dt = " << acoustic_dt << "\n";
+                // auto current_pressure = bidirectional_pressure_condition_right.getCondition().getPressure(0, 0);
+                std::cout << "Current Pressure: " << updated_pressure << std::endl;
                 if (number_of_iterations % observation_sample_interval == 0 && number_of_iterations != sph_system.RestartStep())
                 {
-                    tick_instance = TickCount::now();
                     write_centerline_velocity.writeToFile(number_of_iterations);
-                    interval_io += TickCount::now() - tick_instance;
                 }
             }
             number_of_iterations++;
-
-            tick_instance = TickCount::now();
+            /** inflow emitter injection*/
             bidirectional_velocity_condition_left.injectParticles();
             bidirectional_pressure_condition_right.injectParticles();
             bidirectional_velocity_condition_left.deleteParticles();
@@ -427,25 +537,30 @@ int main(int ac, char *av[])
             water_cell_linked_list.exec();
             water_body_update_complex_relation.exec();
             fluid_observer_contact_relation.exec();
+            interval_updating_configuration += TickCount::now() - time_instance;
             fluid_boundary_indicator.exec();
             bidirectional_velocity_condition_left.tagBufferParticles();
             bidirectional_pressure_condition_right.tagBufferParticles();
-            interval_updating_configuration += TickCount::now() - tick_instance;
         }
 
-        tick_instance = TickCount::now();
+        TickCount t2 = TickCount::now();
+
         body_states_recording.writeToFile(MainExecutionPolicy{});
         fluid_observer_contact_relation.exec();
-        interval_io += TickCount::now() - tick_instance;
-    }
 
-    TimeInterval tt = TickCount::now() - tick_start - interval_io;
+        TickCount t3 = TickCount::now();
+        interval += t3 - t2;
+    }
+    TickCount t4 = TickCount::now();
+
+    TimeInterval tt;
+    tt = t4 - t1 - interval;
     std::cout << "Total wall time for computation: " << tt.seconds()
               << " seconds." << std::endl;
-    std::cout << std::fixed << std::setprecision(9) << "interval_outer_loop ="
-              << interval_outer_loop.seconds() << "\n";
-    std::cout << std::fixed << std::setprecision(9) << "interval_inner_loop = "
-              << interval_inner_loop.seconds() << "\n";
+    std::cout << std::fixed << std::setprecision(9) << "interval_computing_time_step ="
+              << interval_computing_time_step.seconds() << "\n";
+    std::cout << std::fixed << std::setprecision(9) << "interval_computing_pressure_relaxation = "
+              << interval_computing_pressure_relaxation.seconds() << "\n";
     std::cout << std::fixed << std::setprecision(9) << "interval_updating_configuration = "
               << interval_updating_configuration.seconds() << "\n";
     //----------------------------------------------------------------------

@@ -68,7 +68,7 @@ class BufferIndicationCK : public BaseLocalDynamics<AlignedBoxPartByCell>
     DiscreteVariable<int> *dv_buffer_indicator_;
 };
 
-template <class ConditionType>
+template <class BoundaryConditionConfig, class ConditionType>
 class BufferInflowInjectionCK : public BaseLocalDynamics<AlignedBoxPartByCell>
 {
     using SpawnRealParticleKernel = typename SpawnRealParticle::ComputingKernel;
@@ -113,12 +113,16 @@ class BufferInflowInjectionCK : public BaseLocalDynamics<AlignedBoxPartByCell>
         Real *p_, *rho_;
         Real upper_bound_fringe_;
     };
+    BoundaryConditionConfig &getConditionConstruction()
+    {
+        return bc_config_;
+    }
 
   protected:
     int part_id_;
     ParticleBuffer<Base> &buffer_;
     FluidType &fluid_;
-    // ConditionType condition_;
+    BoundaryConditionConfig bc_config_;
     SingularVariable<AlignedBox> *sv_aligned_box_;
     SingularVariable<UnsignedInt> *sv_total_real_particles_;
     SpawnRealParticle spawn_real_particle_method_;
@@ -176,7 +180,7 @@ class BufferOutflowDeletionCK : public BaseLocalDynamics<AlignedBoxPartByCell>
     DiscreteVariable<Vecd> *dv_pos_;
 };
 
-template <class KernelCorrectionType, typename ConditionType>
+template <class KernelCorrectionType, typename BoundaryConditionConfig, typename ConditionType>
 class PressureVelocityCondition : public BaseLocalDynamics<AlignedBoxPartByCell>,
                                   public BaseStateCondition
 {
@@ -203,21 +207,25 @@ class PressureVelocityCondition : public BaseLocalDynamics<AlignedBoxPartByCell>
         int axis_;
         Transform *transform_;
     };
+    BoundaryConditionConfig &getConditionConstruction()
+    {
+        return bc_config_;
+    }
 
   public:
     SingularVariable<AlignedBox> *sv_aligned_box_;
     KernelCorrectionType kernel_correction_method_;
-    // ConditionType condition_;
+    BoundaryConditionConfig bc_config_;
     SingularVariable<Real> *sv_physical_time_;
     DiscreteVariable<Vecd> *dv_zero_gradient_residue_;
 };
 
-template <typename ExecutionPolicy, class KernelCorrectionType, class ConditionType>
+template <typename ExecutionPolicy, class KernelCorrectionType, class BoundaryConditionConfig, class ConditionType>
 class BidirectionalBoundaryCK
 {
     StateDynamics<ExecutionPolicy, BufferIndicationCK> tag_buffer_particles_;
-    StateDynamics<ExecutionPolicy, PressureVelocityCondition<KernelCorrectionType, ConditionType>> boundary_condition_;
-    StateDynamics<ExecutionPolicy, BufferInflowInjectionCK<ConditionType>> inflow_injection_;
+    StateDynamics<ExecutionPolicy, PressureVelocityCondition<KernelCorrectionType, BoundaryConditionConfig, ConditionType>> boundary_condition_;
+    StateDynamics<ExecutionPolicy, BufferInflowInjectionCK<BoundaryConditionConfig, ConditionType>> inflow_injection_;
     StateDynamics<ExecutionPolicy, BufferOutflowDeletionCK> outflow_deletion_;
 
   public:

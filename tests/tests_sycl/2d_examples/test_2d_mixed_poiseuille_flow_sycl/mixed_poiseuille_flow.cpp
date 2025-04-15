@@ -232,12 +232,6 @@ struct PressurePrescribedUpdateSingularVariable
     {
     }
 
-    // template <class ExecutionPolicy>
-    // void setupDelegatedPointer(ExecutionPolicy &ex_policy)
-    // {
-    //     p_ = current_pressure_->DelegatedData(ex_policy);
-    // }
-
     inline void setPressure(Real new_pressure)
     {
         *p_ = new_pressure;
@@ -246,17 +240,25 @@ struct PressurePrescribedUpdateSingularVariable
     inline Real getPressure(const Real &, Real) const
     {
         return *p_;
-        // return 0.;
     }
     inline void showPressure() const
     {
-        // std::cout << "Pressure: " << *p_ << std::endl;
     }
 
     inline Real getAxisVelocity(const Vecd &, const Real &input_axis_velocity, Real) const
     {
         return input_axis_velocity;
     }
+};
+class DefaultBoundaryConditionConfig
+{
+  public:
+    DefaultBoundaryConditionConfig(Real DH, Real U_f, Real mu_f) : DH_(DH), U_f_(U_f), mu_f_(mu_f) {};
+
+    Real DH_, U_f_, mu_f_;
+};
+class Empty
+{
 };
 
 template <class FluidType = WeaklyCompressibleFluid>
@@ -299,7 +301,7 @@ class InflowVelocityPrescribedSingularVariable : public VelocityPrescribed<>
   public:
     template <class ExecutionPolicy, class EncloserType>
     InflowVelocityPrescribedSingularVariable(const ExecutionPolicy &ex_policy, EncloserType &encloser)
-        : VelocityPrescribed<>(), DH_(DH), U_f_(DL), tau_((DH * DH) / (M_PI * M_PI * mu_f)){};
+        : VelocityPrescribed<>(), DH_(encloser.getConditionConstruction().DH_), U_f_(encloser.getConditionConstruction().U_f_), tau_((DH_ * DH_) / (M_PI * M_PI * encloser.getConditionConstruction().mu_f_)){};
 
     Real getAxisVelocity(const Vecd &input_position, const Real &input_axis_velocity, Real time)
     {
@@ -411,20 +413,14 @@ int main(int ac, char *av[])
     InteractionDynamicsCK<MainExecutionPolicy, fluid_dynamics::TransportVelocityLimitedCorrectionCorrectedComplexBulkParticlesCKWithoutUpdate>
         zero_gradient_ck(water_body_inner, water_wall_contact);
 
-    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, PressurePrescribedUpdateSingularVariableleft<>>
-        bidirectional_velocity_condition_left(left_emitter_by_cell, particle_buffer);
+    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, DefaultBoundaryConditionConfig, InflowVelocityPrescribedSingularVariable>
+        bidirectional_velocity_condition_left(left_emitter_by_cell, particle_buffer, DH, U_f, mu_f);
 
-    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, PressurePrescribedUpdateSingularVariable<>>
+    fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, Empty, PressurePrescribedUpdateSingularVariable<>>
         bidirectional_pressure_condition_right(right_emitter_by_cell, particle_buffer);
-    // bidirectional_pressure_condition_right.getCondition().setPressure(0.);
 
     auto *p_var = water_body.getBaseParticles().getSingularVariableByName<Real>("RightPressure");
     *p_var->DelegatedData(MainExecutionPolicy{}) = 0.;
-
-    // Real outlet_pressure_value = 0.1;
-    // PressurePrescribedUpdatePointer<> outlet_pressure_condition(&outlet_pressure_value);
-    // fluid_dynamics::BidirectionalBoundaryCK<MainExecutionPolicy, NoKernelCorrectionCK, PressurePrescribedUpdatePointer<>>
-    //     bidirectional_pressure_condition_right(right_emitter_by_cell, particle_buffer, &outlet_pressure_value);
 
     //----------------------------------------------------------------------
     //	Define the methods for I/O operations, observations

@@ -27,8 +27,8 @@
  * @author	Alberto Guarnieri and Xiangyu Hu
  */
 
-#ifndef IMPLEMENTATION_H
-#define IMPLEMENTATION_H
+#ifndef VIRTOSIM_IMPLEMENTATION_H_A14D2558_2003_4872_9DED_D59751C64E18
+#define VIRTOSIM_IMPLEMENTATION_H_A14D2558_2003_4872_9DED_D59751C64E18
 
 #include "base_data_type.h"
 #include "base_implementation.h"
@@ -144,4 +144,4 @@ class Implementation<ExecutionPolicy, LocalDynamicsType, ComputingKernelType>
 };
 } // namespace execution
 } // namespace SPH
-#endif // IMPLEMENTATION_H
+#endif // VIRTOSIM_IMPLEMENTATION_H_A14D2558_2003_4872_9DED_D59751C64E18

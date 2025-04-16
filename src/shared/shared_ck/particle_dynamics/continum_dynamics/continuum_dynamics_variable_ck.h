@@ -27,8 +27,8 @@
  * @author Shuang Li, Xiangyu Hu and Xiangyu Hu
  */
 
-#ifndef CONTINUUM_DYNAMICS_VARIABLE_CK_H
-#define CONTINUUM_DYNAMICS_VARIABLE_CK_H
+#ifndef VIRTOSIM_CONTINUUM_DYNAMICS_VARIABLE_CK_H_F2FEB896_8768_44A6_8B85_4E3E89941657
+#define VIRTOSIM_CONTINUUM_DYNAMICS_VARIABLE_CK_H_F2FEB896_8768_44A6_8B85_4E3E89941657
 
 #include "base_general_dynamics.h"
 #include "general_continuum.h"
@@ -45,18 +45,19 @@ class VerticalStressCK : public BaseDerivedVariable<Real>
 {
   public:
     explicit VerticalStressCK(SPHBody &sph_body);
-    virtual ~VerticalStressCK(){};
+    virtual ~VerticalStressCK() {};
     class UpdateKernel
     {
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0);
+        inline void update(size_t index_i, Real dt = 0.0);
 
       protected:
         Mat3d *stress_tensor_3D_;
         Real *derived_variable_;
     };
+
   protected:
     DiscreteVariable<Mat3d> *dv_stress_tensor_3D_;
     DiscreteVariable<Real> *dv_derived_variable_;
@@ -67,17 +68,18 @@ class VerticalStressCK : public BaseDerivedVariable<Real>
  */
 class AccDeviatoricPlasticStrainCK : public BaseDerivedVariable<Real>
 {
-  using PlasticKernel = typename PlasticContinuum::PlasticKernel;
+    using PlasticKernel = typename PlasticContinuum::PlasticKernel;
+
   public:
     explicit AccDeviatoricPlasticStrainCK(SPHBody &sph_body);
-    virtual ~AccDeviatoricPlasticStrainCK(){};
+    virtual ~AccDeviatoricPlasticStrainCK() {};
 
     class UpdateKernel
     {
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0);
+        inline void update(size_t index_i, Real dt = 0.0);
 
       protected:
         PlasticKernel plastic_kernel_;
@@ -96,4 +98,4 @@ class AccDeviatoricPlasticStrainCK : public BaseDerivedVariable<Real>
 } // namespace continuum_dynamics
 } // namespace SPH
 
-#endif // CONTINUUM_DYNAMICS_VARIABLE_CK_H
+#endif // VIRTOSIM_CONTINUUM_DYNAMICS_VARIABLE_CK_H_F2FEB896_8768_44A6_8B85_4E3E89941657

@@ -26,8 +26,8 @@
  * @author	Xiangyu Hu
  */
 
-#ifndef BIDIRECTIONAL_BOUNDARY_CK_H
-#define BIDIRECTIONAL_BOUNDARY_CK_H
+#ifndef VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_H_EF6EF7AE_A2F5_45A5_ADC2_11E328DBBF54
+#define VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_H_EF6EF7AE_A2F5_45A5_ADC2_11E328DBBF54
 
 #include "base_body_part.h"
 #include "base_fluid_dynamics.h"
@@ -52,7 +52,7 @@ class BufferIndicationCK : public BaseLocalDynamics<AlignedBoxPartByCell>
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0);
+        inline void update(size_t index_i, Real dt = 0.0);
 
       protected:
         int part_id_;
@@ -161,7 +161,7 @@ class BufferOutflowDeletionCK : public BaseLocalDynamics<AlignedBoxPartByCell>
       public:
         template <class ExecutionPolicy, class EncloserType>
         UpdateKernel(const ExecutionPolicy &ex_policy, EncloserType &encloser);
-        void update(size_t index_i, Real dt = 0.0);
+        inline void update(size_t index_i, Real dt = 0.0);
 
       protected:
         AlignedBox *aligned_box_;
@@ -240,4 +240,4 @@ class BidirectionalBoundaryCK
 };
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // BIDIRECTIONAL_BOUNDARY_CK_H
+#endif // VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_H_EF6EF7AE_A2F5_45A5_ADC2_11E328DBBF54

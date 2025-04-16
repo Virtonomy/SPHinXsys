@@ -1,5 +1,5 @@
-#ifndef BIDIRECTIONAL_BOUNDARY_CK_HPP
-#define BIDIRECTIONAL_BOUNDARY_CK_HPP
+#ifndef VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_F9EC5BEF_C5E3_4DFF_ABEE_0C3B9E458A51
+#define VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_F9EC5BEF_C5E3_4DFF_ABEE_0C3B9E458A51
 
 #include "bidirectional_boundary_ck.h"
 
@@ -162,4 +162,4 @@ BidirectionalBoundaryCK<ExecutionPolicy, KernelCorrectionType, BoundaryCondition
 //=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // BIDIRECTIONAL_BOUNDARY_CK_HPP
+#endif // VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_F9EC5BEF_C5E3_4DFF_ABEE_0C3B9E458A51

@@ -33,8 +33,9 @@
 
 #include "acoustic_step_1st_half.hpp"
 #include "acoustic_step_2nd_half.hpp"
-#include "density_regularization.hpp"
 #include "all_fluid_boundary_condition_ck.h"
+#include "density_regularization.hpp"
+#include "flowrate_ck.hpp"
 #include "fluid_time_step_ck.hpp"
 #include "transport_velocity_correction_ck.hpp"
 #include "viscous_force.hpp"

@@ -1,5 +1,5 @@
-#ifndef VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_F9EC5BEF_C5E3_4DFF_ABEE_0C3B9E458A51
-#define VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_F9EC5BEF_C5E3_4DFF_ABEE_0C3B9E458A51
+#ifndef VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_A0ADF232_7A8B_4510_899A_2F5E0035F350
+#define VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_A0ADF232_7A8B_4510_899A_2F5E0035F350
 
 #include "bidirectional_boundary_ck.h"
 
@@ -139,7 +139,7 @@ void PressureVelocityCondition<KernelCorrectionType, BoundaryConditionConfig, Co
     {
         Vecd corrected_residue = correction_kernel_(index_i) * zero_gradient_residue_[index_i];
         Real test_p = condition_.getPressure(p_[index_i], *physical_time_);
-        vel_[index_i] += dt * test_p /
+        vel_[index_i] -= dt * test_p /
                          rho_[index_i] * corrected_residue;
 
         Vecd frame_velocity = Vecd::Zero();
@@ -162,4 +162,4 @@ BidirectionalBoundaryCK<ExecutionPolicy, KernelCorrectionType, BoundaryCondition
 //=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_F9EC5BEF_C5E3_4DFF_ABEE_0C3B9E458A51
+#endif // VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_A0ADF232_7A8B_4510_899A_2F5E0035F350

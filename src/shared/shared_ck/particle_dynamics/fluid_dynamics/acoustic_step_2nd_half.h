@@ -27,8 +27,8 @@
  * @author	Xiangyu Hu
  */
 
-#ifndef ACOUSTIC_STEP_2ND_HALF_H
-#define ACOUSTIC_STEP_2ND_HALF_H
+#ifndef VIRTOSIM_ACOUSTIC_STEP_2ND_HALF_H_D01376F5_756D_4AFC_9809_460C18B30C4A
+#define VIRTOSIM_ACOUSTIC_STEP_2ND_HALF_H_D01376F5_756D_4AFC_9809_460C18B30C4A
 
 #include "acoustic_step_1st_half.h"
 
@@ -131,6 +131,9 @@ class AcousticStep2ndHalf<Contact<Wall, RiemannSolverType, KernelCorrectionType,
     RiemannSolverType riemann_solver_;
 };
 
+using AcousticStep2ndHalfWithWallNoRiemannCK =
+    AcousticStep2ndHalf<Inner<OneLevel, NoRiemannSolverCK, NoKernelCorrectionCK>,
+                        Contact<Wall, NoRiemannSolverCK, NoKernelCorrectionCK>>;
 using AcousticStep2ndHalfWithWallRiemannCK =
     AcousticStep2ndHalf<Inner<OneLevel, AcousticRiemannSolverCK, NoKernelCorrectionCK>,
                         Contact<Wall, AcousticRiemannSolverCK, NoKernelCorrectionCK>>;
@@ -139,4 +142,4 @@ using AcousticStep2ndHalfWithWallRiemannCorrectionCK =
                         Contact<Wall, AcousticRiemannSolverCK, LinearCorrectionCK>>;
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // ACOUSTIC_STEP_2ND_HALF_H
+#endif // VIRTOSIM_ACOUSTIC_STEP_2ND_HALF_H_D01376F5_756D_4AFC_9809_460C18B30C4A

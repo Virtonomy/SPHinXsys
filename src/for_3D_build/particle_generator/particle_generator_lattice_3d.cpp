@@ -5,28 +5,78 @@
 #include "base_particle_dynamics.h"
 #include "base_particles.h"
 #include "complex_geometry.h"
-
+#include <tbb/mutex.h>
 namespace SPH
 {
 //=================================================================================================//
 void ParticleGenerator<BaseParticles, Lattice>::prepareGeometricData()
 {
     Mesh mesh(domain_bounds_, lattice_spacing_, 0);
-    Real particle_volume = lattice_spacing_ * lattice_spacing_ * lattice_spacing_;
-    Arrayi number_of_lattices = mesh.AllCells();
-    for (int i = 0; i < number_of_lattices[0]; ++i)
-        for (int j = 0; j < number_of_lattices[1]; ++j)
-            for (int k = 0; k < number_of_lattices[2]; ++k)
+    Arrayi ncell = mesh.AllCells();
+    Real volume = lattice_spacing_ * lattice_spacing_ * lattice_spacing_;
+    size_t total_cells = (size_t)ncell[0] * ncell[1] * ncell[2];
+
+    // ——— 1) Count valid cells in parallel ———
+    tbb::enumerable_thread_specific<size_t> tls_count(0);
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, total_cells),
+        [&](auto &r)
+        {
+            auto &local_count = tls_count.local();
+            for (size_t idx = r.begin(); idx < r.end(); ++idx)
             {
-                Vecd particle_position = mesh.CellPositionFromIndex(Arrayi(i, j, k));
-                if (initial_shape_.checkNotFar(particle_position, lattice_spacing_))
+                int i = idx / (ncell[1] * ncell[2]);
+                int rem = idx % (ncell[1] * ncell[2]);
+                int j = rem / ncell[2];
+                int k = rem % ncell[2];
+                Vecd p = mesh.CellPositionFromIndex({i, j, k});
+                if (initial_shape_.checkNotFar(p, lattice_spacing_) &&
+                    initial_shape_.checkContain(p))
                 {
-                    if (initial_shape_.checkContain(particle_position))
-                    {
-                        addPositionAndVolumetricMeasure(particle_position, particle_volume);
-                    }
+                    ++local_count;
                 }
             }
+        });
+
+    // Sum up per‐thread counts
+    size_t total_particles = std::accumulate(
+        tls_count.begin(), tls_count.end(), size_t(0));
+
+    // ——— 2) Pre‐allocate exactly needed space ———
+    position_.clear();           // your internal array
+    volumetric_measure_.clear(); // your internal volume array
+    position_.reserve(total_particles);
+    volumetric_measure_.reserve(total_particles);
+
+    // Actually resize so we can write by index
+    position_.resize(total_particles);
+    volumetric_measure_.resize(total_particles);
+
+    // ——— 3) Second pass: fill in place with atomic index ———
+    std::atomic<size_t> write_idx{0};
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, total_cells),
+        [&](auto &r)
+        {
+            for (size_t idx = r.begin(); idx < r.end(); ++idx)
+            {
+                int i = idx / (ncell[1] * ncell[2]);
+                int rem = idx % (ncell[1] * ncell[2]);
+                int j = rem / ncell[2];
+                int k = rem % ncell[2];
+                Vecd p = mesh.CellPositionFromIndex({i, j, k});
+                if (initial_shape_.checkNotFar(p, lattice_spacing_) &&
+                    initial_shape_.checkContain(p))
+                {
+                    size_t id = write_idx.fetch_add(1, std::memory_order_relaxed);
+                    position_[id] = p;
+                    volumetric_measure_[id] = volume;
+                }
+            }
+        });
+
+    std::cout << "finish ParticleGenerator: generated "
+              << total_particles << " particles\n";
 }
 //=================================================================================================//
 void ParticleGenerator<SurfaceParticles, Lattice>::prepareGeometricData()

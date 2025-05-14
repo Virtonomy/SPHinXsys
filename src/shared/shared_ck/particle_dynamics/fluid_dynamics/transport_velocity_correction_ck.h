@@ -1,5 +1,5 @@
-#ifndef TRANSPORT_VELOCITY_CORRECTION_CK_H
-#define TRANSPORT_VELOCITY_CORRECTION_CK_H
+#ifndef VIRTOSIM_TRANSPORT_VELOCITY_CORRECTION_CK_H_CA95CA0C_11B3_46CE_B9D1_26B01BEA8EEA
+#define VIRTOSIM_TRANSPORT_VELOCITY_CORRECTION_CK_H_CA95CA0C_11B3_46CE_B9D1_26B01BEA8EEA
 
 #include "base_fluid_dynamics.h"
 #include "interaction_ck.hpp"
@@ -43,7 +43,7 @@ class TransportVelocityCorrectionCK<Inner<UpdatePolicy, KernelCorrectionType, Re
     using ParticleScopeTypeKernel = typename ParticleScopeTypeCK<ParticleScopeType>::ComputingKernel;
 
   public:
-    explicit TransportVelocityCorrectionCK(Relation<Inner<Parameters...>> &inner_relation, Real coefficient = 0.2);
+    explicit TransportVelocityCorrectionCK(Relation<Inner<Parameters...>> &inner_relation, Real coefficient = 0.3);
 
     virtual ~TransportVelocityCorrectionCK() {}
 
@@ -136,6 +136,10 @@ using TransportVelocityCorrectionWallNoCorrectionBulkParticlesCK =
     TransportVelocityCorrectionCK<
         Inner<WithUpdate, NoKernelCorrectionCK, SingleResolution, NoLimiter, BulkParticles>,
         Contact<Wall, NoKernelCorrectionCK, SingleResolution, NoLimiter, BulkParticles>>;
+using TransportVelocityCorrectionWallNoCorrectionExcludeBufferParticlesCK =
+    TransportVelocityCorrectionCK<
+        Inner<WithUpdate, NoKernelCorrectionCK, SingleResolution, NoLimiter, ExcludeBufferParticles>,
+        Contact<Wall, NoKernelCorrectionCK, SingleResolution, NoLimiter, ExcludeBufferParticles>>;
 
 using TransportVelocityLimitedCorrectionCorrectedComplexBulkParticlesCK =
     TransportVelocityCorrectionCK<
@@ -154,4 +158,4 @@ using TransportVelocityCorrectedComplexBulkParticlesCKWithoutUpdate =
 } // namespace fluid_dynamics
 } // namespace SPH
 
-#endif // TRANSPORT_VELOCITY_CORRECTION_CK_H
+#endif // VIRTOSIM_TRANSPORT_VELOCITY_CORRECTION_CK_H_CA95CA0C_11B3_46CE_B9D1_26B01BEA8EEA

@@ -28,15 +28,16 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef ALL_SHARED_FLUID_DYNAMICS_CK_H
-#define ALL_SHARED_FLUID_DYNAMICS_CK_H
+#ifndef VIRTOSIM_ALL_SHARED_FLUID_DYNAMICS_CK_H_C523D6DE_95CC_424C_9FAF_5CBDEA3F47FA
+#define VIRTOSIM_ALL_SHARED_FLUID_DYNAMICS_CK_H_C523D6DE_95CC_424C_9FAF_5CBDEA3F47FA
 
 #include "acoustic_step_1st_half.hpp"
 #include "acoustic_step_2nd_half.hpp"
-#include "density_regularization.hpp"
 #include "all_fluid_boundary_condition_ck.h"
+#include "density_regularization.hpp"
 #include "fluid_time_step_ck.hpp"
+#include "renormalizationVW.hpp"
 #include "transport_velocity_correction_ck.hpp"
 #include "viscous_force.hpp"
 
-#endif // ALL_SHARED_FLUID_DYNAMICS_CK_H
+#endif // VIRTOSIM_ALL_SHARED_FLUID_DYNAMICS_CK_H_C523D6DE_95CC_424C_9FAF_5CBDEA3F47FA

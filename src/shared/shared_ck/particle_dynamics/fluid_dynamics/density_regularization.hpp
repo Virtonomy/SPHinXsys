@@ -1,5 +1,5 @@
-#ifndef DENSITY_REGULARIZATION_HPP
-#define DENSITY_REGULARIZATION_HPP
+#ifndef VIRTOSIM_DENSITY_REGULARIZATION_HPP_B3171E45_2B12_4908_A334_746052FFF514
+#define VIRTOSIM_DENSITY_REGULARIZATION_HPP_B3171E45_2B12_4908_A334_746052FFF514
 
 #include "density_regularization.h"
 
@@ -41,6 +41,7 @@ DensityRegularization<Inner<WithUpdate, RegularizationType, ParticleScopeType, P
     DensityRegularization(Relation<Inner<Parameters...>> &inner_relation)
     : DensityRegularization<Base, Inner<Parameters...>>(inner_relation),
       regularization_method_(this->particles_),
+      freestream_regularization_method_(this->particles_),
       within_scope_method_(this->particles_)
 {
 }
@@ -71,7 +72,10 @@ DensityRegularization<Inner<WithUpdate, RegularizationType, ParticleScopeType, P
                  DensityRegularization<Inner<WithUpdate, RegularizationType, ParticleScopeType, Parameters...>> &encloser)
     : DensityRegularization<Base, Inner<Parameters...>>::InteractKernel(ex_policy, encloser),
       regularization_(ex_policy, encloser.regularization_method_, *this),
-      particle_scope_(ex_policy, encloser.within_scope_method_, *this)
+      freestream_regularization_(ex_policy, encloser.freestream_regularization_method_, *this),
+      particle_scope_(ex_policy, encloser.within_scope_method_, *this),
+      Vol_(encloser.dv_Vol_->DelegatedData(ex_policy)),
+      mass_(encloser.dv_mass_->DelegatedData(ex_policy))
 {
 }
 //=================================================================================================//
@@ -79,8 +83,20 @@ template <typename RegularizationType, typename ParticleScopeType, typename... P
 void DensityRegularization<Inner<WithUpdate, RegularizationType, ParticleScopeType, Parameters...>>::
     UpdateKernel::update(size_t index_i, Real dt)
 {
+    // internal fluid: just take the raw sum
     if (this->particle_scope_(index_i))
-        this->rho_[index_i] = regularization_(this->rho_sum_[index_i]);
+    {
+        this->rho_[index_i] = freestream_regularization_(this->rho_sum_[index_i],
+                                                         this->rho_[index_i],
+                                                         index_i);
+    }
+    else
+    {
+        this->rho_[index_i] = regularization_(this->rho_sum_[index_i],
+                                              this->rho_[index_i],
+                                              index_i);
+    }
+    this->Vol_[index_i] = this->mass_[index_i] / this->rho_[index_i];
 }
 //=================================================================================================//
 template <typename... Parameters>
@@ -123,4 +139,4 @@ void DensityRegularization<Contact<Parameters...>>::
 //=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // DENSITY_REGULARIZATION_HPP
+#endif // VIRTOSIM_DENSITY_REGULARIZATION_HPP_B3171E45_2B12_4908_A334_746052FFF514

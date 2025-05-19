@@ -1,5 +1,5 @@
-#ifndef VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_E7912B3C_A90B_4405_A1D2_8257733BDA54
-#define VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_E7912B3C_A90B_4405_A1D2_8257733BDA54
+#ifndef VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_E8C5680D_1893_4C01_9039_7434EB94DEA1
+#define VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_E8C5680D_1893_4C01_9039_7434EB94DEA1
 
 #include "bidirectional_boundary_ck.h"
 
@@ -27,9 +27,9 @@ void BufferIndicationCK::UpdateKernel::update(size_t index_i, Real dt)
 template <class BoundaryConditionConfig, class ConditionType>
 template <typename... Args>
 BufferInflowInjectionCK<BoundaryConditionConfig, ConditionType>::
-    BufferInflowInjectionCK(AlignedBoxPartByCell &aligned_box_part,
+    BufferInflowInjectionCK(AlignedBoxByCell &aligned_box_part,
                             ParticleBuffer<Base> &buffer, Args &&...args)
-    : BaseLocalDynamics<AlignedBoxPartByCell>(aligned_box_part),
+    : BaseLocalDynamics<AlignedBoxByCell>(aligned_box_part),
       part_id_(aligned_box_part.getPartID()), buffer_(buffer),
       fluid_(DynamicCast<FluidType>(this, sph_body_.getBaseMaterial())),
       bc_config_(std::forward<Args>(args)...),
@@ -106,8 +106,8 @@ void BufferOutflowDeletionCK::UpdateKernel::update(size_t index_i, Real dt)
 template <class KernelCorrectionType, typename BoundaryConditionConfig, typename ConditionType>
 template <typename... Args>
 PressureVelocityCondition<KernelCorrectionType, BoundaryConditionConfig, ConditionType>::
-    PressureVelocityCondition(AlignedBoxPartByCell &aligned_box_part, Args &&...args)
-    : BaseLocalDynamics<AlignedBoxPartByCell>(aligned_box_part),
+    PressureVelocityCondition(AlignedBoxByCell &aligned_box_part, Args &&...args)
+    : BaseLocalDynamics<AlignedBoxByCell>(aligned_box_part),
       BaseStateCondition(this->particles_),
       sv_aligned_box_(aligned_box_part.svAlignedBox()),
       kernel_correction_method_(this->particles_),
@@ -138,8 +138,7 @@ void PressureVelocityCondition<KernelCorrectionType, BoundaryConditionConfig, Co
     if (aligned_box_->checkContain(pos_[index_i]))
     {
         Vecd corrected_residue = correction_kernel_(index_i) * zero_gradient_residue_[index_i];
-        Real test_p = condition_.getPressure(p_[index_i], *physical_time_);
-        vel_[index_i] -= dt * test_p /
+        vel_[index_i] -= dt * condition_.getPressure(p_[index_i], *physical_time_) /
                          rho_[index_i] * corrected_residue;
 
         Vecd frame_velocity = Vecd::Zero();
@@ -153,7 +152,7 @@ void PressureVelocityCondition<KernelCorrectionType, BoundaryConditionConfig, Co
 template <typename ExecutionPolicy, class KernelCorrectionType, class BoundaryConditionConfig, class ConditionType>
 template <typename... Args>
 BidirectionalBoundaryCK<ExecutionPolicy, KernelCorrectionType, BoundaryConditionConfig, ConditionType>::
-    BidirectionalBoundaryCK(AlignedBoxPartByCell &aligned_box_part,
+    BidirectionalBoundaryCK(AlignedBoxByCell &aligned_box_part,
                             ParticleBuffer<Base> &particle_buffer, Args &&...args)
     : tag_buffer_particles_(aligned_box_part),
       boundary_condition_(aligned_box_part, std::forward<Args>(args)...),
@@ -162,4 +161,4 @@ BidirectionalBoundaryCK<ExecutionPolicy, KernelCorrectionType, BoundaryCondition
 //=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_E7912B3C_A90B_4405_A1D2_8257733BDA54
+#endif // VIRTOSIM_BIDIRECTIONAL_BOUNDARY_CK_HPP_E8C5680D_1893_4C01_9039_7434EB94DEA1

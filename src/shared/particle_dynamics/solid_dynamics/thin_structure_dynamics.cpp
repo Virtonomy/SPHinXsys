@@ -167,7 +167,8 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
                 E = (s_next - s_prev) / (e_next - e_prev);
             }
             if (cauchy_stress.allFinite() == false || it == max_iterations)
-                throw std::runtime_error("[ShellStressRelaxationFirstHalf::initialization] Enforcing plane stress condition failed for particle with unsorted_id: " + std::to_string(unsorted_id_[index_i]) + "In object: " + sph_body_.getName() + "\nWith normal stress in the out-of-plane direction: " + std::to_string(cauchy_stress(2, 2)));
+                throw std::runtime_error("[ShellStressRelaxationFirstHalf::initialization] Enforcing plane stress condition failed for particle with unsorted_id: " + std::to_string(unsorted_id_[index_i]) + " in object: " + sph_body_.getName() + "\nWith normal stress in the out-of-plane direction: " + std::to_string(cauchy_stress(2, 2)));
+
         }
         /// Impact of including numerical damping in the algorithm above unclear
         /// Left here in absence of discriminating factors

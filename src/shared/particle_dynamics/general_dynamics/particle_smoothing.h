@@ -42,7 +42,7 @@ class ParticleSmoothing : public LocalDynamics, public DataDelegateInner
 {
   public:
     explicit ParticleSmoothing(BaseInnerRelation &inner_relation, const std::string &variable_name);
-    virtual ~ParticleSmoothing(){};
+    virtual ~ParticleSmoothing() {};
     void interaction(size_t index_i, Real dt = 0.0);
     void update(size_t index_i, Real dt = 0.0);
 
@@ -60,9 +60,10 @@ class ParticleSnapshotAverage : public LocalDynamics
 {
   public:
     explicit ParticleSnapshotAverage(SPHBody &sph_body, const std::string &variable_name);
-    virtual ~ParticleSnapshotAverage(){};
+    virtual ~ParticleSnapshotAverage() {};
     virtual void setupDynamics(Real dt = 0.0);
     void update(size_t index_i, Real dt = 0.0);
+    void reset();
 
   protected:
     size_t number_of_snapshot_ = 0;

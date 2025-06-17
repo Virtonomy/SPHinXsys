@@ -1,5 +1,5 @@
-#ifndef PARTICLE_SMOOTHING_HPP
-#define PARTICLE_SMOOTHING_HPP
+#ifndef VIRTOSIM_PARTICLE_SMOOTHING_HPP_A538B6F8_D164_4D2D_BC09_5A86A35FA6CD
+#define VIRTOSIM_PARTICLE_SMOOTHING_HPP_A538B6F8_D164_4D2D_BC09_5A86A35FA6CD
 
 #include "particle_smoothing.h"
 
@@ -57,5 +57,15 @@ void ParticleSnapshotAverage<VariableType>::update(size_t index_i, Real dt)
     averaged_variable_[index_i] += (target_variable_[index_i] - averaged_variable_[index_i]) / Real(number_of_snapshot_);
 }
 //=================================================================================================//
+template <typename VariableType>
+void ParticleSnapshotAverage<VariableType>::reset()
+{
+    number_of_snapshot_ = 0;
+    for (size_t index_i = 0; index_i < particles_->TotalRealParticles(); index_i++)
+    {
+        averaged_variable_[index_i] = VariableType(0);
+    }
+}
+//=================================================================================================//
 } // namespace SPH
-#endif // PARTICLE_SMOOTHING_HPP
+#endif // VIRTOSIM_PARTICLE_SMOOTHING_HPP_A538B6F8_D164_4D2D_BC09_5A86A35FA6CD

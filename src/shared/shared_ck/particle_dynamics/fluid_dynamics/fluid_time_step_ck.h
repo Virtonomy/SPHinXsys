@@ -33,6 +33,7 @@
 #define FLUID_TIME_STEP_CK_H
 
 #include "base_fluid_dynamics.h"
+#include "particle_functors_ck.h"
 #include "weakly_compressible_fluid.h"
 
 namespace SPH
@@ -197,6 +198,63 @@ class AdvectionStepClose : public LocalDynamics
   protected:
     DiscreteVariable<Vecd> *dv_pos_, *dv_dpos_;
 };
+//--------------------------------------------------------------------------------------
+template <class ParticleScopeType, class FluidType = WeaklyCompressibleFluid>
+class AcousticTimeStepCK_v2 : public LocalDynamicsReduce<ReduceMax>
+{
+    using EosKernel = typename FluidType::EosKernel;
+    using ParticleScopeTypeKernel = typename ParticleScopeTypeCK<ParticleScopeType>::ComputingKernel;
+
+  public:
+    explicit AcousticTimeStepCK_v2(SPHBody &sph_body, Real acousticCFL = 0.6);
+    virtual ~AcousticTimeStepCK_v2() {};
+
+    class FinishDynamics
+    {
+        Real h_min_, acousticCFL_;
+
+      public:
+        using OutputType = Real;
+        FinishDynamics(AcousticTimeStepCK_v2<ParticleScopeType, FluidType> &encloser);
+        Real Result(Real reduced_value);
+    };
+
+    class ReduceKernel
+    {
+      public:
+        template <class ExecutionPolicy>
+        ReduceKernel(const ExecutionPolicy &ex_policy, AcousticTimeStepCK_v2<ParticleScopeType, FluidType> &encloser);
+
+        Real reduce(size_t index_i, Real dt = 0.0)
+        {
+            if (this->within_scope_(index_i))
+            {
+                Real acceleration_scale = 4.0 * h_min_ *
+                                          (force_[index_i] + force_prior_[index_i]).norm() / mass_[index_i];
+                return SMAX(eos_.getSoundSpeed(p_[index_i], rho_[index_i]) + vel_[index_i].norm(), acceleration_scale);
+            }
+            return 0.0; // Outside the scope, return zero to not affect the max reduction
+        };
+
+      protected:
+        EosKernel eos_;
+        Real *rho_, *p_, *mass_;
+        Vecd *vel_, *force_, *force_prior_;
+        Real h_min_;
+        ParticleScopeTypeKernel within_scope_;
+    };
+
+  protected:
+    FluidType &fluid_;
+    DiscreteVariable<Real> *dv_rho_, *dv_p_, *dv_mass_;
+    DiscreteVariable<Vecd> *dv_vel_, *dv_force_, *dv_force_prior_;
+    Real h_min_;
+    Real acousticCFL_;
+    ParticleScopeTypeCK<ParticleScopeType> within_scope_method_;
+};
+
+using AcousticTimeStepAllCK_v2 = AcousticTimeStepCK_v2<AllParticles>;
+using AcousticTimeStepExcludeBufferCK_v2 = AcousticTimeStepCK_v2<ExcludeBufferParticles>;
 } // namespace fluid_dynamics
 } // namespace SPH
 #endif // FLUID_TIME_STEP_CK_H

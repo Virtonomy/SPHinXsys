@@ -1,5 +1,5 @@
-#ifndef FLUID_TIME_STEP_CK_HPP
-#define FLUID_TIME_STEP_CK_HPP
+#ifndef VIRTOSIM_FLUID_TIME_STEP_CK_HPP_C05ED276_747F_4DEA_B3DE_36DD727F69EC
+#define VIRTOSIM_FLUID_TIME_STEP_CK_HPP_C05ED276_747F_4DEA_B3DE_36DD727F69EC
 
 #include "fluid_time_step_ck.h"
 
@@ -61,6 +61,47 @@ AdvectionStepClose::UpdateKernel::
     : pos_(encloser.dv_pos_->DelegatedData(ex_policy)),
       dpos_(encloser.dv_dpos_->DelegatedData(ex_policy)) {}
 //=================================================================================================//
+template <class ParticleScopeType, class FluidType>
+AcousticTimeStepCK_v2<ParticleScopeType, FluidType>::AcousticTimeStepCK_v2(SPHBody &sph_body, Real acousticCFL)
+    : LocalDynamicsReduce<ReduceMax>(sph_body),
+      fluid_(DynamicCast<FluidType>(this, particles_->getBaseMaterial())),
+      dv_rho_(particles_->getVariableByName<Real>("Density")),
+      dv_p_(particles_->getVariableByName<Real>("Pressure")),
+      dv_mass_(particles_->getVariableByName<Real>("Mass")),
+      dv_vel_(particles_->getVariableByName<Vecd>("Velocity")),
+      dv_force_(particles_->getVariableByName<Vecd>("Force")),
+      dv_force_prior_(particles_->getVariableByName<Vecd>("ForcePrior")),
+      h_min_(sph_body.getSPHAdaptation().MinimumSmoothingLength()),
+      acousticCFL_(acousticCFL),
+      within_scope_method_(this->particles_) {}
+//=================================================================================================//
+template <class ParticleScopeType, class FluidType>
+AcousticTimeStepCK_v2<ParticleScopeType, FluidType>::FinishDynamics::
+    FinishDynamics(AcousticTimeStepCK_v2<ParticleScopeType, FluidType> &encloser)
+    : h_min_(encloser.h_min_), acousticCFL_(encloser.acousticCFL_) {}
+//=================================================================================================//
+template <class ParticleScopeType, class FluidType>
+Real AcousticTimeStepCK_v2<ParticleScopeType, FluidType>::FinishDynamics::Result(Real reduced_value)
+{
+    // since the particle does not change its configuration in the acoustic time steps
+    // I chose a time-step size according to Eulerian method
+    return acousticCFL_ * h_min_ / (reduced_value + TinyReal);
+}
+//=================================================================================================//
+template <class ParticleScopeType, class FluidType>
+template <class ExecutionPolicy>
+AcousticTimeStepCK_v2<ParticleScopeType, FluidType>::ReduceKernel::ReduceKernel(
+    const ExecutionPolicy &ex_policy, AcousticTimeStepCK_v2<ParticleScopeType, FluidType> &encloser)
+    : eos_(encloser.fluid_),
+      rho_(encloser.dv_rho_->DelegatedData(ex_policy)),
+      p_(encloser.dv_p_->DelegatedData(ex_policy)),
+      mass_(encloser.dv_mass_->DelegatedData(ex_policy)),
+      vel_(encloser.dv_vel_->DelegatedData(ex_policy)),
+      force_(encloser.dv_force_->DelegatedData(ex_policy)),
+      force_prior_(encloser.dv_force_prior_->DelegatedData(ex_policy)),
+      h_min_(encloser.h_min_),
+      within_scope_(ex_policy, encloser.within_scope_method_, *this) {}
+//=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // FLUID_TIME_STEP_CK_HPP
+#endif // VIRTOSIM_FLUID_TIME_STEP_CK_HPP_C05ED276_747F_4DEA_B3DE_36DD727F69EC

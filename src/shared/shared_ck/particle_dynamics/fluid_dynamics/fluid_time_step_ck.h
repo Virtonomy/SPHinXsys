@@ -29,8 +29,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef FLUID_TIME_STEP_CK_H
-#define FLUID_TIME_STEP_CK_H
+#ifndef VIRTOSIM_FLUID_TIME_STEP_CK_H_DD3DCF8C_941B_4FAA_A5D4_6E2800BFD41F
+#define VIRTOSIM_FLUID_TIME_STEP_CK_H_DD3DCF8C_941B_4FAA_A5D4_6E2800BFD41F
 
 #include "base_fluid_dynamics.h"
 #include "particle_functors_ck.h"
@@ -255,6 +255,67 @@ class AcousticTimeStepCK_v2 : public LocalDynamicsReduce<ReduceMax>
 
 using AcousticTimeStepAllCK_v2 = AcousticTimeStepCK_v2<AllParticles>;
 using AcousticTimeStepExcludeBufferCK_v2 = AcousticTimeStepCK_v2<ExcludeBufferParticles>;
+
+template <class ParticleScopeType>
+class AdvectionTimeStepCK_v2 : public LocalDynamicsReduce<ReduceMax>
+{
+    using ParticleScopeTypeKernel = typename ParticleScopeTypeCK<ParticleScopeType>::ComputingKernel;
+
+  public:
+    AdvectionTimeStepCK_v2(SPHBody &sph_body, Real U_ref, Real advectionCFL = 0.25);
+    virtual ~AdvectionTimeStepCK_v2() {};
+
+    class FinishDynamics
+    {
+        Real h_min_;
+        Real speed_ref_, advectionCFL_;
+
+      public:
+        using OutputType = Real;
+        FinishDynamics(AdvectionTimeStepCK_v2<ParticleScopeType> &encloser);
+        Real Result(Real reduced_value);
+    };
+
+    class ReduceKernel
+    {
+      public:
+        template <class ExecutionPolicy>
+        ReduceKernel(const ExecutionPolicy &ex_policy, AdvectionTimeStepCK_v2<ParticleScopeType> &encloser)
+            : h_min_(encloser.h_min_),
+              mass_(encloser.dv_mass_->DelegatedData(ex_policy)),
+              vel_(encloser.dv_vel_->DelegatedData(ex_policy)),
+              force_(encloser.dv_force_->DelegatedData(ex_policy)),
+              force_prior_(encloser.dv_force_prior_->DelegatedData(ex_policy)),
+              within_scope_(ex_policy, encloser.within_scope_method_, *this){};
+
+        Real reduce(size_t index_i, Real dt)
+        {
+            if (this->within_scope_(index_i))
+            {
+                Real acceleration_scale =
+                    4.0 * h_min_ * (force_[index_i] + force_prior_[index_i]).norm() / mass_[index_i];
+                return SMAX(vel_[index_i].squaredNorm(), acceleration_scale);
+            }
+            return 0.0; // Outside the scope, return zero to not affect the max reduction
+        };
+
+      protected:
+        Real h_min_;
+        Real *mass_;
+        Vecd *vel_, *force_, *force_prior_;
+        ParticleScopeTypeKernel within_scope_;
+    };
+
+  protected:
+    Real h_min_;
+    Real speed_ref_, advectionCFL_;
+    DiscreteVariable<Real> *dv_mass_;
+    DiscreteVariable<Vecd> *dv_vel_, *dv_force_, *dv_force_prior_;
+    ParticleScopeTypeCK<ParticleScopeType> within_scope_method_;
+};
+
+using AdvectiveTimeStepAllCK_v2 = AdvectionTimeStepCK_v2<AllParticles>;
+using AdvectiveTimeStepExcludeBufferCK_v2 = AdvectionTimeStepCK_v2<ExcludeBufferParticles>;
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // FLUID_TIME_STEP_CK_H
+#endif // VIRTOSIM_FLUID_TIME_STEP_CK_H_DD3DCF8C_941B_4FAA_A5D4_6E2800BFD41F

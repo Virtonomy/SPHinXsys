@@ -1,5 +1,5 @@
-#ifndef VIRTOSIM_FLUID_TIME_STEP_CK_HPP_C05ED276_747F_4DEA_B3DE_36DD727F69EC
-#define VIRTOSIM_FLUID_TIME_STEP_CK_HPP_C05ED276_747F_4DEA_B3DE_36DD727F69EC
+#ifndef VIRTOSIM_FLUID_TIME_STEP_CK_HPP_D55BD858_6531_4A31_A05A_144EFCE2CBA3
+#define VIRTOSIM_FLUID_TIME_STEP_CK_HPP_D55BD858_6531_4A31_A05A_144EFCE2CBA3
 
 #include "fluid_time_step_ck.h"
 
@@ -102,6 +102,29 @@ AcousticTimeStepCK_v2<ParticleScopeType, FluidType>::ReduceKernel::ReduceKernel(
       h_min_(encloser.h_min_),
       within_scope_(ex_policy, encloser.within_scope_method_, *this) {}
 //=================================================================================================//
+template <class ParticleScopeType>
+AdvectionTimeStepCK_v2<ParticleScopeType>::
+    AdvectionTimeStepCK_v2(SPHBody &sph_body, Real U_ref, Real advectionCFL)
+    : LocalDynamicsReduce<ReduceMax>(sph_body),
+      h_min_(sph_body.getSPHAdaptation().MinimumSmoothingLength()),
+      speed_ref_(U_ref), advectionCFL_(advectionCFL),
+      dv_mass_(particles_->getVariableByName<Real>("Mass")),
+      dv_vel_(particles_->getVariableByName<Vecd>("Velocity")),
+      dv_force_(particles_->getVariableByName<Vecd>("Force")),
+      dv_force_prior_(particles_->getVariableByName<Vecd>("ForcePrior")),
+      within_scope_method_(this->particles_) {}
+//=================================================================================================//
+template <class ParticleScopeType>
+AdvectionTimeStepCK_v2<ParticleScopeType>::FinishDynamics::FinishDynamics(AdvectionTimeStepCK_v2<ParticleScopeType> &encloser)
+    : h_min_(encloser.h_min_), speed_ref_(encloser.speed_ref_),
+      advectionCFL_(encloser.advectionCFL_) {}
+//=================================================================================================//
+template <class ParticleScopeType>
+Real AdvectionTimeStepCK_v2<ParticleScopeType>::FinishDynamics::Result(Real reduced_value)
+{
+    return advectionCFL_ * h_min_ / (SMAX(std::sqrt(reduced_value), speed_ref_) + TinyReal);
+}
+//=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // VIRTOSIM_FLUID_TIME_STEP_CK_HPP_C05ED276_747F_4DEA_B3DE_36DD727F69EC
+#endif // VIRTOSIM_FLUID_TIME_STEP_CK_HPP_D55BD858_6531_4A31_A05A_144EFCE2CBA3

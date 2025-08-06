@@ -31,15 +31,16 @@ Real BarAcousticTimeStepSize::reduce(size_t index_i, Real dt)
 {
     // Since the particle does not change its configuration in pressure relaxation step,
     // I chose a time-step size according to Eulerian method.
-    Real time_setp_0 = SMIN((Real)sqrt(smoothing_length_ / ((acc_[index_i] + acc_prior_[index_i]).norm() + TinyReal)),
-                            smoothing_length_ / (c0_ + vel_[index_i].norm()));
-    Real time_setp_1 = SMIN((Real)sqrt(1.0 / (dangular_vel_dt_[index_i].norm() + TinyReal)),
-                            Real(1.0) / (angular_vel_[index_i].norm() + TinyReal));
-    Real time_setp_2 = smoothing_length_ *
+    Real max_t_b_h = SMAX(smoothing_length_, thickness_[index_i], width_[index_i]);
+    Real max_acc = (acc_[index_i] + acc_prior_[index_i]).norm() + dangular_vel_dt_[index_i].norm() * max_t_b_h + TinyReal;
+    Real max_vel = vel_[index_i].norm() + angular_vel_[index_i].norm() * max_t_b_h + TinyReal;
+    Real time_setp_0 = SMIN((Real)sqrt(smoothing_length_ / max_acc),
+                            smoothing_length_ / max_vel);
+    Real time_setp_1 = smoothing_length_ *
                        (Real)sqrt(rho0_ * (1.0 - nu_ * nu_) / E0_ /
                                   (2.0 + (Pi * Pi / 12.0) * (1.0 - nu_) *
                                              (1.0 + 1.5 * pow(smoothing_length_ / thickness_[index_i], 2))));
-    return CFL_ * SMIN(time_setp_0, time_setp_1, time_setp_2);
+    return CFL_ * SMIN(time_setp_0, time_setp_1);
 }
 //=================================================================================================//
 BarCorrectConfiguration::

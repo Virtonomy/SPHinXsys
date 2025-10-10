@@ -45,7 +45,7 @@ class BaseIntegration1stHalfCorrect : public BaseIntegration1stHalf<RiemannSolve
 {
   public:
     explicit BaseIntegration1stHalfCorrect(BaseInnerRelation &inner_relation);
-    virtual ~BaseIntegration1stHalfCorrect(){};
+    virtual ~BaseIntegration1stHalfCorrect() {};
 
     using BaseIntegration1stHalf<RiemannSolverType>::BaseIntegration1stHalf;
     void initialization(size_t index_i, Real dt);
@@ -58,6 +58,25 @@ class BaseIntegration1stHalfCorrect : public BaseIntegration1stHalf<RiemannSolve
 using Integration1stHalfCorrect = BaseIntegration1stHalfCorrect<NoRiemannSolver>;
 /** define the mostly used pressure relaxation scheme using Riemann solver */
 using Integration1stHalfRiemannCorrect = BaseIntegration1stHalfCorrect<AcousticRiemannSolver>;
+
+/**
+ * @class BaseIntegration2ndHalfCorrect
+ */
+template <class RiemannSolverType>
+class BaseIntegration2ndHalfCorrect : public BaseIntegration2ndHalf<RiemannSolverType>
+{
+  public:
+    explicit BaseIntegration2ndHalfCorrect(BaseInnerRelation &inner_relation);
+
+    using BaseIntegration2ndHalf<RiemannSolverType>::BaseIntegration2ndHalf;
+    void interaction(size_t index_i, Real dt);
+
+  protected:
+    StdLargeVec<Matd> &B_;
+};
+using Integration2ndHalfCorrect = BaseIntegration2ndHalfCorrect<NoRiemannSolver>;
+/** define the mostly used pressure relaxation scheme using Riemann solver */
+using Integration2ndHalfRiemannCorrect = BaseIntegration2ndHalfCorrect<AcousticRiemannSolver>;
 } // namespace fluid_dynamics
 } // namespace SPH
 #endif // FLUID_DYNAMICS_INNER_CORRECTION_H

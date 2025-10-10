@@ -49,12 +49,29 @@ class BaseIntegration1stHalfCorrectWithWall : public InteractionWithWall<BaseInt
     template <typename... Args>
     BaseIntegration1stHalfCorrectWithWall(Args &&...args)
         : InteractionWithWall<BaseIntegration1stHalfCorrectType>(std::forward<Args>(args)...){};
-    virtual ~BaseIntegration1stHalfCorrectWithWall(){};
+    virtual ~BaseIntegration1stHalfCorrectWithWall() {};
     void interaction(size_t index_i, Real dt = 0.0);
 };
 
 using Integration1stHalfCorrectWithWall = BaseIntegration1stHalfCorrectWithWall<Integration1stHalfCorrect>;
 using Integration1stHalfRiemannCorrectWithWall = BaseIntegration1stHalfCorrectWithWall<Integration1stHalfRiemannCorrect>;
+
+/**
+ * @class BaseIntegration1stHalfCorrectWithWall
+ * @brief  template class pressure relaxation scheme together with wall boundary
+ */
+template <class BaseIntegration2ndHalfCorrectType>
+class BaseIntegration2ndHalfCorrectWithWall : public InteractionWithWall<BaseIntegration2ndHalfCorrectType>
+{
+  public:
+    template <typename... Args>
+    BaseIntegration2ndHalfCorrectWithWall(Args &&...args)
+        : InteractionWithWall<BaseIntegration2ndHalfCorrectType>(std::forward<Args>(args)...){};
+    void interaction(size_t index_i, Real dt = 0.0);
+};
+
+using Integration2ndHalfCorrectWithWall = BaseIntegration2ndHalfCorrectWithWall<Integration2ndHalfCorrect>;
+using Integration2ndHalfRiemannCorrectWithWall = BaseIntegration2ndHalfCorrectWithWall<Integration2ndHalfRiemannCorrect>;
 } // namespace fluid_dynamics
 } // namespace SPH
 #endif // FLUID_DYNAMICS_COMPLEX_CORRECTION_H

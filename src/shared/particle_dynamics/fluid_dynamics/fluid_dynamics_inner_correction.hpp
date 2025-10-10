@@ -41,5 +41,30 @@ void BaseIntegration1stHalfCorrect<RiemannSolverType>::interaction(size_t index_
     this->drho_dt_[index_i] = rho_dissipation * this->rho_[index_i];
 }
 //=================================================================================================//
+template <class RiemannSolverType>
+BaseIntegration2ndHalfCorrect<RiemannSolverType>::BaseIntegration2ndHalfCorrect(BaseInnerRelation &inner_relation)
+    : BaseIntegration2ndHalf<RiemannSolverType>(inner_relation),
+      B_(*this->particles_->template registerSharedVariable<Matd>("CorrectionMatrix", Matd::Identity())) {}
+//=================================================================================================//
+template <class RiemannSolverType>
+void BaseIntegration2ndHalfCorrect<RiemannSolverType>::interaction(size_t index_i, Real dt)
+{
+    Real density_change_rate(0);
+    Vecd p_dissipation = Vecd::Zero();
+    const Neighborhood &inner_neighborhood = this->inner_configuration_[index_i];
+    for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
+    {
+        size_t index_j = inner_neighborhood.j_[n];
+        const Vecd e_ij_corrected = B_[index_i] * inner_neighborhood.e_ij_[n];
+        Real dW_ijV_j = inner_neighborhood.dW_ijV_j_[n];
+
+        Real u_jump = (this->vel_[index_i] - this->vel_[index_j]).dot(e_ij_corrected);
+        density_change_rate += u_jump * dW_ijV_j;
+        p_dissipation += this->riemann_solver_.DissipativePJump(u_jump) * dW_ijV_j * e_ij_corrected;
+    }
+    this->drho_dt_[index_i] += density_change_rate * this->rho_[index_i];
+    this->acc_[index_i] = p_dissipation / this->rho_[index_i];
+}
+//=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH

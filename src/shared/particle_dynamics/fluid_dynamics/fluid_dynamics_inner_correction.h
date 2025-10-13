@@ -48,11 +48,9 @@ class BaseIntegration1stHalfCorrect : public BaseIntegration1stHalf<RiemannSolve
     virtual ~BaseIntegration1stHalfCorrect() {};
 
     using BaseIntegration1stHalf<RiemannSolverType>::BaseIntegration1stHalf;
-    void initialization(size_t index_i, Real dt);
     void interaction(size_t index_i, Real dt);
 
   protected:
-    StdLargeVec<Matd> p_B_;
     StdLargeVec<Matd> &B_;
 };
 using Integration1stHalfCorrect = BaseIntegration1stHalfCorrect<NoRiemannSolver>;

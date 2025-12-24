@@ -43,35 +43,37 @@ Vecd TotalForceFromFluid::reduce(size_t index_i, Real dt)
 }
 //=================================================================================================//
 InitializeDisplacement::
-    InitializeDisplacement(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp)
+    InitializeDisplacement(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp, StdLargeVec<Vecd> &vel_temp)
     : LocalDynamics(sph_body), ElasticSolidDataSimple(sph_body),
-      pos_temp_(pos_temp), pos_(particles_->pos_) {}
+      pos_temp_(pos_temp), pos_(particles_->pos_), vel_temp_(vel_temp) {}
 //=================================================================================================//
 void InitializeDisplacement::update(size_t index_i, Real dt)
 {
     pos_temp_[index_i] = pos_[index_i];
+    vel_temp_[index_i] = particles_->vel_[index_i];
 }
 //=================================================================================================//
 UpdateAverageVelocityAndAcceleration::
-    UpdateAverageVelocityAndAcceleration(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp)
+    UpdateAverageVelocityAndAcceleration(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp, StdLargeVec<Vecd> &vel_temp)
     : LocalDynamics(sph_body), ElasticSolidDataSimple(sph_body),
       pos_temp_(pos_temp), pos_(particles_->pos_),
       vel_ave_(particles_->vel_ave_),
-      acc_ave_(particles_->acc_ave_) {}
+      acc_ave_(particles_->acc_ave_),
+      vel_temp_(vel_temp) {}
 //=================================================================================================//
 void UpdateAverageVelocityAndAcceleration::update(size_t index_i, Real dt)
 {
-    Vecd updated_vel_ave = (pos_[index_i] - pos_temp_[index_i]) / (dt + Eps);
-    acc_ave_[index_i] = (updated_vel_ave - vel_ave_[index_i]) / (dt + Eps);
-    vel_ave_[index_i] = updated_vel_ave;
+    vel_ave_[index_i] = (pos_[index_i] - pos_temp_[index_i]) / (dt + Eps);
+    acc_ave_[index_i] = (particles_->vel_[index_i] - vel_temp_[index_i]) / (dt + Eps);
 }
 //=================================================================================================//
 AverageVelocityAndAcceleration::
     AverageVelocityAndAcceleration(SolidBody &solid_body)
-    : initialize_displacement_(solid_body, pos_temp_),
-      update_averages_(solid_body, pos_temp_)
+    : initialize_displacement_(solid_body, pos_temp_, vel_temp_),
+      update_averages_(solid_body, pos_temp_, vel_temp_)
 {
     solid_body.getBaseParticles().registerVariable(pos_temp_, "TemporaryPosition");
+    solid_body.getBaseParticles().registerVariable(vel_temp_, "TemporaryVelocity");
 }
 //=================================================================================================//
 } // namespace solid_dynamics

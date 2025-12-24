@@ -26,8 +26,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef FLUID_STRUCTURE_INTERACTION_H
-#define FLUID_STRUCTURE_INTERACTION_H
+#ifndef VIRTOSIM_FLUID_STRUCTURE_INTERACTION_H_B90A2B8A_C7B5_4DD9_B3B0_593829F49705
+#define VIRTOSIM_FLUID_STRUCTURE_INTERACTION_H_B90A2B8A_C7B5_4DD9_B3B0_593829F49705
 
 #include "all_particle_dynamics.h"
 #include "base_material.h"
@@ -50,7 +50,7 @@ class BaseForceFromFluid : public LocalDynamics, public FSIContactData
 {
   public:
     explicit BaseForceFromFluid(BaseContactRelation &contact_relation);
-    virtual ~BaseForceFromFluid(){};
+    virtual ~BaseForceFromFluid() {};
     StdLargeVec<Vecd> &getForceFromFluid() { return force_from_fluid_; };
 
   protected:
@@ -67,7 +67,7 @@ class ViscousForceFromFluid : public BaseForceFromFluid
 {
   public:
     explicit ViscousForceFromFluid(BaseContactRelation &contact_relation);
-    virtual ~ViscousForceFromFluid(){};
+    virtual ~ViscousForceFromFluid() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -119,7 +119,7 @@ class BasePressureForceAccelerationFromFluid : public BaseForceFromFluid
     {
         particles_->registerVariable(force_from_fluid_, "PressureForceFromFluid");
     };
-    virtual ~BasePressureForceAccelerationFromFluid(){};
+    virtual ~BasePressureForceAccelerationFromFluid() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -140,7 +140,7 @@ class BasePressureForceAccelerationFromFluid : public BaseForceFromFluid
                 Real face_wall_external_acceleration = (acc_prior_k[index_j] - acc_ave_[index_i]).dot(e_ij);
                 Real p_in_wall = p_k[index_j] + rho_n_k[index_j] * r_ij * SMAX(Real(0), face_wall_external_acceleration);
                 Real u_jump = 2.0 * (vel_k[index_j] - vel_ave_[index_i]).dot(n_[index_i]);
-                force += (riemann_solvers_k.DissipativePJump(u_jump) * n_[index_i] - (p_in_wall + p_k[index_j]) * e_ij) * Vol_[index_i] * contact_neighborhood.dW_ijV_j_[n];
+                force += (-riemann_solvers_k.DissipativePJump(u_jump) * n_[index_i] - (p_in_wall + p_k[index_j]) * e_ij) * Vol_[index_i] * contact_neighborhood.dW_ijV_j_[n];
             }
         }
         force_from_fluid_[index_i] = force;
@@ -188,7 +188,7 @@ class BaseAllForceAccelerationFromFluid : public PressureForceType
     {
         this->particles_->registerVariable(this->force_from_fluid_, "AllForceFromFluid");
     };
-    virtual ~BaseAllForceAccelerationFromFluid(){};
+    virtual ~BaseAllForceAccelerationFromFluid() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -225,7 +225,7 @@ class TotalForceFromFluid : public LocalDynamicsReduce<Vecd, ReduceSum<Vecd>>
         quantity_name_ = force_name;
     };
 
-    virtual ~TotalForceFromFluid(){};
+    virtual ~TotalForceFromFluid() {};
     virtual void setupDynamics(Real dt = 0.0) override;
     Vecd reduce(size_t index_i, Real dt = 0.0);
 };
@@ -240,10 +240,11 @@ class InitializeDisplacement : public LocalDynamics, public ElasticSolidDataSimp
 {
   protected:
     StdLargeVec<Vecd> &pos_temp_, &pos_;
+    StdLargeVec<Vecd> &vel_temp_;
 
   public:
-    explicit InitializeDisplacement(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp);
-    virtual ~InitializeDisplacement(){};
+    explicit InitializeDisplacement(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp, StdLargeVec<Vecd> &vel_temp);
+    virtual ~InitializeDisplacement() {};
 
     void update(size_t index_i, Real dt = 0.0);
 };
@@ -258,10 +259,11 @@ class UpdateAverageVelocityAndAcceleration : public LocalDynamics, public Elasti
 {
   protected:
     StdLargeVec<Vecd> &pos_temp_, &pos_, &vel_ave_, &acc_ave_;
+    StdLargeVec<Vecd> &vel_temp_;
 
   public:
-    explicit UpdateAverageVelocityAndAcceleration(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp);
-    virtual ~UpdateAverageVelocityAndAcceleration(){};
+    explicit UpdateAverageVelocityAndAcceleration(SPHBody &sph_body, StdLargeVec<Vecd> &pos_temp, StdLargeVec<Vecd> &vel_temp);
+    virtual ~UpdateAverageVelocityAndAcceleration() {};
 
     void update(size_t index_i, Real dt = 0.0);
 };
@@ -276,14 +278,15 @@ class AverageVelocityAndAcceleration
 {
   protected:
     StdLargeVec<Vecd> pos_temp_;
+    StdLargeVec<Vecd> vel_temp_;
 
   public:
     SimpleDynamics<InitializeDisplacement> initialize_displacement_;
     SimpleDynamics<UpdateAverageVelocityAndAcceleration> update_averages_;
 
     explicit AverageVelocityAndAcceleration(SolidBody &solid_body);
-    ~AverageVelocityAndAcceleration(){};
+    ~AverageVelocityAndAcceleration() {};
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // FLUID_STRUCTURE_INTERACTION_H
+#endif // VIRTOSIM_FLUID_STRUCTURE_INTERACTION_H_B90A2B8A_C7B5_4DD9_B3B0_593829F49705

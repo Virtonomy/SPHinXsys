@@ -37,33 +37,5 @@ void BaseIntegration1stHalfCorrectWithWall<BaseIntegration1stHalfCorrectType>::i
     this->drho_dt_[index_i] += rho_dissipation * this->rho_[index_i];
 }
 //=================================================================================================//
-template <class BaseIntegration2ndHalfCorrectType>
-void BaseIntegration2ndHalfCorrectWithWall<BaseIntegration2ndHalfCorrectType>::interaction(size_t index_i, Real dt)
-{
-    BaseIntegration2ndHalfCorrectType::interaction(index_i, dt);
-
-    Real density_change_rate = 0.0;
-    Vecd grad_p_dissipation = Vecd::Zero();
-    for (size_t k = 0; k < FluidWallData::contact_configuration_.size(); ++k)
-    {
-        StdLargeVec<Vecd> &vel_ave_k = *(this->wall_vel_ave_[k]);
-        StdLargeVec<Vecd> &n_k = *(this->wall_n_[k]);
-        Neighborhood &wall_neighborhood = (*FluidWallData::contact_configuration_[k])[index_i];
-        for (size_t n = 0; n != wall_neighborhood.current_size_; ++n)
-        {
-            size_t index_j = wall_neighborhood.j_[n];
-            Vecd e_ij_corrected = this->B_[index_i] * wall_neighborhood.e_ij_[n];
-            Real dW_ijV_j = wall_neighborhood.dW_ijV_j_[n];
-
-            Vecd vel_in_wall = 2.0 * vel_ave_k[index_j] - this->vel_[index_i];
-            density_change_rate += (this->vel_[index_i] - vel_in_wall).dot(e_ij_corrected) * dW_ijV_j;
-            Real u_jump = 2.0 * (this->vel_[index_i] - vel_ave_k[index_j]).dot(n_k[index_j]);
-            grad_p_dissipation += this->riemann_solver_.DissipativePJump(u_jump) * dW_ijV_j * n_k[index_j];
-        }
-    }
-    this->drho_dt_[index_i] += density_change_rate * this->rho_[index_i];
-    this->acc_[index_i] += grad_p_dissipation / this->rho_[index_i];
-}
-//=================================================================================================//
 } // namespace fluid_dynamics
 } // namespace SPH

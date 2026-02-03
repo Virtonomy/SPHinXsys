@@ -182,7 +182,7 @@ class MultilevelMesh : public MeshFieldType
             mesh_level_ptr_vector_keeper_
                 .template createPtr<CoarsestMeshType>(tentative_bounds, reference_spacing, std::forward<Args>(args)...));
 
-        for (size_t level = 1; level != total_levels_; ++level)
+        for (size_t level = 1; level < total_levels_; ++level)
         {
             /** all mesh levels aligned at the lower bound of tentative_bounds */
             mesh_levels_.push_back(

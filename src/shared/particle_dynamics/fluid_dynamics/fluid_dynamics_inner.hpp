@@ -234,7 +234,7 @@ void BaseIntegration1stHalf<RiemannSolverType>::
         acceleration -= (p_[index_i] + p_[index_j]) * dW_ijV_j * e_ij;
         rho_dissipation += riemann_solver_.DissipativeUJump(p_[index_i] - p_[index_j]) * dW_ijV_j;
     }
-    acc_[index_i] += acceleration / rho_[index_i];
+    acc_[index_i] += acceleration / rho_[index_i] / gamma_[index_i];
     drho_dt_[index_i] = rho_dissipation * rho_[index_i];
 }
 //=================================================================================================//
@@ -273,7 +273,7 @@ void BaseIntegration2ndHalf<RiemannSolverType>::
         density_change_rate += u_jump * dW_ijV_j;
         p_dissipation += riemann_solver_.DissipativePJump(u_jump) * dW_ijV_j * e_ij;
     }
-    drho_dt_[index_i] += density_change_rate * rho_[index_i];
+    drho_dt_[index_i] += density_change_rate * rho_[index_i] / gamma_[index_i];
     acc_[index_i] = p_dissipation / rho_[index_i];
 };
 //=================================================================================================//

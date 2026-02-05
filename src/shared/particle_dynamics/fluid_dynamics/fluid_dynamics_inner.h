@@ -56,7 +56,7 @@ class FluidInitialCondition : public LocalDynamics, public FluidDataSimple
 {
   public:
     explicit FluidInitialCondition(SPHBody &sph_body);
-    virtual ~FluidInitialCondition(){};
+    virtual ~FluidInitialCondition() {};
 
   protected:
     StdLargeVec<Vecd> &pos_, &vel_;
@@ -70,7 +70,7 @@ class BaseDensitySummationInner : public LocalDynamics, public FluidDataInner
 {
   public:
     explicit BaseDensitySummationInner(BaseInnerRelation &inner_relation);
-    virtual ~BaseDensitySummationInner(){};
+    virtual ~BaseDensitySummationInner() {};
     void update(size_t index_i, Real dt = 0.0);
 
   protected:
@@ -86,7 +86,7 @@ class DensitySummationInner : public BaseDensitySummationInner
 {
   public:
     explicit DensitySummationInner(BaseInnerRelation &inner_relation);
-    virtual ~DensitySummationInner(){};
+    virtual ~DensitySummationInner() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 
@@ -102,7 +102,7 @@ class DensitySummationInnerAdaptive : public BaseDensitySummationInner
 {
   public:
     explicit DensitySummationInnerAdaptive(BaseInnerRelation &inner_relation);
-    virtual ~DensitySummationInnerAdaptive(){};
+    virtual ~DensitySummationInnerAdaptive() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 
@@ -120,7 +120,7 @@ class BaseViscousAccelerationInner : public LocalDynamics, public FluidDataInner
 {
   public:
     explicit BaseViscousAccelerationInner(BaseInnerRelation &inner_relation);
-    virtual ~BaseViscousAccelerationInner(){};
+    virtual ~BaseViscousAccelerationInner() {};
 
   protected:
     StdLargeVec<Real> &rho_;
@@ -137,8 +137,8 @@ class ViscousAccelerationInner : public BaseViscousAccelerationInner
 {
   public:
     explicit ViscousAccelerationInner(BaseInnerRelation &inner_relation)
-        : BaseViscousAccelerationInner(inner_relation){};
-    virtual ~ViscousAccelerationInner(){};
+        : BaseViscousAccelerationInner(inner_relation) {};
+    virtual ~ViscousAccelerationInner() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -152,8 +152,8 @@ class AngularConservativeViscousAccelerationInner : public BaseViscousAccelerati
 {
   public:
     explicit AngularConservativeViscousAccelerationInner(BaseInnerRelation &inner_relation)
-        : BaseViscousAccelerationInner(inner_relation){};
-    virtual ~AngularConservativeViscousAccelerationInner(){};
+        : BaseViscousAccelerationInner(inner_relation) {};
+    virtual ~AngularConservativeViscousAccelerationInner() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -173,7 +173,7 @@ class TransportVelocityCorrectionInner : public LocalDynamics, public FluidDataI
 {
   public:
     explicit TransportVelocityCorrectionInner(BaseInnerRelation &inner_relation, Real coefficient = 0.2);
-    virtual ~TransportVelocityCorrectionInner(){};
+    virtual ~TransportVelocityCorrectionInner() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 
@@ -192,7 +192,7 @@ class TransportVelocityCorrectionInnerAdaptive : public LocalDynamics, public Fl
 {
   public:
     explicit TransportVelocityCorrectionInnerAdaptive(BaseInnerRelation &inner_relation, Real coefficient = 0.2);
-    virtual ~TransportVelocityCorrectionInnerAdaptive(){};
+    virtual ~TransportVelocityCorrectionInnerAdaptive() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 
@@ -212,7 +212,7 @@ class AcousticTimeStepSize : public LocalDynamicsReduce<Real, ReduceMax>, public
 {
   public:
     explicit AcousticTimeStepSize(SPHBody &sph_body, Real acousticCFL = 0.6);
-    virtual ~AcousticTimeStepSize(){};
+    virtual ~AcousticTimeStepSize() {};
     Real reduce(size_t index_i, Real dt = 0.0);
     virtual Real outputResult(Real reduced_value) override;
 
@@ -235,7 +235,7 @@ class AdvectionTimeStepSizeForImplicitViscosity
   public:
     explicit AdvectionTimeStepSizeForImplicitViscosity(
         SPHBody &sph_body, Real U_ref, Real advectionCFL = 0.25);
-    virtual ~AdvectionTimeStepSizeForImplicitViscosity(){};
+    virtual ~AdvectionTimeStepSizeForImplicitViscosity() {};
     Real reduce(size_t index_i, Real dt = 0.0);
     virtual Real outputResult(Real reduced_value) override;
 
@@ -253,7 +253,7 @@ class AdvectionTimeStepSize : public AdvectionTimeStepSizeForImplicitViscosity
 {
   public:
     explicit AdvectionTimeStepSize(SPHBody &sph_body, Real U_ref, Real advectionCFL = 0.25);
-    virtual ~AdvectionTimeStepSize(){};
+    virtual ~AdvectionTimeStepSize() {};
     Real reduce(size_t index_i, Real dt = 0.0);
 
   protected:
@@ -268,7 +268,7 @@ class VorticityInner : public LocalDynamics, public FluidDataInner
 {
   public:
     explicit VorticityInner(BaseInnerRelation &inner_relation);
-    virtual ~VorticityInner(){};
+    virtual ~VorticityInner() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 
@@ -285,12 +285,13 @@ class BaseIntegration : public LocalDynamics, public FluidDataInner
 {
   public:
     explicit BaseIntegration(BaseInnerRelation &inner_relation);
-    virtual ~BaseIntegration(){};
+    virtual ~BaseIntegration() {};
 
   protected:
     Fluid &fluid_;
     StdLargeVec<Real> &rho_, &p_, &drho_dt_;
     StdLargeVec<Vecd> &pos_, &vel_, &acc_, &acc_prior_;
+    StdLargeVec<Real> &gamma_;
 };
 
 /**
@@ -303,7 +304,7 @@ class BaseIntegration1stHalf : public BaseIntegration
 {
   public:
     explicit BaseIntegration1stHalf(BaseInnerRelation &inner_relation);
-    virtual ~BaseIntegration1stHalf(){};
+    virtual ~BaseIntegration1stHalf() {};
     RiemannSolverType riemann_solver_;
     void initialization(size_t index_i, Real dt = 0.0);
 
@@ -328,7 +329,7 @@ class BaseIntegration2ndHalf : public BaseIntegration
 {
   public:
     explicit BaseIntegration2ndHalf(BaseInnerRelation &inner_relation);
-    virtual ~BaseIntegration2ndHalf(){};
+    virtual ~BaseIntegration2ndHalf() {};
     RiemannSolverType riemann_solver_;
     void initialization(size_t index_i, Real dt = 0.0);
 
@@ -352,7 +353,7 @@ class Oldroyd_BIntegration1stHalf : public Integration1stHalfDissipativeRiemann
 {
   public:
     explicit Oldroyd_BIntegration1stHalf(BaseInnerRelation &inner_relation);
-    virtual ~Oldroyd_BIntegration1stHalf(){};
+    virtual ~Oldroyd_BIntegration1stHalf() {};
     void initialization(size_t index_i, Real dt = 0.0);
 
     inline void interaction(size_t index_i, Real dt = 0.0);
@@ -369,7 +370,7 @@ class Oldroyd_BIntegration2ndHalf : public Integration2ndHalfDissipativeRiemann
 {
   public:
     explicit Oldroyd_BIntegration2ndHalf(BaseInnerRelation &inner_relation);
-    virtual ~Oldroyd_BIntegration2ndHalf(){};
+    virtual ~Oldroyd_BIntegration2ndHalf() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 

@@ -121,7 +121,8 @@ BaseIntegration::BaseIntegration(BaseInnerRelation &inner_relation)
       p_(*particles_->getVariableByName<Real>("Pressure")),
       drho_dt_(*particles_->registerSharedVariable<Real>("DensityChangeRate")),
       pos_(particles_->pos_), vel_(particles_->vel_),
-      acc_(particles_->acc_), acc_prior_(particles_->acc_prior_) {}
+      acc_(particles_->acc_), acc_prior_(particles_->acc_prior_),
+      gamma_(*particles_->registerSharedVariable<Real>("Gamma", 1.0)) {}
 //=================================================================================================//
 Oldroyd_BIntegration1stHalf ::
     Oldroyd_BIntegration1stHalf(BaseInnerRelation &inner_relation)

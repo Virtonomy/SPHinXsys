@@ -289,7 +289,7 @@ void BaseExtendIntegration1stHalfWithWall<BaseIntegration1stHalfType>::
             Real delta = 2.0 * projection * r_ij * particle_spacing_j1;
             Real beta = delta < 1.0 ? (1.0 - delta) * (1.0 - delta) * particle_spacing_ratio2 : 0.0;
             // penalty must be positive so that the penalty force is pointed to fluid inner domain
-            Real penalty = penalty_strength_ * beta * fabs(projection * penalty_pressure);
+            Real penalty = -penalty_strength_ * beta * projection * penalty_pressure;
 
             // penalty force induced acceleration
             acceleration -= 2.0 * penalty * n_j * dW_ijV_j / rho_i;

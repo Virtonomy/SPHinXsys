@@ -28,8 +28,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef FLUID_DYNAMICS_COMPLEX_H
-#define FLUID_DYNAMICS_COMPLEX_H
+#ifndef VIRTOSIM_FLUID_DYNAMICS_COMPLEX_H_EF1F0D15_AEAF_4151_AC74_DEF4ACD4136F
+#define VIRTOSIM_FLUID_DYNAMICS_COMPLEX_H_EF1F0D15_AEAF_4151_AC74_DEF4ACD4136F
 
 #include "fluid_dynamics_inner.h"
 #include "fluid_dynamics_inner.hpp"
@@ -50,17 +50,12 @@ typedef DataDelegateContact<BaseParticles, SolidParticles> FSIContactData;
  * @brief Base class adding interaction with wall to general relaxation process
  */
 template <class BaseIntegrationType>
-class InteractionWithWall : public BaseIntegrationType, public FluidWallData
+class InteractionWithWall : public BaseInteractionComplex<BaseIntegrationType, FluidWallData>
 {
   public:
-    template <class BaseBodyRelationType, typename... Args>
-    InteractionWithWall(BaseContactRelation &wall_contact_relation,
-                        BaseBodyRelationType &base_body_relation, Args &&...args);
     template <typename... Args>
-    InteractionWithWall(ComplexRelation &fluid_wall_relation, Args &&...args)
-        : InteractionWithWall(fluid_wall_relation.getContactRelation(),
-                              fluid_wall_relation.getInnerRelation(), std::forward<Args>(args)...) {}
-    virtual ~InteractionWithWall(){};
+    InteractionWithWall(Args &&...args);
+    virtual ~InteractionWithWall() {};
 
   protected:
     StdVec<Real> wall_inv_rho0_;
@@ -79,7 +74,7 @@ class BaseDensitySummationComplex
   public:
     template <typename... Args>
     explicit BaseDensitySummationComplex(Args &&...args);
-    virtual ~BaseDensitySummationComplex(){};
+    virtual ~BaseDensitySummationComplex() {};
 
   protected:
     StdVec<Real> contact_inv_rho0_;
@@ -99,7 +94,7 @@ class DensitySummationComplex
     template <typename... Args>
     explicit DensitySummationComplex(Args &&...args)
         : BaseDensitySummationComplex<DensitySummationInner>(std::forward<Args>(args)...){};
-    virtual ~DensitySummationComplex(){};
+    virtual ~DensitySummationComplex() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -115,7 +110,7 @@ class DensitySummationComplexAdaptive
     template <typename... Args>
     explicit DensitySummationComplexAdaptive(Args &&...args)
         : BaseDensitySummationComplex<DensitySummationInnerAdaptive>(std::forward<Args>(args)...){};
-    virtual ~DensitySummationComplexAdaptive(){};
+    virtual ~DensitySummationComplexAdaptive() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -131,7 +126,7 @@ class BaseViscousAccelerationWithWall : public InteractionWithWall<ViscousAccele
     template <typename... Args>
     BaseViscousAccelerationWithWall(Args &&...args)
         : InteractionWithWall<ViscousAccelerationInnerType>(std::forward<Args>(args)...){};
-    virtual ~BaseViscousAccelerationWithWall(){};
+    virtual ~BaseViscousAccelerationWithWall() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -150,7 +145,7 @@ class TransportVelocityCorrectionComplex
     TransportVelocityCorrectionComplex(Args &&...args)
         : BaseInteractionComplex<TransportVelocityCorrectionInner, FluidContactData>(
               std::forward<Args>(args)...){};
-    virtual ~TransportVelocityCorrectionComplex(){};
+    virtual ~TransportVelocityCorrectionComplex() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -167,7 +162,7 @@ class TransportVelocityCorrectionComplexAdaptive
     TransportVelocityCorrectionComplexAdaptive(Args &&...args)
         : BaseInteractionComplex<TransportVelocityCorrectionInnerAdaptive, FluidContactData>(
               std::forward<Args>(args)...){};
-    virtual ~TransportVelocityCorrectionComplexAdaptive(){};
+    virtual ~TransportVelocityCorrectionComplexAdaptive() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -183,7 +178,7 @@ class BaseIntegration1stHalfWithWall : public InteractionWithWall<BaseIntegratio
     template <typename... Args>
     BaseIntegration1stHalfWithWall(Args &&...args)
         : InteractionWithWall<BaseIntegration1stHalfType>(std::forward<Args>(args)...){};
-    virtual ~BaseIntegration1stHalfWithWall(){};
+    virtual ~BaseIntegration1stHalfWithWall() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 
@@ -220,7 +215,7 @@ class BaseExtendIntegration1stHalfWithWall : public BaseIntegration1stHalfWithWa
         : BaseExtendIntegration1stHalfWithWall(fluid_wall_relation.getContactRelation(),
                                                fluid_wall_relation.getInnerRelation(),
                                                std::forward<Args>(args)..., penalty_strength){};
-    virtual ~BaseExtendIntegration1stHalfWithWall(){};
+    virtual ~BaseExtendIntegration1stHalfWithWall() {};
     void initialization(size_t index_i, Real dt = 0.0);
 
     inline void interaction(size_t index_i, Real dt = 0.0);
@@ -246,7 +241,7 @@ class BaseIntegration2ndHalfWithWall : public InteractionWithWall<BaseIntegratio
     template <typename... Args>
     BaseIntegration2ndHalfWithWall(Args &&...args)
         : InteractionWithWall<BaseIntegration2ndHalfType>(std::forward<Args>(args)...){};
-    virtual ~BaseIntegration2ndHalfWithWall(){};
+    virtual ~BaseIntegration2ndHalfWithWall() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -262,9 +257,9 @@ class Oldroyd_BIntegration1stHalfWithWall : public BaseIntegration1stHalfWithWal
 {
   public:
     explicit Oldroyd_BIntegration1stHalfWithWall(ComplexRelation &fluid_wall_relation)
-        : BaseIntegration1stHalfWithWall<Oldroyd_BIntegration1stHalf>(fluid_wall_relation){};
+        : BaseIntegration1stHalfWithWall<Oldroyd_BIntegration1stHalf>(fluid_wall_relation) {};
 
-    virtual ~Oldroyd_BIntegration1stHalfWithWall(){};
+    virtual ~Oldroyd_BIntegration1stHalfWithWall() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
@@ -277,12 +272,12 @@ class Oldroyd_BIntegration2ndHalfWithWall : public BaseIntegration2ndHalfWithWal
 {
   public:
     explicit Oldroyd_BIntegration2ndHalfWithWall(ComplexRelation &fluid_wall_relation)
-        : BaseIntegration2ndHalfWithWall<Oldroyd_BIntegration2ndHalf>(fluid_wall_relation){};
+        : BaseIntegration2ndHalfWithWall<Oldroyd_BIntegration2ndHalf>(fluid_wall_relation) {};
 
-    virtual ~Oldroyd_BIntegration2ndHalfWithWall(){};
+    virtual ~Oldroyd_BIntegration2ndHalfWithWall() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0);
 };
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // FLUID_DYNAMICS_COMPLEX_H
+#endif // VIRTOSIM_FLUID_DYNAMICS_COMPLEX_H_EF1F0D15_AEAF_4151_AC74_DEF4ACD4136F

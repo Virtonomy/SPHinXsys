@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef CONTACT_DYNAMICS_H
-#define CONTACT_DYNAMICS_H
+#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_D8305961_5B67_4DF6_9E15_F9CBFB60A6C8
+#define VIRTOSIM_CONTACT_DYNAMICS_H_D8305961_5B67_4DF6_9E15_F9CBFB60A6C8
 
 #include "general_solid_dynamics.h"
 
@@ -132,8 +132,8 @@ class ShellRepulsionFactor : public RepulsionFactorAccessor, public LocalDynamic
             Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
             for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
             {
-                Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
-                sigma += corrected_W_ij * contact_Vol_k[contact_neighborhood.j_[n]];
+                // Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
+                sigma += contact_neighborhood.W_ij_[n] * contact_Vol_k[contact_neighborhood.j_[n]];
             }
             constexpr Real heuristic_limiter = 0.1;
             // With heuristic_limiter, the maximum contact pressure is heuristic_limiter * K (Bulk modulus).
@@ -449,4 +449,4 @@ class DynamicContactForceWithWall : public LocalDynamics, public ContactDynamics
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // CONTACT_DYNAMICS_H
+#endif // VIRTOSIM_CONTACT_DYNAMICS_H_D8305961_5B67_4DF6_9E15_F9CBFB60A6C8

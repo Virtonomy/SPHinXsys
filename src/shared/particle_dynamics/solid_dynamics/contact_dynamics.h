@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_D8305961_5B67_4DF6_9E15_F9CBFB60A6C8
-#define VIRTOSIM_CONTACT_DYNAMICS_H_D8305961_5B67_4DF6_9E15_F9CBFB60A6C8
+#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_DDE35F32_9A37_4EC9_B177_FC22E17D9B16
+#define VIRTOSIM_CONTACT_DYNAMICS_H_DDE35F32_9A37_4EC9_B177_FC22E17D9B16
 
 #include "general_solid_dynamics.h"
 
@@ -96,8 +96,8 @@ class RepulsionFactorSummation : public RepulsionFactorAccessor, public LocalDyn
 
             for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
             {
-                Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
-                sigma += corrected_W_ij * contact_Vol_k[contact_neighborhood.j_[n]];
+                // Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
+                sigma += contact_neighborhood.W_ij_[n] * contact_Vol_k[contact_neighborhood.j_[n]];
             }
         }
         repulsion_factor_[index_i] = sigma;
@@ -449,4 +449,4 @@ class DynamicContactForceWithWall : public LocalDynamics, public ContactDynamics
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // VIRTOSIM_CONTACT_DYNAMICS_H_D8305961_5B67_4DF6_9E15_F9CBFB60A6C8
+#endif // VIRTOSIM_CONTACT_DYNAMICS_H_DDE35F32_9A37_4EC9_B177_FC22E17D9B16

@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_DDE35F32_9A37_4EC9_B177_FC22E17D9B16
-#define VIRTOSIM_CONTACT_DYNAMICS_H_DDE35F32_9A37_4EC9_B177_FC22E17D9B16
+#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_DC22A4EA_C580_4BCE_8EA3_8D3AF08200BD
+#define VIRTOSIM_CONTACT_DYNAMICS_H_DC22A4EA_C580_4BCE_8EA3_8D3AF08200BD
 
 #include "general_solid_dynamics.h"
 
@@ -209,6 +209,7 @@ class ContactForce : public LocalDynamics, public ContactDynamicsData
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
+        Real K_1 = solid_.ContactStiffness(index_i);
         Real Vol_i = Vol_[index_i];
         Real sigma_i = repulsion_factor_[index_i];
         /** Contact interaction. */
@@ -216,23 +217,28 @@ class ContactForce : public LocalDynamics, public ContactDynamicsData
         // contact force from particle j: f_ij = 2 * K_ij * sigma_ij * Vi * Vj * dW_ij * e_ij
         for (size_t k = 0; k < contact_configuration_.size(); ++k)
         {
-            StdLargeVec<Real> &repulsion_factor_k = *(contact_repulsion_factor_[k]);
+            const StdLargeVec<Real> &repulsion_factor_k = *(contact_repulsion_factor_[k]);
 
-            Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
+            const Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
 
             // Calculate the factor 2 * sigma_ij * Vi * Vj * dW_ij * e_ij
             // sigma_ij = 0.5 * (sigma_i + sigma_j)
-            Vecd factor_k = Vecd::Zero();
+            Vecd force_k = Vecd::Zero();
             for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
             {
                 size_t index_j = contact_neighborhood.j_[n];
+
+                Real K_2 = contact_solids_[k]->ContactStiffness(index_j);
+                Real contact_stiffness = 2 * K_1 * K_2 / (K_1 + K_2);
+
                 Vecd e_ij = contact_neighborhood.e_ij_[n];
 
                 Real sigma_star = 0.5 * (sigma_i + repulsion_factor_k[index_j]);
                 // force due to pressure
-                factor_k -= 2.0 * sigma_star * e_ij * Vol_i * contact_neighborhood.dW_ijV_j_[n];
+                force_k -= 2.0 * contact_stiffness * sigma_star * e_ij * Vol_i * contact_neighborhood.dW_ijV_j_[n];
             }
-            force += contact_stiffness_[k] * factor_k;
+
+            force += force_k;
         }
         acc_prior_[index_i] += force / mass_[index_i];
     };
@@ -243,7 +249,6 @@ class ContactForce : public LocalDynamics, public ContactDynamicsData
     StdLargeVec<Vecd> &acc_prior_;
     StdVec<Solid *> contact_solids_;
     StdVec<StdLargeVec<Real> *> contact_repulsion_factor_;
-    SPH::StdVec<double> contact_stiffness_;
 };
 
 /**
@@ -260,8 +265,9 @@ class ContactForceFromWall : public LocalDynamics, public ContactWithWallData
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
+        Real K_1 = solid_.ContactStiffness(index_i);
         Real Vol_i = Vol_[index_i];
-        Real p_i = repulsion_factor_[index_i] * solid_.ContactStiffness();
+        Real p_i = repulsion_factor_[index_i] * K_1;
         /** Contact interaction. */
         Vecd force = Vecd::Zero();
         for (size_t k = 0; k < contact_configuration_.size(); ++k)
@@ -449,4 +455,4 @@ class DynamicContactForceWithWall : public LocalDynamics, public ContactDynamics
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // VIRTOSIM_CONTACT_DYNAMICS_H_DDE35F32_9A37_4EC9_B177_FC22E17D9B16
+#endif // VIRTOSIM_CONTACT_DYNAMICS_H_DC22A4EA_C580_4BCE_8EA3_8D3AF08200BD

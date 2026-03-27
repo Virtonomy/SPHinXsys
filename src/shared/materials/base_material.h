@@ -53,9 +53,9 @@ class BaseMaterial
 {
   public:
     explicit BaseMaterial(Real rho0)
-        : material_type_name_("BaseMaterial"), rho0_(rho0){};
-    BaseMaterial() : BaseMaterial(1.0){};
-    virtual ~BaseMaterial(){};
+        : material_type_name_("BaseMaterial"), rho0_(rho0) {};
+    BaseMaterial() : BaseMaterial(1.0) {};
+    virtual ~BaseMaterial() {};
     std::string MaterialType() { return material_type_name_; }
     Real ReferenceDensity() { return rho0_; };
     /**interface called in base particles constructor */
@@ -92,7 +92,7 @@ class Fluid : public BaseMaterial
         material_type_name_ = "Fluid";
     };
     Fluid(Real rho0, Real mu) : Fluid(rho0, 1.0, mu) {}
-    virtual ~Fluid(){};
+    virtual ~Fluid() {};
 
     Real ReferenceViscosity() { return mu_; };
     Real ReferenceSoundSpeed() { return c0_; };
@@ -117,12 +117,13 @@ class Solid : public BaseMaterial
     {
         material_type_name_ = "Solid";
     };
-    explicit Solid(Real rho0) : Solid(rho0, 1.0){};
-    Solid() : Solid(1.0){};
-    virtual ~Solid(){};
+    explicit Solid(Real rho0) : Solid(rho0, 1.0) {};
+    Solid() : Solid(1.0) {};
+    virtual ~Solid() {};
 
     Real ContactFriction() { return contact_friction_; };
     Real ContactStiffness() { return contact_stiffness_; };
+    virtual Real ContactStiffness(size_t index_i) { return contact_stiffness_; };
     virtual Solid *ThisObjectPtr() override { return this; };
 
   protected:

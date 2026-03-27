@@ -105,13 +105,10 @@ ContactForce::ContactForce(SurfaceContactRelation &solid_body_contact_relation)
     // In comparison of geometric average, the harmonic average is dominant by the softer material.
     // Empirically, the harmonic average is sufficient to prevent penetration, and matches the time-step size of the softer material.
     // This allows us to use a different time-step size for the two materials
-    Real K_1 = solid_.ContactStiffness();
     for (size_t k = 0; k != contact_particles_.size(); ++k)
     {
         contact_solids_.push_back(&contact_particles_[k]->solid_);
         contact_repulsion_factor_.push_back(contact_particles_[k]->getVariableByName<Real>("RepulsionFactor"));
-        Real K_2 = contact_solids_[k]->ContactStiffness();
-        contact_stiffness_.emplace_back(2 * K_1 * K_2 / (K_1 + K_2));
     }
 }
 //=================================================================================================//

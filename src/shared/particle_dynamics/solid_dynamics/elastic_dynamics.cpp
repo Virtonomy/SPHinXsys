@@ -60,6 +60,12 @@ BaseIntegration1stHalf::
 void BaseIntegration1stHalf::update(size_t index_i, Real dt)
 {
     vel_[index_i] += (acc_prior_[index_i] + acc_[index_i]) * dt;
+    if (double vel_norm = vel_[index_i].norm(); std::isnan(vel_norm) || std::isinf(vel_norm))
+    {
+        std::cout << "NaN detected in acceleration calculation at particle " << index_i << std::endl;
+        std::cout << "Velocity: " << vel_[index_i] << std::endl;
+        throw std::runtime_error("BaseIntegration1stHalf::update, NaN detected in velocity calculation.");
+    }
 }
 //=================================================================================================//
 Integration1stHalf::
@@ -71,7 +77,7 @@ Integration1stHalf::
 }
 //=================================================================================================//
 Integration1stHalfPK2::Integration1stHalfPK2(BaseInnerRelation &inner_relation)
-    : Integration1stHalf(inner_relation){};
+    : Integration1stHalf(inner_relation) {};
 //=================================================================================================//
 void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
 {
@@ -80,12 +86,21 @@ void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
     rho_[index_i] = elastic_solid_.ReferenceDensity(index_i) / F_[index_i].determinant();
     // obtain the first Piola-Kirchhoff stress from the second Piola-Kirchhoff stress
     // it seems using reproducing correction here increases convergence rate near the free surface
-    stress_PK1_B_[index_i] = elastic_solid_.StressPK1(F_[index_i], index_i) * B_[index_i];
+    auto stress = elastic_solid_.StressPK1(F_[index_i], index_i);
+
+    if (double stress_norm = stress.norm(); std::isnan(stress_norm) || std::isinf(stress_norm))
+    {
+        std::cout << "NaN detected in stress calculation at particle " << index_i << std::endl;
+        std::cout << "Deformation gradient F: " << F_[index_i] << std::endl;
+        std::cout << "Jacobian J: " << F_[index_i].determinant() << std::endl;
+        throw std::runtime_error("Integration1stHalfPK2::initialization, NaN detected in stress calculation.");
+    }
+    stress_PK1_B_[index_i] = stress * B_[index_i];
 }
 //=================================================================================================//
 Integration1stHalfKirchhoff::
     Integration1stHalfKirchhoff(BaseInnerRelation &inner_relation)
-    : Integration1stHalf(inner_relation){};
+    : Integration1stHalf(inner_relation) {};
 //=================================================================================================//
 void Integration1stHalfKirchhoff::initialization(size_t index_i, Real dt)
 {
@@ -159,6 +174,12 @@ void Integration2ndHalf::initialization(size_t index_i, Real dt)
 void Integration2ndHalf::update(size_t index_i, Real dt)
 {
     F_[index_i] += dF_dt_[index_i] * dt * 0.5;
+    if (double F_norm = F_[index_i].norm(); std::isnan(F_norm) || std::isinf(F_norm))
+    {
+        std::cout << "NaN detected in deformation gradient calculation at particle " << index_i << std::endl;
+        std::cout << "Deformation gradient F: " << F_[index_i] << std::endl;
+        throw std::runtime_error("Integration2ndHalf::update, NaN detected in deformation gradient calculation.");
+    }
 }
 //=================================================================================================//
 } // namespace solid_dynamics

@@ -57,7 +57,7 @@ class ElasticDynamicsInitialCondition : public LocalDynamics, public ElasticSoli
 {
   public:
     explicit ElasticDynamicsInitialCondition(SPHBody &sph_body);
-    virtual ~ElasticDynamicsInitialCondition(){};
+    virtual ~ElasticDynamicsInitialCondition() {};
 
   protected:
     StdLargeVec<Vecd> &pos_, &vel_;
@@ -75,7 +75,7 @@ class UpdateElasticNormalDirection : public LocalDynamics, public ElasticSolidDa
 
   public:
     explicit UpdateElasticNormalDirection(SPHBody &sph_body);
-    virtual ~UpdateElasticNormalDirection(){};
+    virtual ~UpdateElasticNormalDirection() {};
 
     void update(size_t index_i, Real dt = 0.0);
 };
@@ -95,7 +95,7 @@ class AcousticTimeStepSize : public LocalDynamicsReduce<Real, ReduceMin>,
 
   public:
     explicit AcousticTimeStepSize(SPHBody &sph_body, Real CFL = 0.6);
-    virtual ~AcousticTimeStepSize(){};
+    virtual ~AcousticTimeStepSize() {};
 
     Real reduce(size_t index_i, Real dt = 0.0);
 };
@@ -108,7 +108,7 @@ class DeformationGradientBySummation : public LocalDynamics, public ElasticSolid
 {
   public:
     explicit DeformationGradientBySummation(BaseInnerRelation &inner_relation);
-    virtual ~DeformationGradientBySummation(){};
+    virtual ~DeformationGradientBySummation() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -140,7 +140,7 @@ class BaseElasticIntegration : public LocalDynamics, public ElasticSolidDataInne
 {
   public:
     explicit BaseElasticIntegration(BaseInnerRelation &inner_relation);
-    virtual ~BaseElasticIntegration(){};
+    virtual ~BaseElasticIntegration() {};
 
   protected:
     StdLargeVec<Real> &rho_, &mass_;
@@ -157,7 +157,7 @@ class BaseIntegration1stHalf : public BaseElasticIntegration
 {
   public:
     explicit BaseIntegration1stHalf(BaseInnerRelation &inner_relation);
-    virtual ~BaseIntegration1stHalf(){};
+    virtual ~BaseIntegration1stHalf() {};
     void update(size_t index_i, Real dt = 0.0);
 
   protected:
@@ -176,7 +176,7 @@ class Integration1stHalf : public BaseIntegration1stHalf
 {
   public:
     explicit Integration1stHalf(BaseInnerRelation &inner_relation);
-    virtual ~Integration1stHalf(){};
+    virtual ~Integration1stHalf() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -200,7 +200,12 @@ class Integration1stHalf : public BaseIntegration1stHalf
                              numerical_dissipation_factor_ * weight * numerical_stress_ij) *
                             e_ij;
         }
-
+        if (double acc = acceleration.norm(); std::isnan(acc) || std::isinf(acc))
+        {
+            std::cout << "NaN detected in acceleration calculation at particle " << index_i << std::endl;
+            std::cout << "Acceleration: " << acceleration << std::endl;
+            throw std::runtime_error("Integration1stHalf::interaction, NaN detected in acceleration calculation.");
+        }
         acc_[index_i] = acceleration;
     };
 
@@ -218,7 +223,7 @@ class Integration1stHalfPK2 : public Integration1stHalf
 {
   public:
     explicit Integration1stHalfPK2(BaseInnerRelation &inner_relation);
-    virtual ~Integration1stHalfPK2(){};
+    virtual ~Integration1stHalfPK2() {};
     void initialization(size_t index_i, Real dt = 0.0);
 };
 
@@ -229,7 +234,7 @@ class Integration1stHalfCauchy : public Integration1stHalf
 {
   public:
     explicit Integration1stHalfCauchy(BaseInnerRelation &inner_relation);
-    virtual ~Integration1stHalfCauchy(){};
+    virtual ~Integration1stHalfCauchy() {};
     void initialization(size_t index_i, Real dt = 0.0);
 };
 
@@ -241,7 +246,7 @@ class Integration1stHalfKirchhoff : public Integration1stHalf
 {
   public:
     explicit Integration1stHalfKirchhoff(BaseInnerRelation &inner_relation);
-    virtual ~Integration1stHalfKirchhoff(){};
+    virtual ~Integration1stHalfKirchhoff() {};
     void initialization(size_t index_i, Real dt = 0.0);
 };
 
@@ -264,7 +269,7 @@ class DecomposedIntegration1stHalf : public BaseIntegration1stHalf
 {
   public:
     explicit DecomposedIntegration1stHalf(BaseInnerRelation &inner_relation);
-    virtual ~DecomposedIntegration1stHalf(){};
+    virtual ~DecomposedIntegration1stHalf() {};
     void initialization(size_t index_i, Real dt = 0.0);
 
     inline void interaction(size_t index_i, Real dt = 0.0)
@@ -299,8 +304,8 @@ class Integration2ndHalf : public BaseElasticIntegration
 {
   public:
     explicit Integration2ndHalf(BaseInnerRelation &inner_relation)
-        : BaseElasticIntegration(inner_relation){};
-    virtual ~Integration2ndHalf(){};
+        : BaseElasticIntegration(inner_relation) {};
+    virtual ~Integration2ndHalf() {};
     void initialization(size_t index_i, Real dt = 0.0);
 
     inline void interaction(size_t index_i, Real dt = 0.0)
@@ -318,6 +323,13 @@ class Integration2ndHalf : public BaseElasticIntegration
         }
 
         dF_dt_[index_i] = deformation_gradient_change_rate * B_[index_i];
+
+        if (double dF_norm = dF_dt_[index_i].norm(); std::isnan(dF_norm) || std::isinf(dF_norm))
+        {
+            std::cout << "NaN detected in deformation gradient change rate calculation at particle " << index_i << std::endl;
+            std::cout << "Deformation gradient change rate: " << dF_dt_[index_i] << std::endl;
+            throw std::runtime_error("Integration1stHalf::interaction, NaN detected in deformation gradient change rate calculation.");
+        }
     };
 
     void update(size_t index_i, Real dt = 0.0);

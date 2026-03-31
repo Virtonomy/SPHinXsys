@@ -29,8 +29,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef ELASTIC_SOLID_H
-#define ELASTIC_SOLID_H
+#ifndef VIRTOSIM_ELASTIC_SOLID_H_B213AF30_F88D_40D1_BC39_D3182840010E
+#define VIRTOSIM_ELASTIC_SOLID_H_B213AF30_F88D_40D1_BC39_D3182840010E
 
 #include "base_material.h"
 #include <fstream>
@@ -59,9 +59,10 @@ class ElasticSolid : public Solid
     {
         material_type_name_ = "ElasticSolid";
     };
-    virtual ~ElasticSolid(){};
+    virtual ~ElasticSolid() {};
 
     Real ReferenceSoundSpeed() { return c0_; };
+    virtual Real ReferenceSoundSpeed(size_t index_i) { return c0_; };
     Real ShearWaveSpeed() { return cs0_; };
     Real YoungsModulus() { return E0_; };
     Real ShearModulus() { return G0_; };
@@ -113,7 +114,7 @@ class LinearElasticSolid : public ElasticSolid
 {
   public:
     explicit LinearElasticSolid(Real rho0, Real youngs_modulus, Real poisson_ratio);
-    virtual ~LinearElasticSolid(){};
+    virtual ~LinearElasticSolid() {};
 
     virtual Matd StressPK1(Matd &deformation, size_t particle_index_i) override;
     virtual Matd StressPK2(Matd &deformation, size_t particle_index_i) override;
@@ -149,7 +150,7 @@ class SaintVenantKirchhoffSolid : public LinearElasticSolid
     {
         material_type_name_ = "SaintVenantKirchhoffSolid";
     };
-    virtual ~SaintVenantKirchhoffSolid(){};
+    virtual ~SaintVenantKirchhoffSolid() {};
 
     /** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
     virtual Matd StressPK2(Matd &deformation, size_t particle_index_i) override;
@@ -168,7 +169,7 @@ class NeoHookeanSolid : public LinearElasticSolid
     {
         material_type_name_ = "NeoHookeanSolid";
     };
-    virtual ~NeoHookeanSolid(){};
+    virtual ~NeoHookeanSolid() {};
 
     /** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
     virtual Matd StressPK2(Matd &deformation, size_t particle_index_i) override;
@@ -192,7 +193,7 @@ class NeoHookeanSolidIncompressible : public LinearElasticSolid
     {
         material_type_name_ = "NeoHookeanSolidIncompressible";
     };
-    virtual ~NeoHookeanSolidIncompressible(){};
+    virtual ~NeoHookeanSolidIncompressible() {};
 
     /** second Piola-Kirchhoff stress related with green-lagrangian deformation tensor */
     virtual Matd StressPK2(Matd &deformation, size_t particle_index_i) override;
@@ -252,7 +253,7 @@ class FeneNeoHookeanSolid : public LinearElasticSolid
     {
         material_type_name_ = "FeneNeoHookeanSolid";
     };
-    virtual ~FeneNeoHookeanSolid(){};
+    virtual ~FeneNeoHookeanSolid() {};
     virtual Matd StressPK2(Matd &deformation, size_t particle_index_i) override;
     virtual Matd StressCauchy(Matd &almansi_strain, Matd &F, size_t particle_index_i) override;
     /** Define the calculation of the stress matrix for postprocessing */
@@ -277,7 +278,7 @@ class Muscle : public NeoHookeanSolid
         std::copy(a0, a0 + 4, a0_);
         std::copy(b0, b0 + 4, b0_);
     };
-    virtual ~Muscle(){};
+    virtual ~Muscle() {};
 
     virtual Matd MuscleFiberDirection(size_t particle_index_i) { return f0f0_; };
     /** compute the stress through Constitutive relation. */
@@ -324,7 +325,7 @@ class LocallyOrthotropicMuscle : public Muscle
     {
         material_type_name_ = "LocallyOrthotropicMuscle";
     };
-    virtual ~LocallyOrthotropicMuscle(){};
+    virtual ~LocallyOrthotropicMuscle() {};
 
     virtual void registerReloadLocalParameters(BaseParticles *base_particles) override;
     virtual void initializeLocalParameters(BaseParticles *base_particles) override;
@@ -337,4 +338,4 @@ class LocallyOrthotropicMuscle : public Muscle
     virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
 };
 } // namespace SPH
-#endif // ELASTIC_SOLID_H
+#endif // VIRTOSIM_ELASTIC_SOLID_H_B213AF30_F88D_40D1_BC39_D3182840010E

@@ -195,7 +195,7 @@ class Integration1stHalf : public BaseIntegration1stHalf
             Real weight = inner_neighborhood.W_ij_[n] * inv_W0_;
             Matd numerical_stress_ij =
                 0.5 * (F_[index_i] + F_[index_j]) * elastic_solid_.PairNumericalDamping(strain_rate, smoothing_length_);
-            acceleration += inv_rho0_ * inner_neighborhood.dW_ijV_j_[n] *
+            acceleration += 1.0 / elastic_solid_.ReferenceDensity(index_i) * inner_neighborhood.dW_ijV_j_[n] *
                             (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] +
                              numerical_dissipation_factor_ * weight * numerical_stress_ij) *
                             e_ij;

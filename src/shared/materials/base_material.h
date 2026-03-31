@@ -32,8 +32,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef BASE_MATERIAL_H
-#define BASE_MATERIAL_H
+#ifndef VIRTOSIM_BASE_MATERIAL_H_C812E607_B8C9_49BA_AAB4_09AA068B91A7
+#define VIRTOSIM_BASE_MATERIAL_H_C812E607_B8C9_49BA_AAB4_09AA068B91A7
 
 #include "base_data_package.h"
 #include "xml_engine.h"
@@ -58,6 +58,7 @@ class BaseMaterial
     virtual ~BaseMaterial() {};
     std::string MaterialType() { return material_type_name_; }
     Real ReferenceDensity() { return rho0_; };
+    virtual Real ReferenceDensity(size_t index_i) { return rho0_; };
     /**interface called in base particles constructor */
     virtual void registerReloadLocalParameters(BaseParticles *base_particles) {};
     /**
@@ -133,4 +134,4 @@ class Solid : public BaseMaterial
     void setContactStiffness(Real c0) { contact_stiffness_ = rho0_ * c0 * c0; };
 };
 } // namespace SPH
-#endif // BASE_MATERIAL_H
+#endif // VIRTOSIM_BASE_MATERIAL_H_C812E607_B8C9_49BA_AAB4_09AA068B91A7

@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef CONTACT_DYNAMICS_H
-#define CONTACT_DYNAMICS_H
+#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_CC1DF9D7_79B5_471A_B995_34ECB582D204
+#define VIRTOSIM_CONTACT_DYNAMICS_H_CC1DF9D7_79B5_471A_B995_34ECB582D204
 
 #include "general_solid_dynamics.h"
 
@@ -185,7 +185,7 @@ class SelfContactForce : public LocalDynamics, public SolidDataInner
             Real p_star = 0.5 * (p_i + self_repulsion_factor_[index_j] * solid_.ContactStiffness());
             Real impedance_p = 0.5 * contact_impedance_ * (vel_i - vel_[index_j]).dot(-e_ij);
             // force to mimic pressure
-            force -= 2.0 * (p_star + impedance_p) * e_ij * Vol_i * inner_neighborhood.dW_ijV_j_[n];
+            force -= 100.0 * 2.0 * (p_star + impedance_p) * e_ij * Vol_i * inner_neighborhood.dW_ijV_j_[n];
         }
         acc_prior_[index_i] += force / mass_[index_i];
     };
@@ -449,4 +449,4 @@ class DynamicContactForceWithWall : public LocalDynamics, public ContactDynamics
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // CONTACT_DYNAMICS_H
+#endif // VIRTOSIM_CONTACT_DYNAMICS_H_CC1DF9D7_79B5_471A_B995_34ECB582D204

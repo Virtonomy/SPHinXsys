@@ -175,6 +175,9 @@ class BaseIntegration1stHalf : public BaseElasticIntegration
 class Integration1stHalf : public BaseIntegration1stHalf
 {
   public:
+    // The numerical dissipation factor is used to increase the numerical stability of the solid, which is between 0 and 1
+    // The default value is set to 0.25, which is a common choice in practice.
+    // For soft solids in FSI simulations, a larger numerical dissipation factor may be needed to maintain stability
     explicit Integration1stHalf(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor);
     virtual ~Integration1stHalf() {};
 

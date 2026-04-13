@@ -139,8 +139,29 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
                                             (Matd::Identity() - inverse_F_gaussian_point.transpose() * inverse_F_gaussian_point) *
                                             transformation_matrix_[index_i] * current_transformation_matrix.transpose();
 
-        current_local_almansi_strain(2, 2) = 0;
+        {
+            // compute before
+
+            if (Mat3d stress_no_correction = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i); !stress_no_correction.allFinite())
+            {
+                std::cout << "NaN detected in stress calculation at particle " << index_i << std::endl;
+                std::cout << "Deformation gradient F: " << F_[index_i] << std::endl;
+                std::cout << "F bending: " << F_bending_[index_i] << std::endl;
+                std::cout << "J: " << F_gaussian_point.determinant() << std::endl;
+                throw std::runtime_error("ShellStressRelaxationFirstHalf::initialization, NaN detected in stress calculation before correction.");
+            }
+        }
+
+        // current_local_almansi_strain(2, 2) = 0;
         Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
+        if (!cauchy_stress.allFinite())
+        {
+            std::cout << "NaN detected in stress calculation at particle " << index_i << std::endl;
+            std::cout << "Deformation gradient F: " << F_[index_i] << std::endl;
+            std::cout << "F bending: " << F_bending_[index_i] << std::endl;
+            std::cout << "J: " << F_gaussian_point.determinant() << std::endl;
+            throw std::runtime_error("ShellStressRelaxationFirstHalf::initialization, NaN detected in stress calculation at 1st correction.");
+        }
         { /// Enforce plane stress condition adapting algorithm from Sec. 5.4.1 from http://dx.doi.org/10.18419/opus-14215
           /// Differential geometry and the geometrically non-linear Reissner-Mindlin shell model
           /// @WARN Algorithm is not guaranteed to converge, see discussion in Sec. 5.4.1
@@ -149,6 +170,17 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
             double E = E0_; // Take the default Young's modulus of the material as the initial derivative.
             int it = 0;
             constexpr int max_iterations = 20; // @WARN hard-coded maximum number of iterations
+
+            std::vector<double> s_history;
+            std::vector<double> e_history;
+            std::vector<double> E_history;
+            s_history.reserve(max_iterations);
+            e_history.reserve(max_iterations);
+            E_history.reserve(max_iterations);
+            s_history.push_back(cauchy_stress(2, 2));
+            e_history.push_back(current_local_almansi_strain(2, 2));
+            E_history.push_back(E);
+
             constexpr auto infinity = std::numeric_limits<Real>::infinity();
             auto tolerance_sqr = [](const Matd &stress)
             {
@@ -165,10 +197,28 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
                 cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
                 s_next = cauchy_stress(2, 2);
                 E = (s_next - s_prev) / (e_next - e_prev);
+
+                s_history.push_back(s_next);
+                e_history.push_back(e_next);
+                E_history.push_back(E);
             }
             if (cauchy_stress.allFinite() == false || it == max_iterations)
-                throw std::runtime_error("[ShellStressRelaxationFirstHalf::initialization] Enforcing plane stress condition failed for particle with unsorted_id: " + std::to_string(unsorted_id_[index_i]) + " in object: " + sph_body_.getName() + "\nWith normal stress in the out-of-plane direction: " + std::to_string(cauchy_stress(2, 2)));
-
+            {
+                std::string info = "i = " + std::to_string(index_i) + ", history: ";
+                for (size_t i = 0; i < s_history.size(); ++i)
+                {
+                    info += "\n  " + std::to_string(i) + ": s=" + std::to_string(s_history[i]) +
+                            ", e=" + std::to_string(e_history[i]) + ", E=" + std::to_string(E_history[i]);
+                }
+                for (size_t m = 0; m < 3; ++m)
+                {
+                    for (size_t n = 0; n < 3; ++n)
+                    {
+                        info += "\n  almansi strain(" + std::to_string(m) + ", " + std::to_string(n) + ")=" + std::to_string(current_local_almansi_strain(m, n));
+                    }
+                }
+                throw std::runtime_error(info);
+            }
         }
         /// Impact of including numerical damping in the algorithm above unclear
         /// Left here in absence of discriminating factors

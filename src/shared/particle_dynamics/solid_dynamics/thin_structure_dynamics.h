@@ -27,8 +27,8 @@
  * @author	Dong Wu, Chi Zhang and Xiangyu Hu
  */
 
-#ifndef THIN_STRUCTURE_DYNAMICS_H
-#define THIN_STRUCTURE_DYNAMICS_H
+#ifndef VIRTOSIM_THIN_STRUCTURE_DYNAMICS_H_D0B7D58E_C2CB_4B50_9E8A_4352E73D85C9
+#define VIRTOSIM_THIN_STRUCTURE_DYNAMICS_H_D0B7D58E_C2CB_4B50_9E8A_4352E73D85C9
 
 #include "all_body_relations.h"
 #include "all_particle_dynamics.h"
@@ -54,7 +54,7 @@ class ShellDynamicsInitialCondition : public LocalDynamics, public ShellDataSimp
 {
   public:
     explicit ShellDynamicsInitialCondition(SPHBody &sph_body);
-    virtual ~ShellDynamicsInitialCondition(){};
+    virtual ~ShellDynamicsInitialCondition() {};
 
   protected:
     StdLargeVec<Vecd> &n0_, &n_, &pseudo_n_, &pos0_;
@@ -77,7 +77,7 @@ class ShellAcousticTimeStepSize : public LocalDynamicsReduce<Real, ReduceMin>,
 
   public:
     explicit ShellAcousticTimeStepSize(SPHBody &sph_body, Real CFL = 0.6);
-    virtual ~ShellAcousticTimeStepSize(){};
+    virtual ~ShellAcousticTimeStepSize() {};
 
     Real reduce(size_t index_i, Real dt = 0.0);
 };
@@ -90,7 +90,7 @@ class ShellCorrectConfiguration : public LocalDynamics, public ShellDataInner
 {
   public:
     explicit ShellCorrectConfiguration(BaseInnerRelation &inner_relation);
-    virtual ~ShellCorrectConfiguration(){};
+    virtual ~ShellCorrectConfiguration() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -124,7 +124,7 @@ class ShellDeformationGradientTensor : public LocalDynamics, public ShellDataInn
 {
   public:
     explicit ShellDeformationGradientTensor(BaseInnerRelation &inner_relation);
-    virtual ~ShellDeformationGradientTensor(){};
+    virtual ~ShellDeformationGradientTensor() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -161,7 +161,7 @@ class BaseShellRelaxation : public LocalDynamics, public ShellDataInner
 {
   public:
     explicit BaseShellRelaxation(BaseInnerRelation &inner_relation);
-    virtual ~BaseShellRelaxation(){};
+    virtual ~BaseShellRelaxation() {};
 
   protected:
     StdLargeVec<Real> &rho_, &thickness_;
@@ -182,7 +182,7 @@ class ShellStressRelaxationFirstHalf : public BaseShellRelaxation
   public:
     explicit ShellStressRelaxationFirstHalf(BaseInnerRelation &inner_relation,
                                             int number_of_gaussian_points = 3, bool hourglass_control = false);
-    virtual ~ShellStressRelaxationFirstHalf(){};
+    virtual ~ShellStressRelaxationFirstHalf() {};
     void initialization(size_t index_i, Real dt = 0.0);
 
     inline void interaction(size_t index_i, Real dt = 0.0)
@@ -232,6 +232,19 @@ class ShellStressRelaxationFirstHalf : public BaseShellRelaxation
         /** the relation between pseudo-normal and rotations */
         Vecd local_dpseudo_n_d2t = transformation_matrix_[index_i] * dpseudo_n_d2t_[index_i];
         dangular_vel_dt_[index_i] = getRotationFromPseudoNormalForFiniteDeformation(local_dpseudo_n_d2t, rotation_[index_i], angular_vel_[index_i], dt);
+
+        if (!acc_[index_i].allFinite())
+        {
+            std::cout << "NaN detected in acceleration calculation at particle " << index_i << std::endl;
+            std::cout << "Acceleration: " << acceleration << std::endl;
+            throw std::runtime_error("Integration1stHalf::interaction, NaN detected in acceleration calculation.");
+        }
+        if (!dangular_vel_dt_[index_i].allFinite())
+        {
+            std::cout << "NaN detected in angular velocity calculation at particle " << index_i << std::endl;
+            std::cout << "Angular velocity: " << dangular_vel_dt_[index_i] << std::endl;
+            throw std::runtime_error("Integration1stHalf::interaction, NaN detected in angular velocity calculation.");
+        }
     };
 
     void update(size_t index_i, Real dt = 0.0);
@@ -269,8 +282,8 @@ class ShellStressRelaxationSecondHalf : public BaseShellRelaxation
 {
   public:
     explicit ShellStressRelaxationSecondHalf(BaseInnerRelation &inner_relation)
-        : BaseShellRelaxation(inner_relation){};
-    virtual ~ShellStressRelaxationSecondHalf(){};
+        : BaseShellRelaxation(inner_relation) {};
+    virtual ~ShellStressRelaxationSecondHalf() {};
     void initialization(size_t index_i, Real dt = 0.0);
 
     inline void interaction(size_t index_i, Real dt = 0.0)
@@ -293,6 +306,19 @@ class ShellStressRelaxationSecondHalf : public BaseShellRelaxation
         dF_dt_[index_i] = transformation_matrix_i * deformation_gradient_change_rate_part_one * transformation_matrix_i.transpose() * B_[index_i];
         dF_dt_[index_i].col(Dimensions - 1) = transformation_matrix_i * dpseudo_n_dt_[index_i];
         dF_bending_dt_[index_i] = transformation_matrix_i * deformation_gradient_change_rate_part_two * transformation_matrix_i.transpose() * B_[index_i];
+
+        if (!dF_dt_[index_i].allFinite())
+        {
+            std::cout << "NaN detected in deformation gradient change rate calculation at particle " << index_i << std::endl;
+            std::cout << "Deformation gradient change rate: " << dF_dt_[index_i] << std::endl;
+            throw std::runtime_error("Integration2ndHalf::interaction, NaN detected in deformation gradient change rate calculation.");
+        }
+        if (!dF_bending_dt_[index_i].allFinite())
+        {
+            std::cout << "NaN detected in bending deformation gradient change rate calculation at particle " << index_i << std::endl;
+            std::cout << "Bending deformation gradient change rate: " << dF_bending_dt_[index_i] << std::endl;
+            throw std::runtime_error("Integration2ndHalf::interaction, NaN detected in bending deformation gradient change rate calculation.");
+        }
     };
 
     void update(size_t index_i, Real dt = 0.0);
@@ -305,7 +331,7 @@ class ConstrainShellBodyRegion : public BaseLocalDynamics<BodyPartByParticle>, p
 {
   public:
     ConstrainShellBodyRegion(BodyPartByParticle &body_part);
-    virtual ~ConstrainShellBodyRegion(){};
+    virtual ~ConstrainShellBodyRegion() {};
     void update(size_t index_i, Real dt = 0.0);
 
   protected:
@@ -321,7 +347,7 @@ class ConstrainShellBodyRegionAlongAxis : public BaseLocalDynamics<BodyPartByPar
 {
   public:
     ConstrainShellBodyRegionAlongAxis(BodyPartByParticle &body_part, int axis);
-    virtual ~ConstrainShellBodyRegionAlongAxis(){};
+    virtual ~ConstrainShellBodyRegionAlongAxis() {};
     void update(size_t index_i, Real dt = 0.0);
 
   protected:
@@ -352,11 +378,11 @@ class DistributingPointForcesToShell : public LocalDynamics, public ShellDataSim
     DistributingPointForcesToShell(SPHBody &sph_body, std::vector<Vecd> point_forces,
                                    std::vector<Vecd> reference_positions, Real time_to_full_external_force,
                                    Real particle_spacing_ref, Real h_spacing_ratio = 1.6);
-    virtual ~DistributingPointForcesToShell(){};
+    virtual ~DistributingPointForcesToShell() {};
 
     virtual void setupDynamics(Real dt = 0.0) override;
     void update(size_t index_i, Real dt = 0.0);
 };
 } // namespace thin_structure_dynamics
 } // namespace SPH
-#endif // THIN_STRUCTURE_DYNAMICS_H
+#endif // VIRTOSIM_THIN_STRUCTURE_DYNAMICS_H_D0B7D58E_C2CB_4B50_9E8A_4352E73D85C9

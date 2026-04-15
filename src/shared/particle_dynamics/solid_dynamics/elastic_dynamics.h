@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef ELASTIC_DYNAMICS_H
-#define ELASTIC_DYNAMICS_H
+#ifndef VIRTOSIM_ELASTIC_DYNAMICS_H_D5C7BFAF_09FC_4074_84D4_BB57619CD17C
+#define VIRTOSIM_ELASTIC_DYNAMICS_H_D5C7BFAF_09FC_4074_84D4_BB57619CD17C
 
 #include "all_body_relations.h"
 #include "all_particle_dynamics.h"
@@ -186,26 +186,41 @@ class Integration1stHalf : public BaseIntegration1stHalf
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
             size_t index_j = inner_neighborhood.j_[n];
-            Vecd e_ij_0 = inner_neighborhood.e_ij_[n];
+            Vecd grad_W_ij0V_j0 = inner_neighborhood.dW_ijV_j_[n] * inner_neighborhood.e_ij_[n];
+            acceleration += inv_rho0_ * (stress_PK1_B_[index_i] + stress_PK1_B_[index_j]) * grad_W_ij0V_j0;
 
-            auto numerical_stress = [&]() -> Matd
+            // See ref: Gotoh, Takafumi & Sakoda, Daiki & Khayyer, Abbas & Lee, Chun Hean & Gil, Antonio & Gotoh, Hitoshi & Bonet, Javier. (2025). An enhanced total Lagrangian SPH for non-linear and finite strain elastic structural dynamics. Computational Mechanics. 76. 147-179. 10.1007/s00466-024-02592-z.
+            // Equation (26): a_i = sum_j 0.5 * beta * (c_cp * e_ij \otimes e_ij + c_sh * (I - e_ij \otimes eij)) * u_ij_R \otimes e_ij_0 * grad0W_0ijV_0j
+            // The notation is different from sphinxsys, with r_ij = r_j - r_i and u_ij = u_j - u_i
+            // Inside the lambda function, we follow the notation of the paper
+
+            // Definition of r_ij is r_j - r_i, see the paragraph below equation (8) in the paper
+            // e_ij_0 is hence defined as (r_j0 - r_i0) / |r_j0 - r_i0|, which is equivalent to -inner_neighborhood.e_ij_[n] since inner_neighborhood.e_ij_[n] is defined as (r_i0 - r_j0) / |r_i0 - r_j0|
+            Vecd e_ij_0 = -inner_neighborhood.e_ij_[n];
+
+            auto numerical_acc = [&]() -> Vecd
             {
-                Real c_cp = elastic_solid_.ReferenceSoundSpeed();
-                Real c_sh = elastic_solid_.ShearWaveSpeed();
-                Vecd r_ji_0 = -inner_neighborhood.r_ij_[n] * e_ij_0;
-                Vecd e_ji = (pos_[index_j] - pos_[index_i]).normalized();
-                Matd e_ji_eji = e_ji * e_ji.transpose();
-                Vecd ui_R = vel_[index_i] + 0.5 * dF_dt_[index_i] * r_ji_0;
-                Vecd uj_R = vel_[index_j] - 0.5 * dF_dt_[index_j] * r_ji_0;
-                Vecd u_ji_R = uj_R - ui_R;
+                Real c_cp = elastic_solid_.ReferenceSoundSpeed(); // pressure wave speed
+                Real c_sh = elastic_solid_.ShearWaveSpeed();      // shear wave speed
+
+                Vecd e_ij = (pos_[index_j] - pos_[index_i]).normalized(); // equivalent to r_ij / r_ij.norm() in the equation
+                Matd e_ij_eij = e_ij * e_ij.transpose();
+
+                // See equation (18)
+                Vecd r_ij_0 = inner_neighborhood.r_ij_[n] * e_ij_0; // r_ij_0 = r_j0 - r_i0
+                Vecd ui_R = vel_[index_i] + 0.5 * dF_dt_[index_i] * r_ij_0;
+                Vecd uj_R = vel_[index_j] - 0.5 * dF_dt_[index_j] * r_ij_0;
+                Vecd u_ij_R = uj_R - ui_R;
+
                 // only activate numerical dissipation when the particle pair is approaching
-                // double beta = SMAX(Real(0), SGN(-u_ji_R.dot(e_ji)));
-                return -0.5 * (c_cp * e_ji_eji + c_sh * (Matd::Identity() - e_ji_eji)) * rho0_ * u_ji_R * e_ij_0.transpose();
+                // See equation (17)
+                // Vecd u_ji_R = -u_ij_R;
+                // Real u_ji_R_dot_e_ij = u_ji_R.dot(e_ij);
+                // Real beta = SMAX(Real(0), u_ji_R_dot_e_ij / abs(u_ji_R_dot_e_ij));
+                return (0.5 * (c_cp * e_ij_eij + c_sh * (Matd::Identity() - e_ij_eij)) * u_ij_R * e_ij_0.transpose()) * grad_W_ij0V_j0;
             }();
 
-            acceleration += inv_rho0_ * inner_neighborhood.dW_ijV_j_[n] *
-                            (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] + numerical_stress) *
-                            e_ij_0;
+            acceleration += numerical_acc;
         }
 
         acc_[index_i] = acceleration;
@@ -329,4 +344,4 @@ class Integration2ndHalf : public BaseElasticIntegration
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // ELASTIC_DYNAMICS_H
+#endif // VIRTOSIM_ELASTIC_DYNAMICS_H_D5C7BFAF_09FC_4074_84D4_BB57619CD17C

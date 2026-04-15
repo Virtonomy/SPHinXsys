@@ -10,7 +10,6 @@ PlasticIntegration1stHalf::
     PlasticIntegration1stHalf(BaseInnerRelation &inner_relation) : Integration1stHalf(inner_relation),
                                                                    plastic_solid_(DynamicCast<PlasticSolid>(this, elastic_solid_))
 {
-    numerical_dissipation_factor_ = 0.5;
 }
 //=================================================================================================//
 void PlasticIntegration1stHalf::initialization(size_t index_i, Real dt)

@@ -175,10 +175,7 @@ class BaseIntegration1stHalf : public BaseElasticIntegration
 class Integration1stHalf : public BaseIntegration1stHalf
 {
   public:
-    // The numerical dissipation factor is used to increase the numerical stability of the solid, which is between 0 and 1
-    // The default value is set to 0.25, which is a common choice in practice.
-    // For soft solids in FSI simulations, a larger numerical dissipation factor may be needed to maintain stability
-    explicit Integration1stHalf(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor);
+    explicit Integration1stHalf(BaseInnerRelation &inner_relation);
     virtual ~Integration1stHalf() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
@@ -189,19 +186,26 @@ class Integration1stHalf : public BaseIntegration1stHalf
         for (size_t n = 0; n != inner_neighborhood.current_size_; ++n)
         {
             size_t index_j = inner_neighborhood.j_[n];
-            Vecd e_ij = inner_neighborhood.e_ij_[n];
-            Real r_ij = inner_neighborhood.r_ij_[n];
-            Real dim_r_ij_1 = Dimensions / r_ij;
-            Vecd pos_jump = pos_[index_i] - pos_[index_j];
-            Vecd vel_jump = vel_[index_i] - vel_[index_j];
-            Real strain_rate = dim_r_ij_1 * dim_r_ij_1 * pos_jump.dot(vel_jump);
-            Real weight = inner_neighborhood.W_ij_[n] * inv_W0_;
-            Matd numerical_stress_ij =
-                0.5 * (F_[index_i] + F_[index_j]) * elastic_solid_.PairNumericalDamping(strain_rate, smoothing_length_);
+            Vecd e_ij_0 = inner_neighborhood.e_ij_[n];
+
+            auto numerical_stress = [&]() -> Matd
+            {
+                Real c_cp = elastic_solid_.ReferenceSoundSpeed();
+                Real c_sh = elastic_solid_.ShearWaveSpeed();
+                Vecd r_ji_0 = -inner_neighborhood.r_ij_[n] * e_ij_0;
+                Vecd e_ji = (pos_[index_j] - pos_[index_i]).normalized();
+                Matd e_ji_eji = e_ji * e_ji.transpose();
+                Vecd ui_R = vel_[index_i] + 0.5 * dF_dt_[index_i] * r_ji_0;
+                Vecd uj_R = vel_[index_j] - 0.5 * dF_dt_[index_j] * r_ji_0;
+                Vecd u_ji_R = uj_R - ui_R;
+                // only activate numerical dissipation when the particle pair is approaching
+                // double beta = SMAX(Real(0), SGN(-u_ji_R.dot(e_ji)));
+                return -0.5 * (c_cp * e_ji_eji + c_sh * (Matd::Identity() - e_ji_eji)) * rho0_ * u_ji_R * e_ij_0.transpose();
+            }();
+
             acceleration += inv_rho0_ * inner_neighborhood.dW_ijV_j_[n] *
-                            (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] +
-                             numerical_dissipation_factor_ * weight * numerical_stress_ij) *
-                            e_ij;
+                            (stress_PK1_B_[index_i] + stress_PK1_B_[index_j] + numerical_stress) *
+                            e_ij_0;
         }
 
         acc_[index_i] = acceleration;
@@ -220,7 +224,7 @@ class Integration1stHalf : public BaseIntegration1stHalf
 class Integration1stHalfPK2 : public Integration1stHalf
 {
   public:
-    explicit Integration1stHalfPK2(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor = 0.25);
+    explicit Integration1stHalfPK2(BaseInnerRelation &inner_relation);
     virtual ~Integration1stHalfPK2() {};
     void initialization(size_t index_i, Real dt = 0.0);
 };
@@ -231,7 +235,7 @@ class Integration1stHalfPK2 : public Integration1stHalf
 class Integration1stHalfCauchy : public Integration1stHalf
 {
   public:
-    explicit Integration1stHalfCauchy(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor = 0.25);
+    explicit Integration1stHalfCauchy(BaseInnerRelation &inner_relation);
     virtual ~Integration1stHalfCauchy() {};
     void initialization(size_t index_i, Real dt = 0.0);
 };
@@ -243,7 +247,7 @@ class Integration1stHalfCauchy : public Integration1stHalf
 class Integration1stHalfKirchhoff : public Integration1stHalf
 {
   public:
-    explicit Integration1stHalfKirchhoff(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor = 0.25);
+    explicit Integration1stHalfKirchhoff(BaseInnerRelation &inner_relation);
     virtual ~Integration1stHalfKirchhoff() {};
     void initialization(size_t index_i, Real dt = 0.0);
 };

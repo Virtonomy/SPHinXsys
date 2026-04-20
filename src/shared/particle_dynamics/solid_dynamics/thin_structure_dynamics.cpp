@@ -125,6 +125,7 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
     n_[index_i] = transformation_matrix_[index_i].transpose() * getNormalFromDeformationGradientTensor(F_[index_i]);
     /** Get transformation matrix from global coordinates to current local coordinates. */
     Matd current_transformation_matrix = getTransformationMatrix(pseudo_n_[index_i]);
+    Matd Q = current_transformation_matrix * transformation_matrix_[index_i].transpose();
 
     Matd resultant_stress = Matd::Zero();
     Matd resultant_moment = Matd::Zero();
@@ -135,39 +136,47 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
         Matd F_gaussian_point = F_[index_i] + gaussian_point_[i] * F_bending_[index_i] * thickness_[index_i] * 0.5;
         Matd dF_gaussian_point_dt = dF_dt_[index_i] + gaussian_point_[i] * dF_bending_dt_[index_i] * thickness_[index_i] * 0.5;
         Matd inverse_F_gaussian_point = F_gaussian_point.inverse();
-        Matd current_local_almansi_strain = current_transformation_matrix * transformation_matrix_[index_i].transpose() * 0.5 *
-                                            (Matd::Identity() - inverse_F_gaussian_point.transpose() * inverse_F_gaussian_point) *
-                                            transformation_matrix_[index_i] * current_transformation_matrix.transpose();
-
-        {
-            // compute before
-
-            if (Mat3d stress_no_correction = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i); !stress_no_correction.allFinite())
-            {
-                std::cout << "NaN detected in stress calculation at particle " << index_i << std::endl;
-                std::cout << "Deformation gradient F: " << F_[index_i] << std::endl;
-                std::cout << "F bending: " << F_bending_[index_i] << std::endl;
-                std::cout << "J: " << F_gaussian_point.determinant() << std::endl;
-                throw std::runtime_error("ShellStressRelaxationFirstHalf::initialization, NaN detected in stress calculation before correction.");
-            }
-        }
+        Matd e_L = 0.5 * (Matd::Identity() - inverse_F_gaussian_point.transpose() * inverse_F_gaussian_point);
+        Matd current_local_almansi_strain = Q * e_L * Q.transpose();
 
         // current_local_almansi_strain(2, 2) = 0;
         Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
         if (!cauchy_stress.allFinite())
         {
-            std::cout << "NaN detected in stress calculation at particle " << index_i << std::endl;
-            std::cout << "Deformation gradient F: " << F_[index_i] << std::endl;
-            std::cout << "F bending: " << F_bending_[index_i] << std::endl;
-            std::cout << "J: " << F_gaussian_point.determinant() << std::endl;
-            throw std::runtime_error("ShellStressRelaxationFirstHalf::initialization, NaN detected in stress calculation at 1st correction.");
+            std::string info = "i = " + std::to_string(index_i) + ", Gaussian point = " + std::to_string(i);
+            info += "\nF_gaussian_point: " + std::to_string(F_gaussian_point(0, 0)) + " " + std::to_string(F_gaussian_point(0, 1)) + " " + std::to_string(F_gaussian_point(0, 2)) + "\n" +
+                    std::to_string(F_gaussian_point(1, 0)) + " " + std::to_string(F_gaussian_point(1, 1)) + " " + std::to_string(F_gaussian_point(1, 2)) + "\n" +
+                    std::to_string(F_gaussian_point(2, 0)) + " " + std::to_string(F_gaussian_point(2, 1)) + " " + std::to_string(F_gaussian_point(2, 2)) + "\n";
+            info += "\nQ = " + std::to_string(Q(0, 0)) + " " + std::to_string(Q(0, 1)) + " " + std::to_string(Q(0, 2)) + "\n" +
+                    std::to_string(Q(1, 0)) + " " + std::to_string(Q(1, 1)) + " " + std::to_string(Q(1, 2)) + "\n" +
+                    std::to_string(Q(2, 0)) + " " + std::to_string(Q(2, 1)) + " " + std::to_string(Q(2, 2)) + "\n";
+            info += "\ne_L: " + std::to_string(e_L(0, 0)) + " " + std::to_string(e_L(0, 1)) + " " + std::to_string(e_L(0, 2)) + "\n" +
+                    std::to_string(e_L(1, 0)) + " " + std::to_string(e_L(1, 1)) + " " + std::to_string(e_L(1, 2)) + "\n" +
+                    std::to_string(e_L(2, 0)) + " " + std::to_string(e_L(2, 1)) + " " + std::to_string(e_L(2, 2)) + "\n";
+            info += "\ncurrent_local_almansi_strain: " + std::to_string(current_local_almansi_strain(0, 0)) + " " + std::to_string(current_local_almansi_strain(0, 1)) + " " + std::to_string(current_local_almansi_strain(0, 2)) + "\n" +
+                    std::to_string(current_local_almansi_strain(1, 0)) + " " + std::to_string(current_local_almansi_strain(1, 1)) + " " + std::to_string(current_local_almansi_strain(1, 2)) + "\n" +
+                    std::to_string(current_local_almansi_strain(2, 0)) + " " + std::to_string(current_local_almansi_strain(2, 1)) + " " + std::to_string(current_local_almansi_strain(2, 2)) + "\n";
+            info += "\ndet(e_L): " + std::to_string(e_L.determinant()) + "\n";
+            info += "det(e_l): " + std::to_string(current_local_almansi_strain.determinant()) + "\n";
+            info += "B: " + std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(0, 0)) + " " +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(0, 1)) + " " +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(0, 2)) + "\n" +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(1, 0)) + " " +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(1, 1)) + " " +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(1, 2)) + "\n" +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(2, 0)) + " " +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(2, 1)) + " " +
+                    std::to_string(((-2.0 * current_local_almansi_strain + SPH::Mat3d::Identity()).inverse())(2, 2)) + "\n";
+            throw std::runtime_error(info);
         }
         { /// Enforce plane stress condition adapting algorithm from Sec. 5.4.1 from http://dx.doi.org/10.18419/opus-14215
           /// Differential geometry and the geometrically non-linear Reissner-Mindlin shell model
           /// @WARN Algorithm is not guaranteed to converge, see discussion in Sec. 5.4.1
           ///       even more so considering we do not reuse analytical derivatives.
 
-            double E = E0_; // Take the default Young's modulus of the material as the initial derivative.
+            // Based on the Cauchy stress and the inverse left Cauchy-Green tensor c = I-2*almansi_strain
+            // Initial secant is based on the linear elastic model
+            double slope = -0.5 * (elastic_solid_.BulkModulus() + 4.0 / 3.0 * elastic_solid_.ShearModulus());
             int it = 0;
             constexpr int max_iterations = 20; // @WARN hard-coded maximum number of iterations
 
@@ -179,7 +188,7 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
             E_history.reserve(max_iterations);
             s_history.push_back(cauchy_stress(2, 2));
             e_history.push_back(current_local_almansi_strain(2, 2));
-            E_history.push_back(E);
+            E_history.push_back(slope);
 
             constexpr auto infinity = std::numeric_limits<Real>::infinity();
             auto tolerance_sqr = [](const Matd &stress)
@@ -190,17 +199,22 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
                  s_next * s_next > tolerance_sqr(cauchy_stress) && it < max_iterations;
                  ++it)
             {
-                double e_prev = current_local_almansi_strain(2, 2);
                 double s_prev = cauchy_stress(2, 2);
-                double e_next = e_prev - s_prev / E;
+                Matd c = -2.0 * current_local_almansi_strain + Matd::Identity();
+                double c_prev = c(2, 2);
+                double d_c = -s_prev / slope;
+                double det_c = c.determinant();
+                double m_12 = c.block<2, 2>(0, 0).determinant();
+                double c_next = c_prev + det_c * std::expm1(d_c * m_12 / det_c) / m_12;
+                double e_next = 0.5 * (1.0 - c_next);
                 current_local_almansi_strain(2, 2) = e_next;
                 cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
                 s_next = cauchy_stress(2, 2);
-                E = (s_next - s_prev) / (e_next - e_prev);
+                slope = (s_next - s_prev) / (c_next - c_prev);
 
                 s_history.push_back(s_next);
                 e_history.push_back(e_next);
-                E_history.push_back(E);
+                E_history.push_back(slope);
             }
             if (cauchy_stress.allFinite() == false || it == max_iterations)
             {

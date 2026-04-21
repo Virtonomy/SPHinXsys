@@ -61,7 +61,7 @@ class ContactRelationCrossResolution : public BaseContactRelation
         }
         resizeConfiguration();
     };
-    virtual ~ContactRelationCrossResolution(){};
+    virtual ~ContactRelationCrossResolution() {};
 
   protected:
     StdVec<CellLinkedList *> target_cell_linked_lists_;
@@ -79,7 +79,7 @@ class ContactRelation : public ContactRelationCrossResolution
 
   public:
     ContactRelation(SPHBody &sph_body, RealBodyVector contact_bodies);
-    virtual ~ContactRelation(){};
+    virtual ~ContactRelation() {};
     virtual void updateConfiguration() override;
 
   protected:
@@ -102,9 +102,11 @@ class SurfaceContactRelation : public ContactRelationCrossResolution
     SurfaceContactRelation(SPHBody &sph_body, RealBodyVector contact_bodies);
     SurfaceContactRelation(SelfSurfaceContactRelation &solid_body_relation_self_contact,
                            RealBodyVector contact_bodies)
-        : SurfaceContactRelation(*solid_body_relation_self_contact.real_body_, contact_bodies){};
-    virtual ~SurfaceContactRelation(){};
+        : SurfaceContactRelation(*solid_body_relation_self_contact.real_body_, contact_bodies) {};
+    virtual ~SurfaceContactRelation() {};
     virtual void updateConfiguration() override;
+    auto &getContactNeighbors() { return get_contact_neighbors_; }
+    auto *getContactNeighbors(size_t k) { return get_contact_neighbors_[k]; }
 
   protected:
     IndexVector &body_part_particles_;
@@ -126,7 +128,7 @@ class ContactRelationToBodyPart : public ContactRelationCrossResolution
     StdVec<NeighborBuilderContactBodyPart *> get_part_contact_neighbors_;
 
     ContactRelationToBodyPart(SPHBody &sph_body, BodyPartVector contact_body_parts_);
-    virtual ~ContactRelationToBodyPart(){};
+    virtual ~ContactRelationToBodyPart() {};
 
     virtual void updateConfiguration() override;
 };
@@ -148,7 +150,7 @@ class AdaptiveContactRelation : public BaseContactRelation
 
   public:
     AdaptiveContactRelation(SPHBody &body, RealBodyVector contact_bodies);
-    virtual ~AdaptiveContactRelation(){};
+    virtual ~AdaptiveContactRelation() {};
 
     virtual void updateConfiguration() override;
 };

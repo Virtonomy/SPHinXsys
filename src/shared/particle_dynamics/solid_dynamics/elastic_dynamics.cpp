@@ -20,8 +20,10 @@ Real AcousticTimeStepSize::reduce(size_t index_i, Real dt)
 {
     // since the particle does not change its configuration in pressure relaxation step
     // I chose a time-step size according to Eulerian method
+    Real U = vel_[index_i].norm();
+    Real adpative_c = SMAX(U * 10.0, c0_);
     return CFL_ * SMIN((Real)sqrt(smoothing_length_ / ((acc_[index_i] + acc_prior_[index_i]).norm() + TinyReal)),
-                       smoothing_length_ / (c0_ + vel_[index_i].norm()));
+                       smoothing_length_ / (adpative_c + U));
 }
 //=================================================================================================//
 ElasticDynamicsInitialCondition::ElasticDynamicsInitialCondition(SPHBody &sph_body)

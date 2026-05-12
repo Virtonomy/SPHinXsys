@@ -56,6 +56,9 @@ ShellRepulsionFactor::ShellRepulsionFactor(SurfaceContactRelation &solid_body_co
 {
     for (size_t k = 0; k != contact_particles_.size(); ++k)
     {
+        auto *contact_kernel_k = solid_body_contact_relation.getContactNeighbors(k)->getKernel();
+        contact_kernels_.emplace_back(contact_kernel_k);
+
         Real dp_k = solid_body_contact_relation.contact_bodies_[k]->sph_adaptation_->ReferenceSpacing();
         Real average_spacing_k = 0.5 * particle_spacing_ + 0.5 * dp_k;
         Real h_ratio_k = particle_spacing_ / average_spacing_k;
@@ -65,10 +68,10 @@ ShellRepulsionFactor::ShellRepulsionFactor(SurfaceContactRelation &solid_body_co
         for (int l = 0; l != 3; ++l)
         {
             Real temp = three_gaussian_points_[l] * average_spacing_k * 0.5 + average_spacing_k * 0.5;
-            // Real contact_temp = 2.0 * (kernel_->W(h_ratio_k, temp, ZeroVecd) - offset_W_ij_[k]) *
-            //                     average_spacing_k * 0.5 * three_gaussian_weights_[l];
-            Real contact_temp = 2.0 * kernel_->W(h_ratio_k, temp, ZeroVecd) *
+            Real contact_temp = 2.0 * (kernel_->W(h_ratio_k, temp, ZeroVecd) - offset_W_ij_[k]) *
                                 average_spacing_k * 0.5 * three_gaussian_weights_[l];
+            // Real contact_temp = 2.0 * kernel_->W(h_ratio_k, temp, ZeroVecd) *
+            //                     average_spacing_k * 0.5 * three_gaussian_weights_[l];
             contact_max += Dimensions == 2 ? contact_temp : contact_temp * Pi * temp;
         }
         /** a calibration factor to avoid particle penetration into shell structure */
@@ -76,6 +79,30 @@ ShellRepulsionFactor::ShellRepulsionFactor(SurfaceContactRelation &solid_body_co
 
         contact_Vol_.push_back(&(contact_particles_[k]->Vol_));
     }
+}
+//=================================================================================================//
+void ShellRepulsionFactor::setupDynamics(Real dt)
+{
+    // for (size_t k = 0; k != contact_particles_.size(); ++k)
+    // {
+    //     const auto *kernel_k = contact_kernels_[k];
+    //     Real h_ave = kernel_k->SmoothingLength();
+    //     Real average_spacing_k = h_ave / 1.15;
+    //     offset_W_ij_[k] = kernel_k->W(average_spacing_k, ZeroVecd);
+
+    //     Real contact_max(0.0);
+    //     for (int l = 0; l != 3; ++l)
+    //     {
+    //         Real temp = three_gaussian_points_[l] * average_spacing_k * 0.5 + average_spacing_k * 0.5;
+    //         // Real contact_temp = 2.0 * (kernel_k->W(temp, ZeroVecd) - offset_W_ij_[k]) *
+    //         //                     average_spacing_k * 0.5 * three_gaussian_weights_[l];
+    //         Real contact_temp = 2.0 * kernel_k->W(temp, ZeroVecd) *
+    //                             average_spacing_k * 0.5 * three_gaussian_weights_[l];
+    //         contact_max += Dimensions == 2 ? contact_temp : contact_temp * Pi * temp;
+    //     }
+    //     /** a calibration factor to avoid particle penetration into shell structure */
+    //     calibration_factor_[k] = 1.0 / (contact_max + Eps);
+    // }
 }
 //=================================================================================================//
 SelfContactForce::

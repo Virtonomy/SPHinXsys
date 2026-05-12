@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_DC22A4EA_C580_4BCE_8EA3_8D3AF08200BD
-#define VIRTOSIM_CONTACT_DYNAMICS_H_DC22A4EA_C580_4BCE_8EA3_8D3AF08200BD
+#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_B3DBC1AE_D8D1_4938_ADA6_68D93BC4087F
+#define VIRTOSIM_CONTACT_DYNAMICS_H_B3DBC1AE_D8D1_4938_ADA6_68D93BC4087F
 
 #include "general_solid_dynamics.h"
 
@@ -96,8 +96,8 @@ class RepulsionFactorSummation : public RepulsionFactorAccessor, public LocalDyn
 
             for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
             {
-                // Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
-                sigma += contact_neighborhood.W_ij_[n] * contact_Vol_k[contact_neighborhood.j_[n]];
+                Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
+                sigma += corrected_W_ij * contact_Vol_k[contact_neighborhood.j_[n]];
             }
         }
         repulsion_factor_[index_i] = sigma;
@@ -116,6 +116,9 @@ class RepulsionFactorSummation : public RepulsionFactorAccessor, public LocalDyn
  */
 class ShellRepulsionFactor : public RepulsionFactorAccessor, public LocalDynamics, public ContactDynamicsData
 {
+  private:
+    StdLargeVec<Kernel *> contact_kernels_;
+
   public:
     explicit ShellRepulsionFactor(SurfaceContactRelation &solid_body_contact_relation);
     virtual ~ShellRepulsionFactor() {};
@@ -132,8 +135,9 @@ class ShellRepulsionFactor : public RepulsionFactorAccessor, public LocalDynamic
             Neighborhood &contact_neighborhood = (*contact_configuration_[k])[index_i];
             for (size_t n = 0; n != contact_neighborhood.current_size_; ++n)
             {
-                // Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
-                sigma += contact_neighborhood.W_ij_[n] * contact_Vol_k[contact_neighborhood.j_[n]];
+                Real corrected_W_ij = std::max(contact_neighborhood.W_ij_[n] - offset_W_ij_[k], Real(0));
+                sigma += corrected_W_ij * contact_Vol_k[contact_neighborhood.j_[n]];
+                // sigma += contact_neighborhood.W_ij_[n] * contact_Vol_k[contact_neighborhood.j_[n]];
             }
             constexpr Real heuristic_limiter = 0.1;
             // With heuristic_limiter, the maximum contact pressure is heuristic_limiter * K (Bulk modulus).
@@ -144,6 +148,8 @@ class ShellRepulsionFactor : public RepulsionFactorAccessor, public LocalDynamic
         }
         repulsion_factor_[index_i] = repulsion_factor_i;
     };
+
+    void setupDynamics(Real dt = 0.0) override;
 
   protected:
     Solid &solid_;
@@ -209,7 +215,7 @@ class ContactForce : public LocalDynamics, public ContactDynamicsData
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
-        Real K_1 = solid_.ContactStiffness(index_i);
+        Real K_1 = solid_.ContactStiffness();
         Real Vol_i = Vol_[index_i];
         Real sigma_i = repulsion_factor_[index_i];
         /** Contact interaction. */
@@ -228,7 +234,7 @@ class ContactForce : public LocalDynamics, public ContactDynamicsData
             {
                 size_t index_j = contact_neighborhood.j_[n];
 
-                Real K_2 = contact_solids_[k]->ContactStiffness(index_j);
+                Real K_2 = contact_solids_[k]->ContactStiffness();
                 Real contact_stiffness = 2 * K_1 * K_2 / (K_1 + K_2);
 
                 Vecd e_ij = contact_neighborhood.e_ij_[n];
@@ -265,7 +271,7 @@ class ContactForceFromWall : public LocalDynamics, public ContactWithWallData
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
-        Real K_1 = solid_.ContactStiffness(index_i);
+        Real K_1 = solid_.ContactStiffness();
         Real Vol_i = Vol_[index_i];
         Real p_i = repulsion_factor_[index_i] * K_1;
         /** Contact interaction. */
@@ -455,4 +461,4 @@ class DynamicContactForceWithWall : public LocalDynamics, public ContactDynamics
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // VIRTOSIM_CONTACT_DYNAMICS_H_DC22A4EA_C580_4BCE_8EA3_8D3AF08200BD
+#endif // VIRTOSIM_CONTACT_DYNAMICS_H_B3DBC1AE_D8D1_4938_ADA6_68D93BC4087F

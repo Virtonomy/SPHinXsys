@@ -19,6 +19,14 @@ Real ElasticSolid::PairNumericalDamping(Real dE_dt_ij, Real smoothing_length)
     return 0.5 * rho0_ * c0_ * dE_dt_ij * smoothing_length;
 }
 //=================================================================================================//
+Real ElasticSolid::PairNumericalDamping(Real dE_dt_ij, Real smoothing_length, size_t index_i, size_t index_j)
+{
+    Real rho_ic_i = ReferenceDensity(index_i) * ReferenceSoundSpeed(index_i);
+    Real rho_ic_j = ReferenceDensity(index_j) * ReferenceSoundSpeed(index_j);
+    Real rho_ic_ij = rho_ic_i * rho_ic_j / (rho_ic_i + rho_ic_j);
+    return rho_ic_ij * dE_dt_ij * smoothing_length;
+}
+//=================================================================================================//
 Matd ElasticSolid::DeviatoricKirchhoff(const Matd &deviatoric_be)
 {
     return G0_ * deviatoric_be;

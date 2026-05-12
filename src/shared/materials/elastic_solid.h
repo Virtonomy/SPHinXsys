@@ -29,8 +29,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef VIRTOSIM_ELASTIC_SOLID_H_B213AF30_F88D_40D1_BC39_D3182840010E
-#define VIRTOSIM_ELASTIC_SOLID_H_B213AF30_F88D_40D1_BC39_D3182840010E
+#ifndef VIRTOSIM_ELASTIC_SOLID_H_B3F32448_1BA4_4B65_A8F8_5FED22791C18
+#define VIRTOSIM_ELASTIC_SOLID_H_B3F32448_1BA4_4B65_A8F8_5FED22791C18
 
 #include "base_material.h"
 #include <fstream>
@@ -93,6 +93,7 @@ class ElasticSolid : public Solid
     }
     /** Numerical damping is computed between particles i and j */
     virtual Real PairNumericalDamping(Real dE_dt_ij, Real smoothing_length);
+    virtual Real PairNumericalDamping(Real dE_dt_ij, Real smoothing_length, size_t index_i, size_t index_j);
 
     /** Deviatoric Kirchhoff stress related with the deviatoric part of left Cauchy-Green deformation tensor.
      *  Note that, dependent of the normalization of the later, the returned stress can be normalized or non-normalized. */
@@ -338,4 +339,4 @@ class LocallyOrthotropicMuscle : public Muscle
     virtual std::string getRelevantStressMeasureName() override { return "Cauchy"; };
 };
 } // namespace SPH
-#endif // VIRTOSIM_ELASTIC_SOLID_H_B213AF30_F88D_40D1_BC39_D3182840010E
+#endif // VIRTOSIM_ELASTIC_SOLID_H_B3F32448_1BA4_4B65_A8F8_5FED22791C18

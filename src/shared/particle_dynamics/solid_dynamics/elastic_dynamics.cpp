@@ -20,8 +20,10 @@ Real AcousticTimeStepSize::reduce(size_t index_i, Real dt)
 {
     // since the particle does not change its configuration in pressure relaxation step
     // I chose a time-step size according to Eulerian method
+    Real U = vel_[index_i].norm();
+    Real adpative_c = SMAX(U * 10.0, c0_);
     return CFL_ * SMIN((Real)sqrt(smoothing_length_ / ((acc_[index_i] + acc_prior_[index_i]).norm() + TinyReal)),
-                       smoothing_length_ / (c0_ + vel_[index_i].norm()));
+                       smoothing_length_ / (adpative_c + U));
 }
 //=================================================================================================//
 ElasticDynamicsInitialCondition::ElasticDynamicsInitialCondition(SPHBody &sph_body)
@@ -71,7 +73,7 @@ Integration1stHalf::
 }
 //=================================================================================================//
 Integration1stHalfPK2::Integration1stHalfPK2(BaseInnerRelation &inner_relation)
-    : Integration1stHalf(inner_relation){};
+    : Integration1stHalf(inner_relation) {};
 //=================================================================================================//
 void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
 {
@@ -85,7 +87,7 @@ void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
 //=================================================================================================//
 Integration1stHalfKirchhoff::
     Integration1stHalfKirchhoff(BaseInnerRelation &inner_relation)
-    : Integration1stHalf(inner_relation){};
+    : Integration1stHalf(inner_relation) {};
 //=================================================================================================//
 void Integration1stHalfKirchhoff::initialization(size_t index_i, Real dt)
 {

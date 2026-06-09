@@ -142,11 +142,11 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
         current_local_almansi_strain(2, 2) = 0;
         Matd cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
         { /// Enforce plane stress condition adapting algorithm from Sec. 5.4.1 from http://dx.doi.org/10.18419/opus-14215
-          /// Differential geometry and the geometrically non-linear Reissner-Mindlin shell model
-          /// @WARN Algorithm is not guaranteed to converge, see discussion in Sec. 5.4.1
-          ///       even more so considering we do not reuse analytical derivatives.
-
-            double E = E0_; // Take the default Young's modulus of the material as the initial derivative.
+            /// Differential geometry and the geometrically non-linear Reissner-Mindlin shell model
+            /// @WARN Algorithm is not guaranteed to converge, see discussion in Sec. 5.4.1
+            ///       even more so considering we do not reuse analytical derivatives.
+            // Take lambda + 2mu as the initial derivative based on the linear material
+            double ds_de = elastic_solid_.BulkModulus() + 4.0 / 3.0 * elastic_solid_.ShearModulus();
             int it = 0;
             constexpr int max_iterations = 20; // @WARN hard-coded maximum number of iterations
             constexpr auto infinity = std::numeric_limits<Real>::infinity();
@@ -160,15 +160,14 @@ void ShellStressRelaxationFirstHalf::initialization(size_t index_i, Real dt)
             {
                 double e_prev = current_local_almansi_strain(2, 2);
                 double s_prev = cauchy_stress(2, 2);
-                double e_next = e_prev - s_prev / E;
+                double e_next = e_prev - s_prev / ds_de;
                 current_local_almansi_strain(2, 2) = e_next;
                 cauchy_stress = elastic_solid_.StressCauchy(current_local_almansi_strain, F_gaussian_point, index_i);
                 s_next = cauchy_stress(2, 2);
-                E = (s_next - s_prev) / (e_next - e_prev);
+                ds_de = (s_next - s_prev) / (e_next - e_prev);
             }
             if (cauchy_stress.allFinite() == false || it == max_iterations)
                 throw std::runtime_error("[ShellStressRelaxationFirstHalf::initialization] Enforcing plane stress condition failed for particle with unsorted_id: " + std::to_string(unsorted_id_[index_i]) + " in object: " + sph_body_.getName() + "\nWith normal stress in the out-of-plane direction: " + std::to_string(cauchy_stress(2, 2)));
-
         }
         /// Impact of including numerical damping in the algorithm above unclear
         /// Left here in absence of discriminating factors

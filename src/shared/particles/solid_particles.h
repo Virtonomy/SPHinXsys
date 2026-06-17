@@ -26,8 +26,8 @@
  * @author	Chi Zhang, Dong Wu and Xiangyu Hu
  */
 
-#ifndef SOLID_PARTICLES_H
-#define SOLID_PARTICLES_H
+#ifndef VIRTOSIM_SOLID_PARTICLES_H_D48B63F3_F82E_48D4_8F2B_C76F32C36090
+#define VIRTOSIM_SOLID_PARTICLES_H_D48B63F3_F82E_48D4_8F2B_C76F32C36090
 
 #include "base_particles.h"
 #include "base_particles.hpp"
@@ -50,13 +50,13 @@ class SolidParticles : public BaseParticles
 {
   public:
     SolidParticles(SPHBody &sph_body, Solid *solid);
-    virtual ~SolidParticles(){};
+    SolidParticles(SPHBody &sph_body, BaseMaterial *solid);
+    virtual ~SolidParticles() {};
 
     StdLargeVec<Vecd> pos0_; /**< initial position */
     StdLargeVec<Vecd> n_;    /**< normal direction */
     StdLargeVec<Vecd> n0_;   /**< initial normal direction */
     StdLargeVec<Matd> B_;    /**< configuration correction for linear reproducing */
-    Solid &solid_;
 
     /** Get wall average velocity when interacting with fluid. */
     virtual StdLargeVec<Vecd> *AverageVelocity() { return &vel_; };
@@ -66,6 +66,12 @@ class SolidParticles : public BaseParticles
     virtual void initializeOtherVariables() override;
     /** Return this pointer. */
     virtual SolidParticles *ThisObjectPtr() override { return this; };
+
+  private:
+    Solid *solid_data_ = nullptr;
+
+  public:
+    Solid &solid_;
 };
 
 /**
@@ -76,11 +82,12 @@ class ElasticSolidParticles : public SolidParticles
 {
   public:
     ElasticSolidParticles(SPHBody &sph_body, ElasticSolid *elastic_solid);
-    virtual ~ElasticSolidParticles(){};
+    ElasticSolidParticles(SPHBody &sph_body, BaseMaterial *elastic_solid);
+
+    virtual ~ElasticSolidParticles() {};
 
     StdLargeVec<Matd> F_;     /**<  deformation tensor */
     StdLargeVec<Matd> dF_dt_; /**<  deformation tensor change rate */
-    ElasticSolid &elastic_solid_;
     //----------------------------------------------------------------------
     //		for fluid-structure interaction (FSI)
     //----------------------------------------------------------------------
@@ -139,6 +146,12 @@ class ElasticSolidParticles : public SolidParticles
     virtual void initializeOtherVariables() override;
     /** Return this pointer. */
     virtual ElasticSolidParticles *ThisObjectPtr() override { return this; };
+
+  private:
+    ElasticSolid *elastic_solid_data_;
+
+  public:
+    ElasticSolid &elastic_solid_;
 };
 
 /**
@@ -149,7 +162,7 @@ class ShellParticles : public ElasticSolidParticles
 {
   public:
     ShellParticles(SPHBody &sph_body, ElasticSolid *elastic_solid);
-    virtual ~ShellParticles(){};
+    virtual ~ShellParticles() {};
 
     Real thickness_ref_;                      /**< Shell thickness. */
     StdLargeVec<Matd> transformation_matrix_; /**< initial transformation matrix from global to local coordinates */
@@ -196,7 +209,5 @@ class ShellParticles : public ElasticSolidParticles
     virtual ShellParticles *ThisObjectPtr() override { return this; };
 };
 
-
-
-}
-#endif // SOLID_PARTICLES_H
+} // namespace SPH
+#endif // VIRTOSIM_SOLID_PARTICLES_H_D48B63F3_F82E_48D4_8F2B_C76F32C36090

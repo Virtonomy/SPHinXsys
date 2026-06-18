@@ -43,6 +43,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <Eigen/Geometry>
+#include <unsupported/Eigen/Splines>
 
 namespace SPH
 {
@@ -110,6 +111,11 @@ template <>
 struct ZeroData<int>
 {
     static inline int value = 0;
+};
+template <>
+struct ZeroData<Eigen::Spline<Real, 1>>
+{
+    static inline Eigen::Spline<Real, 1> value = Eigen::Spline<Real, 1>();
 };
 /** Type trait for data type index. */
 template <typename T>

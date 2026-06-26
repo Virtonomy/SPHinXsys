@@ -28,8 +28,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef FLUID_SURFACE_COMPLEX_H
-#define FLUID_SURFACE_COMPLEX_H
+#ifndef VIRTOSIM_FLUID_SURFACE_COMPLEX_H_A72FE1EB_7943_4903_BB70_3000ABECD2AB
+#define VIRTOSIM_FLUID_SURFACE_COMPLEX_H_A72FE1EB_7943_4903_BB70_3000ABECD2AB
 
 #include "fluid_dynamics_complex.hpp"
 #include "fluid_surface_inner.hpp"
@@ -42,13 +42,21 @@ namespace fluid_dynamics
  * @class FreeSurfaceIndicationComplex
  * @brief indicate the particles near the free fluid surface.
  */
-class FreeSurfaceIndicationComplex : public FreeSurfaceIndicationInner, public FluidContactData
+class FreeSurfaceIndicationComplex : public BaseInteractionComplex<FreeSurfaceIndicationInner, FluidContactData>
 {
   public:
-    FreeSurfaceIndicationComplex(BaseInnerRelation &inner_relation,
-                                 BaseContactRelation &contact_relation, Real threshold = 0.75);
-    explicit FreeSurfaceIndicationComplex(ComplexRelation &complex_relation, Real threshold = 0.75);
-    virtual ~FreeSurfaceIndicationComplex(){};
+    template <typename... Args>
+    explicit FreeSurfaceIndicationComplex(Args &&...args)
+        : BaseInteractionComplex<FreeSurfaceIndicationInner, FluidContactData>(std::forward<Args>(args)...)
+    {
+        for (size_t k = 0; k != contact_particles_.size(); ++k)
+        {
+            Real rho0_k = contact_bodies_[k]->base_material_->ReferenceDensity();
+            contact_inv_rho0_.push_back(1.0 / rho0_k);
+            contact_mass_.push_back(&(contact_particles_[k]->mass_));
+        }
+    }
+    virtual ~FreeSurfaceIndicationComplex() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -89,7 +97,7 @@ class ColorFunctionGradientComplex : public ColorFunctionGradientInner, public F
   public:
     ColorFunctionGradientComplex(BaseInnerRelation &inner_relation, BaseContactRelation &contact_relation);
     ColorFunctionGradientComplex(ComplexRelation &complex_relation);
-    virtual ~ColorFunctionGradientComplex(){};
+    virtual ~ColorFunctionGradientComplex() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -123,7 +131,7 @@ class SurfaceNormWithWall : public LocalDynamics, public FSIContactData
 {
   public:
     SurfaceNormWithWall(BaseContactRelation &contact_relation, Real contact_angle);
-    virtual ~SurfaceNormWithWall(){};
+    virtual ~SurfaceNormWithWall() {};
 
     inline void interaction(size_t index_i, Real dt = 0.0)
     {
@@ -177,4 +185,4 @@ class SurfaceNormWithWall : public LocalDynamics, public FSIContactData
 };
 } // namespace fluid_dynamics
 } // namespace SPH
-#endif // FLUID_SURFACE_COMPLEX_H
+#endif // VIRTOSIM_FLUID_SURFACE_COMPLEX_H_A72FE1EB_7943_4903_BB70_3000ABECD2AB

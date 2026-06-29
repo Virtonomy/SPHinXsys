@@ -63,15 +63,14 @@ void BaseIntegration1stHalf::update(size_t index_i, Real dt)
 }
 //=================================================================================================//
 Integration1stHalf::
-    Integration1stHalf(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor)
-    : BaseIntegration1stHalf(inner_relation),
-      numerical_dissipation_factor_(numerical_dissipation_factor)
+    Integration1stHalf(BaseInnerRelation &inner_relation)
+    : BaseIntegration1stHalf(inner_relation)
 {
     particles_->registerVariable(stress_PK1_B_, "CorrectedStressPK1");
 }
 //=================================================================================================//
-Integration1stHalfPK2::Integration1stHalfPK2(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor)
-    : Integration1stHalf(inner_relation, numerical_dissipation_factor) {};
+Integration1stHalfPK2::Integration1stHalfPK2(BaseInnerRelation &inner_relation)
+    : Integration1stHalf(inner_relation) {};
 //=================================================================================================//
 void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
 {
@@ -84,8 +83,8 @@ void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
 }
 //=================================================================================================//
 Integration1stHalfKirchhoff::
-    Integration1stHalfKirchhoff(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor)
-    : Integration1stHalf(inner_relation, numerical_dissipation_factor) {};
+    Integration1stHalfKirchhoff(BaseInnerRelation &inner_relation)
+    : Integration1stHalf(inner_relation) {};
 //=================================================================================================//
 void Integration1stHalfKirchhoff::initialization(size_t index_i, Real dt)
 {
@@ -108,8 +107,8 @@ void Integration1stHalfKirchhoff::initialization(size_t index_i, Real dt)
 }
 //=================================================================================================//
 Integration1stHalfCauchy::
-    Integration1stHalfCauchy(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor)
-    : Integration1stHalf(inner_relation, numerical_dissipation_factor) {}
+    Integration1stHalfCauchy(BaseInnerRelation &inner_relation)
+    : Integration1stHalf(inner_relation) {}
 //=================================================================================================//
 void Integration1stHalfCauchy::initialization(size_t index_i, Real dt)
 {

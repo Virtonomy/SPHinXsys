@@ -71,7 +71,8 @@ Integration1stHalf::
 }
 //=================================================================================================//
 Integration1stHalfPK2::Integration1stHalfPK2(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor)
-    : Integration1stHalf(inner_relation, numerical_dissipation_factor) {};
+    : Integration1stHalf(inner_relation, numerical_dissipation_factor),
+      kernel_sum_gamma_(*particles_->registerSharedVariable<Real>("kernel_sum_gamma")) {};
 //=================================================================================================//
 void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
 {
@@ -80,7 +81,9 @@ void Integration1stHalfPK2::initialization(size_t index_i, Real dt)
     rho_[index_i] = rho0_ / F_[index_i].determinant();
     // obtain the first Piola-Kirchhoff stress from the second Piola-Kirchhoff stress
     // it seems using reproducing correction here increases convergence rate near the free surface
-    stress_PK1_B_[index_i] = elastic_solid_.StressPK1(F_[index_i], index_i) * B_[index_i];
+    stress_PK1_B_[index_i] = elastic_solid_.StressPK1(F_[index_i], index_i);
+    if (kernel_sum_gamma_[index_i] > 0.9)
+        stress_PK1_B_[index_i] = stress_PK1_B_[index_i] * B_[index_i];
 }
 //=================================================================================================//
 Integration1stHalfKirchhoff::

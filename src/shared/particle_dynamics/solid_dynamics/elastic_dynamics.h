@@ -223,6 +223,9 @@ class Integration1stHalfPK2 : public Integration1stHalf
     explicit Integration1stHalfPK2(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor = 0.25);
     virtual ~Integration1stHalfPK2() {};
     void initialization(size_t index_i, Real dt = 0.0);
+
+  private:
+    StdLargeVec<Real> &kernel_sum_gamma_;
 };
 
 /** @class Integration1stHalfCauchy

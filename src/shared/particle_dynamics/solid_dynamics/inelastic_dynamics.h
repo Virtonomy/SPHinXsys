@@ -45,8 +45,8 @@ class PlasticIntegration1stHalf
     : public Integration1stHalf
 {
   public:
-    PlasticIntegration1stHalf(BaseInnerRelation &inner_relation);
-    virtual ~PlasticIntegration1stHalf(){};
+    PlasticIntegration1stHalf(BaseInnerRelation &inner_relation, Real numerical_dissipation_factor = 0.5);
+    virtual ~PlasticIntegration1stHalf() {};
     void initialization(size_t index_i, Real dt = 0.0);
 
   protected:

@@ -131,20 +131,11 @@ void Oldroyd_BIntegration2ndHalfWithWall::
 }
 //=================================================================================================//
 template <class BaseIntegrationType>
-template <class BaseBodyRelationType, typename... Args>
+template <typename... Args>
 InteractionWithWall<BaseIntegrationType>::
-    InteractionWithWall(BaseContactRelation &wall_contact_relation,
-                        BaseBodyRelationType &base_body_relation, Args &&...args)
-    : BaseIntegrationType(base_body_relation, std::forward<Args>(args)...),
-      FluidWallData(wall_contact_relation)
+    InteractionWithWall(Args &&...args)
+    : BaseInteractionComplex<BaseIntegrationType, FluidWallData>(std::forward<Args>(args)...)
 {
-    if (&base_body_relation.getSPHBody() != &wall_contact_relation.getSPHBody())
-    {
-        std::cout << "\n Error: the two body_relations do not have the same source body!" << std::endl;
-        std::cout << __FILE__ << ':' << __LINE__ << std::endl;
-        exit(1);
-    }
-
     for (size_t k = 0; k != FluidWallData::contact_particles_.size(); ++k)
     {
         Real rho0_k = FluidWallData::contact_bodies_[k]->base_material_->ReferenceDensity();

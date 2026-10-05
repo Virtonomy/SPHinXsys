@@ -49,7 +49,7 @@ class BaseIntegration1stHalfCorrectWithWall : public InteractionWithWall<BaseInt
     template <typename... Args>
     BaseIntegration1stHalfCorrectWithWall(Args &&...args)
         : InteractionWithWall<BaseIntegration1stHalfCorrectType>(std::forward<Args>(args)...){};
-    virtual ~BaseIntegration1stHalfCorrectWithWall(){};
+    virtual ~BaseIntegration1stHalfCorrectWithWall() {};
     void interaction(size_t index_i, Real dt = 0.0);
 };
 

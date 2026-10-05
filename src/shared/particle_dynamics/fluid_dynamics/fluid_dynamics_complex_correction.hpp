@@ -14,7 +14,7 @@ void BaseIntegration1stHalfCorrectWithWall<BaseIntegration1stHalfCorrectType>::i
 
     Vecd acc_prior_i = this->acc_prior_[index_i];
 
-    Vecd acceleration = Vecd::Zero();
+    Vecd grad_p_i = Vecd::Zero();
     Real rho_dissipation(0);
     for (size_t k = 0; k < FluidWallData::contact_configuration_.size(); ++k)
     {
@@ -29,11 +29,11 @@ void BaseIntegration1stHalfCorrectWithWall<BaseIntegration1stHalfCorrectType>::i
 
             Real face_wall_external_acceleration = (acc_prior_i - acc_ave_k[index_j]).dot(-e_ij);
             Real p_in_wall = this->p_[index_i] + this->rho_[index_i] * r_ij * SMAX(Real(0), face_wall_external_acceleration);
-            acceleration -= (this->p_[index_i] + p_in_wall) * this->B_[index_i] * e_ij * dW_ijV_j;
+            grad_p_i -= (this->p_[index_i] + p_in_wall) * this->B_[index_i] * e_ij * dW_ijV_j;
             rho_dissipation += this->riemann_solver_.DissipativeUJump(this->p_[index_i] - p_in_wall) * dW_ijV_j;
         }
     }
-    this->acc_[index_i] += acceleration / this->rho_[index_i];
+    this->acc_[index_i] += grad_p_i / this->rho_[index_i];
     this->drho_dt_[index_i] += rho_dissipation * this->rho_[index_i];
 }
 //=================================================================================================//

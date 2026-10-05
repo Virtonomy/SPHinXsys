@@ -9,7 +9,7 @@ CorrectedConfigurationInner::
     : LocalDynamics(inner_relation.getSPHBody()),
       GeneralDataDelegateInner(inner_relation),
       beta_(beta), alpha_(alpha),
-      B_(*particles_->getVariableByName<Matd>("CorrectionMatrix")) {}
+      B_(*particles_->registerSharedVariable<Matd>("CorrectionMatrix", Matd::Identity())) {}
 //=================================================================================================//
 void CorrectedConfigurationInner::interaction(size_t index_i, Real dt)
 {

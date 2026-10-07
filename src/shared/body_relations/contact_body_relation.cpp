@@ -27,9 +27,9 @@ void ContactRelation::updateConfiguration()
     }
 }
 //=================================================================================================//
-SurfaceContactRelation::SurfaceContactRelation(SPHBody &sph_body, RealBodyVector contact_bodies)
+SurfaceContactRelation::SurfaceContactRelation(SPHBody &sph_body, RealBodyVector contact_bodies, Real layer_thickness)
     : ContactRelationCrossResolution(sph_body, contact_bodies),
-      body_surface_layer_(shape_surface_ptr_keeper_.createPtr<BodySurfaceLayer>(sph_body)),
+      body_surface_layer_(shape_surface_ptr_keeper_.createPtr<BodySurfaceLayer>(sph_body, layer_thickness)),
       body_part_particles_(body_surface_layer_->body_part_particles_)
 {
     for (size_t k = 0; k != contact_bodies_.size(); ++k)

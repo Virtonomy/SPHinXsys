@@ -157,7 +157,7 @@ class BodySurface : public BodyPartByParticle
 class BodySurfaceLayer : public BodyPartByParticle
 {
   public:
-    explicit BodySurfaceLayer(SPHBody &sph_body, Real layer_thickness = 0.7);
+    explicit BodySurfaceLayer(SPHBody &sph_body, Real layer_thickness = 1.0);
     virtual ~BodySurfaceLayer() {};
 
   private:

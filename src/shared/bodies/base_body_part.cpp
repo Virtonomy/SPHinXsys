@@ -64,6 +64,10 @@ BodySurfaceLayer::BodySurfaceLayer(SPHBody &sph_body, Real layer_thickness)
     : BodyPartByParticle(sph_body, "InnerLayers"),
       thickness_threshold_(sph_body.sph_adaptation_->ReferenceSpacing() * layer_thickness)
 {
+    // Check if the layer thickness is valid
+    if (layer_thickness <= 0 || std::isnan(layer_thickness))
+        throw std::invalid_argument("BodySurfaceLayer::BodySurfaceLayer: Layer thickness must be positive.");
+
     pos_ = [this]()
     {
         if (auto *pos0 = base_particles_.getVariableByName<Vecd>("InitialPosition"))

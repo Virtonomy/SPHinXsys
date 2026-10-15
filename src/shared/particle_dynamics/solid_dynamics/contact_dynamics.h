@@ -27,8 +27,8 @@
  * @author	Chi Zhang and Xiangyu Hu
  */
 
-#ifndef CONTACT_DYNAMICS_H
-#define CONTACT_DYNAMICS_H
+#ifndef VIRTOSIM_CONTACT_DYNAMICS_H_E112B3B6_252F_4E14_AE18_2C6CF5D254BE
+#define VIRTOSIM_CONTACT_DYNAMICS_H_E112B3B6_252F_4E14_AE18_2C6CF5D254BE
 
 #include "general_solid_dynamics.h"
 
@@ -52,7 +52,7 @@ class RepulsionFactorAccessor
  * @class SelfRepulsionFactorSummation
  * @brief Computing the summation repulsion factor due to solid self-contact model.
  */
-class SelfRepulsionFactorSummation : public RepulsionFactorAccessor, public LocalDynamics, public SolidDataInner
+class SelfRepulsionFactorSummation : public RepulsionFactorAccessor, public BaseLocalDynamics<BodyPartByParticle>, public SolidDataInner
 {
   public:
     explicit SelfRepulsionFactorSummation(SelfSurfaceContactRelation &self_contact_relation);
@@ -79,7 +79,7 @@ class SelfRepulsionFactorSummation : public RepulsionFactorAccessor, public Loca
  * @class RepulsionFactorSummation
  * @brief Computing the summation repulsion factor due to solid-solid contact model.
  */
-class RepulsionFactorSummation : public RepulsionFactorAccessor, public LocalDynamics, public ContactDynamicsData
+class RepulsionFactorSummation : public RepulsionFactorAccessor, public BaseLocalDynamics<BodyPartByParticle>, public ContactDynamicsData
 {
   public:
     explicit RepulsionFactorSummation(SurfaceContactRelation &solid_body_contact_relation);
@@ -114,7 +114,7 @@ class RepulsionFactorSummation : public RepulsionFactorAccessor, public LocalDyn
  * @brief Computing the repulsion factor due to shell contact using a
  * 		 surface integral being solved by Gauss-Legendre quadrature integration.
  */
-class ShellRepulsionFactor : public RepulsionFactorAccessor, public LocalDynamics, public ContactDynamicsData
+class ShellRepulsionFactor : public RepulsionFactorAccessor, public BaseLocalDynamics<BodyPartByParticle>, public ContactDynamicsData
 {
   public:
     explicit ShellRepulsionFactor(SurfaceContactRelation &solid_body_contact_relation);
@@ -163,7 +163,7 @@ class ShellRepulsionFactor : public RepulsionFactorAccessor, public LocalDynamic
  * @class SelfContactForce
  * @brief Computing the self-contact force.
  */
-class SelfContactForce : public LocalDynamics, public SolidDataInner
+class SelfContactForce : public BaseLocalDynamics<BodyPartByParticle>, public SolidDataInner
 {
   public:
     explicit SelfContactForce(SelfSurfaceContactRelation &self_contact_relation);
@@ -201,7 +201,7 @@ class SelfContactForce : public LocalDynamics, public SolidDataInner
  * @class ContactForce
  * @brief Computing the contact force.
  */
-class ContactForce : public LocalDynamics, public ContactDynamicsData
+class ContactForce : public BaseLocalDynamics<BodyPartByParticle>, public ContactDynamicsData
 {
   public:
     explicit ContactForce(SurfaceContactRelation &solid_body_contact_relation);
@@ -252,7 +252,7 @@ class ContactForce : public LocalDynamics, public ContactDynamicsData
  *  Note that the body surface of the wall should be
  *  updated before computing the contact force.
  */
-class ContactForceFromWall : public LocalDynamics, public ContactWithWallData
+class ContactForceFromWall : public BaseLocalDynamics<BodyPartByParticle>, public ContactWithWallData
 {
   public:
     explicit ContactForceFromWall(SurfaceContactRelation &solid_body_contact_relation);
@@ -288,7 +288,7 @@ class ContactForceFromWall : public LocalDynamics, public ContactWithWallData
  * @class ContactForceToWall
  * @brief Computing contact force acting on a rigid wall.
  */
-class ContactForceToWall : public LocalDynamics, public ContactDynamicsData
+class ContactForceToWall : public BaseLocalDynamics<BodyPartByParticle>, public ContactDynamicsData
 {
   public:
     explicit ContactForceToWall(SurfaceContactRelation &solid_body_contact_relation);
@@ -394,7 +394,7 @@ class PairwiseFrictionFromWall : public LocalDynamics, public ContactWithWallDat
  *  Note that the body surface of the wall should be
  *  updated before computing the contact force.
  */
-class DynamicContactForceWithWall : public LocalDynamics, public ContactDynamicsData
+class DynamicContactForceWithWall : public BaseLocalDynamics<BodyPartByParticle>, public ContactDynamicsData
 {
   public:
     explicit DynamicContactForceWithWall(SurfaceContactRelation &solid_body_contact_relation, Real penalty_strength = 1.0);
@@ -449,4 +449,4 @@ class DynamicContactForceWithWall : public LocalDynamics, public ContactDynamics
 };
 } // namespace solid_dynamics
 } // namespace SPH
-#endif // CONTACT_DYNAMICS_H
+#endif // VIRTOSIM_CONTACT_DYNAMICS_H_E112B3B6_252F_4E14_AE18_2C6CF5D254BE

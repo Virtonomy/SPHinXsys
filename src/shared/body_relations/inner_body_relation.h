@@ -46,7 +46,7 @@ class InnerRelation : public BaseInnerRelation
 
   public:
     explicit InnerRelation(RealBody &real_body);
-    virtual ~InnerRelation(){};
+    virtual ~InnerRelation() {};
 
     virtual void updateConfiguration() override;
 };
@@ -68,7 +68,7 @@ class AdaptiveInnerRelation : public BaseInnerRelation
 
   public:
     explicit AdaptiveInnerRelation(RealBody &real_body);
-    virtual ~AdaptiveInnerRelation(){};
+    virtual ~AdaptiveInnerRelation() {};
 
     virtual void updateConfiguration() override;
 };
@@ -82,8 +82,8 @@ class SelfSurfaceContactRelation : public BaseInnerRelation
   public:
     BodySurfaceLayer body_surface_layer_;
 
-    explicit SelfSurfaceContactRelation(RealBody &real_body);
-    virtual ~SelfSurfaceContactRelation(){};
+    explicit SelfSurfaceContactRelation(RealBody &real_body, Real layer_thickness = 1.0);
+    virtual ~SelfSurfaceContactRelation() {};
     virtual void updateConfiguration() override;
 
   protected:
@@ -107,10 +107,10 @@ class TreeInnerRelation : public InnerRelation
   public:
     explicit TreeInnerRelation(RealBody &real_body)
         : InnerRelation(real_body),
-          generative_tree_(DynamicCast<TreeBody>(this, real_body)){};
-    virtual ~TreeInnerRelation(){};
+          generative_tree_(DynamicCast<TreeBody>(this, real_body)) {};
+    virtual ~TreeInnerRelation() {};
 
     virtual void updateConfiguration() override;
 };
 } // namespace SPH
-#endif // INNER_BODY_RELATION_H
+#endif // VIRTOSIM_INNER_BODY_RELATION_H_EAB611D9_634E_4CA8_9114_5DDF06120871
